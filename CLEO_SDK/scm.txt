@@ -1,6 +1,7 @@
 { VC only
 016F=10,draw_shadow %1d% at %2d% %3d% %4d% angle %5d% size %6d% intensity %7d% colour %8d% %9d% %10d%
 0349=1,text_draw_style = %1d%
+04A7=1,  actor %1d% in_any_boat
 }
 { GTA3 only
 04C2=7,create_coordinate %5d% %6d% %7d% from_object %1d% offset %2d% %3d% %4d% ;0400 in VC

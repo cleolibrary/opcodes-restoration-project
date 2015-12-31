@@ -58,6 +58,7 @@ class CustomOpcodes
 	static eOpcodeResult WINAPI DRAW_SHADOW(CScript *script);
 	static eOpcodeResult WINAPI SET_TEXT_DRAW_FONT(CScript *script);
 	static eOpcodeResult WINAPI PLAY_ANIMATION(CScript *script);
+	static eOpcodeResult WINAPI IS_CHAR_IN_ANY_BOAT(CScript *script);
 	static eOpcodeResult WINAPI OPCODE_0A8E(CScript *script);
 	static eOpcodeResult WINAPI OPCODE_0A8F(CScript *script);
 	static eOpcodeResult WINAPI OPCODE_0A90(CScript *script);

@@ -184,6 +184,7 @@ void CustomOpcodes::Register()
 	//Scrapped opcodes (VC)
 	Opcodes::RegisterOpcode(0x016F, DRAW_SHADOW);
 	Opcodes::RegisterOpcode(0x0349, SET_TEXT_DRAW_FONT);
+	Opcodes::RegisterOpcode(0x04A7, IS_CHAR_IN_ANY_BOAT);
 }
 
 eOpcodeResult CustomOpcodes::DUMMY(CScript *script)
@@ -1060,6 +1061,26 @@ eOpcodeResult CustomOpcodes::SET_TEXT_DRAW_FONT(CScript *script)
 {
 	script->Collect(1);
 	game.Text.textDrawers[*game.Text.currentTextDrawer].fontStyle = game.Scripts.Params[0].nVar;
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::IS_CHAR_IN_ANY_BOAT(CScript *script)
+{
+	script->Collect(1);
+	void *character = game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
+	if (*(BYTE *)((uintptr_t)character + 0x3AC)) {
+		DWORD car = *(DWORD *)((uintptr_t)character + 0x3A8);
+		if (car != 0) {
+			DWORD handling = *(DWORD *)(car + 0x120);
+			DWORD flags = *(DWORD *)(handling + 0xCC);
+			flags &= 0xF0000;
+			if (flags == 0x80000) {
+				script->UpdateCompareFlag(true);
+				return OR_CONTINUE;
+			}
+		}
+	}
+	script->UpdateCompareFlag(false);
 	return OR_CONTINUE;
 }
 
