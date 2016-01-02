@@ -58,6 +58,14 @@ class CustomOpcodes
 	static eOpcodeResult WINAPI DRAW_SHADOW(CScript *script);
 	static eOpcodeResult WINAPI SET_TEXT_DRAW_FONT(CScript *script);
 	static eOpcodeResult WINAPI PLAY_ANIMATION(CScript *script);
+	static eOpcodeResult WINAPI IS_CHAR_STILL_ALIVE(CScript *script);
+	static eOpcodeResult WINAPI IS_CAR_STILL_ALIVE(CScript *script);
+	static eOpcodeResult WINAPI RETURN_TRUE(CScript *script);
+	static eOpcodeResult WINAPI RETURN_FALSE(CScript *script);
+	static eOpcodeResult WINAPI GET_PAD_STATE(CScript *script);
+	static eOpcodeResult WINAPI ADD_AMMO_TO_PLAYER(CScript *script);
+	static eOpcodeResult WINAPI HAS_PLAYER_BEEN_ARRESTED(CScript *script);
+	static eOpcodeResult WINAPI SET_CHAR_AMMO(CScript *script);
 	static eOpcodeResult WINAPI IS_CHAR_IN_ANY_BOAT(CScript *script);
 	static eOpcodeResult WINAPI OPCODE_0A8E(CScript *script);
 	static eOpcodeResult WINAPI OPCODE_0A8F(CScript *script);

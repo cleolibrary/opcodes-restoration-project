@@ -1,4 +1,12 @@
 { VC only
+00A2=1,  actor %1d% alive
+00AC=1,  car %1d% alive
+00C5=0,  true
+00C6=0,  false
+00E2=3,get_player %1d% key %2d% state_to %3d%
+0113=3,add_ammo_to_player %1d% weapon %2h% ammo %3d%
+0130=1,  player %1d% busted
+017B=3,set_actor %1d% weapon %2d% ammo_to %3d%
 016F=10,draw_shadow %1d% at %2d% %3d% %4d% angle %5d% size %6d% intensity %7d% colour %8d% %9d% %10d%
 0349=1,text_draw_style = %1d%
 04A7=1,  actor %1d% in_any_boat

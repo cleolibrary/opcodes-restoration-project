@@ -184,6 +184,15 @@ void CustomOpcodes::Register()
 	//Scrapped opcodes (VC)
 	Opcodes::RegisterOpcode(0x016F, DRAW_SHADOW);
 	Opcodes::RegisterOpcode(0x0349, SET_TEXT_DRAW_FONT);
+
+	Opcodes::RegisterOpcode(0x00A2, IS_CHAR_STILL_ALIVE);
+	Opcodes::RegisterOpcode(0x00AC, IS_CAR_STILL_ALIVE);
+	Opcodes::RegisterOpcode(0x00C5, RETURN_TRUE);
+	Opcodes::RegisterOpcode(0x00C6, RETURN_FALSE);
+	Opcodes::RegisterOpcode(0x00E2, GET_PAD_STATE);
+	Opcodes::RegisterOpcode(0x0113, ADD_AMMO_TO_PLAYER);
+	Opcodes::RegisterOpcode(0x0130, HAS_PLAYER_BEEN_ARRESTED);
+	Opcodes::RegisterOpcode(0x017B, SET_CHAR_AMMO);
 	Opcodes::RegisterOpcode(0x04A7, IS_CHAR_IN_ANY_BOAT);
 }
 
@@ -1061,6 +1070,148 @@ eOpcodeResult CustomOpcodes::SET_TEXT_DRAW_FONT(CScript *script)
 {
 	script->Collect(1);
 	game.Text.textDrawers[*game.Text.currentTextDrawer].fontStyle = game.Scripts.Params[0].nVar;
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::IS_CHAR_STILL_ALIVE(CScript *script)
+{
+	script->Collect(1);
+	void *character = game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
+	if (*(DWORD *)((uintptr_t)character) != 0) {
+		DWORD state = *(DWORD *)((uintptr_t)character + 0x244);
+		if (state != 0x37 && state != 0x36) {
+			script->UpdateCompareFlag(true);
+			return OR_CONTINUE;
+		}
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::IS_CAR_STILL_ALIVE(CScript *script)
+{
+	script->Collect(1);
+	void *car = game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
+	if (*(DWORD *)((uintptr_t)car) != 0) {
+		BYTE flag = *(BYTE *)((uintptr_t)car + 0x50);
+		flag >>= 3;
+		if (flag != 5) {
+			flag = *(BYTE *)((uintptr_t)car + 0x1FD);
+			flag &= 1;
+			if (flag != 1) {
+				script->UpdateCompareFlag(true);
+				return OR_CONTINUE;
+			}
+		}
+
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::RETURN_TRUE(CScript *script)
+{
+	script->UpdateCompareFlag(true);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::RETURN_FALSE(CScript *script)
+{
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::GET_PAD_STATE(CScript *script)
+{
+	script->Collect(2);
+	void *func = NULL;
+	switch (game.Version) {
+	case GAME_V1_0:
+	case GAME_V1_1:
+		func = (void *)0x460C00;
+		break;
+	default:
+		return OR_CONTINUE; // todo steam address
+	}
+	WORD func_result;
+	unsigned int param = game.Scripts.Params[1].nVar;
+	__asm push param;
+	param = game.Scripts.Params[0].nVar;
+	__asm push param;
+	__asm call func
+	__asm mov func_result, ax
+	game.Scripts.Params[0].nVar = (unsigned int)func_result;
+	script->Store(1);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::ADD_AMMO_TO_PLAYER(CScript *script)
+{
+	script->Collect(3);
+	void *func = NULL;
+	switch (game.Version) {
+	case GAME_V1_0:
+		func = (void *)0x4FF840;
+		break;
+	case GAME_V1_1:
+		func = (void *)0x4FF860;
+		break;
+	default:
+		return OR_CONTINUE; // todo steam address
+	}
+	unsigned int param = game.Scripts.Params[2].nVar;
+	__asm push param;
+	param = game.Scripts.Params[1].nVar;
+	__asm push param;
+	DWORD playerObject = game.Pools.pCPlayerPedPool[0x2E * game.Scripts.Params[0].nVar];
+	__asm mov ecx, playerObject
+	__asm call func
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::HAS_PLAYER_BEEN_ARRESTED(CScript *script)
+{
+	script->Collect(1);
+	void *address = NULL;
+	switch (game.Version) {
+	case GAME_V1_0:
+		address = (void *)0x94ADF4;
+		break;
+	case GAME_V1_1:
+		address = (void *)0x94ADFC;
+		break;
+	default:
+		return OR_CONTINUE; // todo steam address
+	}
+	if ((((uintptr_t *)address)[0x2E * game.Scripts.Params[0].nVar]) == 2) {
+		script->UpdateCompareFlag(true);
+		return OR_CONTINUE;
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::SET_CHAR_AMMO(CScript *script)
+{
+	script->Collect(3);
+	void *func = NULL;
+	switch (game.Version) {
+	case GAME_V1_0:
+		func = (void *)0x4FF780;
+		break;
+	case GAME_V1_1:
+		func = (void *)0x4FF7A0;
+		break;
+	default:
+		return OR_CONTINUE; // todo steam address
+	}
+	unsigned int param = game.Scripts.Params[2].nVar;
+	__asm push param;
+	param = game.Scripts.Params[1].nVar;
+	__asm push param;
+	void *charObject = game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
+	__asm mov ecx, charObject
+	__asm call func
 	return OR_CONTINUE;
 }
 
