@@ -65,7 +65,17 @@ class CustomOpcodes
 	static eOpcodeResult WINAPI GET_PAD_STATE(CScript *script);
 	static eOpcodeResult WINAPI ADD_AMMO_TO_PLAYER(CScript *script);
 	static eOpcodeResult WINAPI HAS_PLAYER_BEEN_ARRESTED(CScript *script);
+	static eOpcodeResult WINAPI CHANGE_CAR_LOCK(CScript *script);
+	static eOpcodeResult WINAPI SHAKE_CAM_WITH_POINT(CScript *script);
+	static eOpcodeResult WINAPI IS_CAR_IN_AIR(CScript *script);
 	static eOpcodeResult WINAPI SET_CHAR_AMMO(CScript *script);
+	static eOpcodeResult WINAPI SET_FREE_BOMBS(CScript *script);
+	static eOpcodeResult WINAPI SET_ALL_TAXI_LIGHTS(CScript *script);
+	static eOpcodeResult WINAPI IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script);
+	static eOpcodeResult WINAPI IS_CAR_ARMED_WITH_BOMB(CScript *script);
+	static eOpcodeResult WINAPI ARM_CAR_WITH_BOMB(CScript *script);
+	static eOpcodeResult WINAPI IS_FIRST_CAR_COLOUR(CScript *script);
+	static eOpcodeResult WINAPI IS_SECOND_CAR_COLOUR(CScript *script);
 	static eOpcodeResult WINAPI IS_CHAR_IN_ANY_BOAT(CScript *script);
 	static eOpcodeResult WINAPI OPCODE_0A8E(CScript *script);
 	static eOpcodeResult WINAPI OPCODE_0A8F(CScript *script);

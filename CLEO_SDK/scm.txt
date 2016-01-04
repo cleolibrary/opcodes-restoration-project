@@ -6,8 +6,18 @@
 00E2=3,get_player %1d% key %2d% state_to %3d%
 0113=3,add_ammo_to_player %1d% weapon %2h% ammo %3d%
 0130=1,  player %1d% busted
+0135=2,change_car %1d% lock %2d%
+0136=4,shake_camera %1d% with_point %2d% %3d% %4d%
+015E=1,  car %1d% in_air
 017B=3,set_actor %1d% weapon %2d% ammo_to %3d%
 016F=10,draw_shadow %1d% at %2d% %3d% %4d% angle %5d% size %6d% intensity %7d% colour %8d% %9d% %10d%
+021D=1,set_free_bomb_shop_to %1d%
+021F=1,set_all_taxi_lights %1d%
+0220=1,  car %1d% has_car_bomb
+0228=2,  car %1d% bomb_status == %2d%
+0242=2,set_car %1d% bomb_status_to %2d%
+031B=2,  car %1d% primary_color %2d%
+031C=2,  car %1d% secondary_color %2d%
 0349=1,text_draw_style = %1d%
 04A7=1,  actor %1d% in_any_boat
 }

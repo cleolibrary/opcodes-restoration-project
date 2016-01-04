@@ -6,8 +6,18 @@
 00E2: get_player 0 key 14 state_to 0@
 0113: add_ammo_to_player $PLAYER_CHAR weapon 17 ammo 100
 0130:   player $PLAYER_CHAR busted
+0135: change_car 0@ lock 2
+0136: shake_camera 100 with_point 0.0 0.0 0.0
+015E:   car 0@ in_air
 017B: set_actor 0@ weapon 17 ammo_to 100
 016F: draw_shadow 3 at 13@ 14@ 15@ angle 0.0 size 1.0 intensity 150 colour 0 0 0
+021D: set_free_bomb_shop_to 1
+021F: set_all_taxi_lights 1
+0220:   car 0@ has_car_bomb
+0228:   car 0@ bomb_status == 1
+0242: set_car 0@ bomb_status_to 1
+031B:   car 0@ primary_color 0
+031C:   car 0@ secondary_color 0
 0349: text_draw_style = 3
 04A7:   actor 0@ in_any_boat
 }
