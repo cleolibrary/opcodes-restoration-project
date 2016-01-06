@@ -1294,7 +1294,7 @@ eOpcodeResult CustomOpcodes::SET_FREE_BOMBS(CScript *script)
 	if (param) {
 		param = 1;
 	}
-	*(BYTE *)address = param;
+	*(BYTE *)address = (BYTE)param;
 	return OR_CONTINUE;
 }
 
@@ -1316,7 +1316,7 @@ eOpcodeResult CustomOpcodes::SET_ALL_TAXI_LIGHTS(CScript *script)
 	if (param) {
 		param = 1;
 	}
-	*(BYTE *)address = param;
+	*(BYTE *)address = (BYTE)param;
 	return OR_CONTINUE;
 }
 

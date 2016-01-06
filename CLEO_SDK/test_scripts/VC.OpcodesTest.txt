@@ -1,0 +1,341 @@
+{$CLEO .cs}
+
+0000:
+const
+POSX       = 0@
+POSY       = 1@
+POSZ       = 2@
+SPAWN_CHAR = 3@
+SPAWN_CAR  = 4@
+LINE       = 5@
+KEYA       = 6@
+KEYB       = 7@
+KEYC       = 8@
+PLAYER_CAR = 9@
+FREEBOMB   = 10@
+SETTAXI    = 11@
+end
+
+while true
+    wait 0
+    if and
+        00E1:   player 0 pressed_button 4 // action
+        80E0:   not player $PLAYER_CHAR driving
+    then
+        break
+    end
+end
+
+while true
+    wait 0
+    if
+        80E1:   not player 0 pressed_button 4
+    then
+        break
+    end
+end
+
+0109: player $PLAYER_CHAR money += 10000
+0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+0247: request_model #COLT45
+0247: request_model #MALE01
+0247: request_model #DINGHY
+038B: load_requested_models
+POSX += 5.0
+009A: SPAWN_CHAR = create_actor_pedtype 4 model #MALE01 at POSX POSY POSZ
+POSX += 5.0
+00A5: SPAWN_CAR = create_car #DINGHY at POSX POSY POSZ
+0229: set_car SPAWN_CAR color_to 6 75
+01B1: give_player $PLAYER_CHAR weapon 17 ammo 10
+FREEBOMB = 0
+SETTAXI = 0
+
+while true
+    wait 10
+    03F0: enable_text_draw 0
+    0343: set_text_linewidth 500.0
+    LINE = 10.0
+    gosub @IS_CHAR_STILL_ALIVE
+    0343: set_text_linewidth 500.0
+    LINE += 10.0
+    gosub @IS_CAR_STILL_ALIVE
+    0343: set_text_linewidth 500.0
+    LINE += 10.0
+    gosub @RETURN_TRUE
+    0343: set_text_linewidth 500.0
+    LINE += 10.0
+    gosub @RETURN_FALSE
+    gosub @GET_PAD_STATE
+    gosub @ADD_AMMO_TO_PLAYER
+    0343: set_text_linewidth 500.0
+    LINE += 10.0
+    gosub @HAS_PLAYER_BEEN_ARRESTED
+    gosub @CHANGE_CAR_LOCK
+    gosub @SHAKE_CAM_WITH_POINT
+    0343: set_text_linewidth 500.0
+    LINE += 10.0
+    gosub @IS_CAR_IN_AIR
+    gosub @SET_CHAR_AMMO
+    gosub @SET_FREE_BOMBS
+    gosub @SET_ALL_TAXI_LIGHTS
+    0343: set_text_linewidth 500.0
+    LINE += 10.0
+    gosub @IS_CAR_ARMED_WITH_ANY_BOMB
+    0343: set_text_linewidth 500.0
+    LINE += 10.0
+    gosub @IS_CAR_ARMED_WITH_BOMB
+    gosub @ARM_CAR_WITH_BOMB
+    0343: set_text_linewidth 500.0
+    LINE += 10.0
+    gosub @IS_FIRST_CAR_COLOUR
+    0343: set_text_linewidth 500.0
+    LINE += 10.0
+    gosub @IS_SECOND_CAR_COLOUR
+    0343: set_text_linewidth 500.0
+    LINE += 10.0
+    gosub @IS_CHAR_IN_ANY_BOAT
+
+    if and
+        00E1:   player 0 pressed_button 4 // action
+        80E0:   not player $PLAYER_CHAR driving
+    then
+        01C2: remove_references_to_actor SPAWN_CHAR
+        01C3: remove_references_to_car SPAWN_CAR
+        05DC: end_custom_thread
+    end
+
+
+    0308: text_6numbers 'HJSTATW' KEYA KEYB KEYC 0 0 0 time 10 flag 5 // aim forward jump
+end
+
+:IS_CHAR_STILL_ALIVE
+if
+    00A2:   actor SPAWN_CHAR alive
+then
+    0608: show_text_position 10.0 LINE text "00A2: Character is still alive"
+else
+    0608: show_text_position 10.0 LINE text "00A2: Character is dead"
+end
+return
+
+:IS_CAR_STILL_ALIVE
+if
+    00AC:   car SPAWN_CAR alive
+then
+    0608: show_text_position 10.0 LINE text "00AC: Car is still alive"
+else
+    0608: show_text_position 10.0 LINE text "00AC: Car is dead"
+end
+return
+
+:RETURN_TRUE
+if
+    00C5:   true
+then
+    0608: show_text_position 10.0 LINE text "00C5: Returned true"
+else
+    0608: show_text_position 10.0 LINE text "00C5: Returned false"
+end
+return
+
+:RETURN_FALSE
+if
+    00C6:   false
+then
+    0608: show_text_position 10.0 LINE text "00C6: Returned true"
+else
+    0608: show_text_position 10.0 LINE text "00C6: Returned false"
+end
+return
+
+:GET_PAD_STATE
+00E2: get_player 0 key 6 state_to KEYA
+00E2: get_player 0 key 8 state_to KEYB
+00E2: get_player 0 key 14 state_to KEYC
+return
+
+:ADD_AMMO_TO_PLAYER
+if
+    0ADC: test_cheat "ADDAMMO"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0113: add_ammo_to_player $PLAYER_CHAR weapon 17 ammo 10
+end
+return
+
+:HAS_PLAYER_BEEN_ARRESTED
+if
+    0130:   player $PLAYER_CHAR busted
+then
+    0608: show_text_position 10.0 LINE text "0130: Player has been arrested"
+else
+    0608: show_text_position 10.0 LINE text "0130: Player has not been arrested"
+end
+return
+
+:CHANGE_CAR_LOCK
+if
+    00E0:   player $PLAYER_CHAR driving
+then
+    if
+        0ADC: test_cheat "LOCK"
+    then
+        018C: play_sound 1 at 0.0 0.0 0.0
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        0135: change_car PLAYER_CAR lock 2
+    end
+end
+return
+
+:SHAKE_CAM_WITH_POINT
+if
+    0ADC: test_cheat "SHAKE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+    POSX += 100.0
+    0136: shake_camera 5000 with_point POSX POSY POSZ
+end
+return
+
+:IS_CAR_IN_AIR
+if
+    00E0:   player $PLAYER_CHAR driving
+then
+    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    if
+        015E:   car PLAYER_CAR in_air
+    then
+        0608: show_text_position 10.0 LINE text "015E: Car is in air"
+        return
+    end
+end
+0608: show_text_position 10.0 LINE text "015E: Car is not in air"
+return
+
+:SET_CHAR_AMMO
+if
+    0ADC: test_cheat "SETAMMO"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    017B: set_actor $PLAYER_ACTOR weapon 17 ammo_to 100
+end
+return
+
+:SET_FREE_BOMBS
+if
+    0ADC: test_cheat "FREEBOMBS"
+then
+    if
+        FREEBOMB == 0
+    then
+        FREEBOMB = 1
+        021D: set_free_bomb_shop_to 1
+    else
+        FREEBOMB = 0
+        021D: set_free_bomb_shop_to 0
+    end
+    018C: play_sound 1 at 0.0 0.0 0.0
+end
+return
+
+:SET_ALL_TAXI_LIGHTS
+if
+    0ADC: test_cheat "TAXI"
+then
+    if
+        SETTAXI == 0
+    then
+        SETTAXI = 1
+        021F: set_all_taxi_lights 1
+    else
+        SETTAXI = 0
+        021F: set_all_taxi_lights 0
+    end
+    018C: play_sound 1 at 0.0 0.0 0.0
+end
+return
+
+:IS_CAR_ARMED_WITH_ANY_BOMB
+if
+    00E0:   player $PLAYER_CHAR driving
+then
+    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    if
+        0220:   car PLAYER_CAR has_car_bomb
+    then
+        0608: show_text_position 10.0 LINE text "0220: Car is armed with any bomb"
+        return
+    end
+end
+0608: show_text_position 10.0 LINE text "0220: Car is not armed with any bomb"
+return
+
+:IS_CAR_ARMED_WITH_BOMB
+if
+    00E0:   player $PLAYER_CHAR driving
+then
+    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    if
+        0228:   car PLAYER_CAR bomb_status == 4
+    then
+        0608: show_text_position 10.0 LINE text "0228: Car is armed with bomb 4"
+        return
+    end
+end
+0608: show_text_position 10.0 LINE text "0228: Car is not armed with bomb 4"
+return
+
+:ARM_CAR_WITH_BOMB
+if
+    00E0:   player $PLAYER_CHAR driving
+then
+    if
+        0ADC: test_cheat "ARMBOMB"
+    then
+        018C: play_sound 1 at 0.0 0.0 0.0
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        0242: set_car PLAYER_CAR bomb_status_to 1
+    end
+end
+return
+
+:IS_FIRST_CAR_COLOUR
+if
+    00E0:   player $PLAYER_CHAR driving
+then
+    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    if
+        031B:   car PLAYER_CAR primary_color 6
+    then
+        0608: show_text_position 10.0 LINE text "031B: Car primary colour is 6"
+        return
+    end
+end
+0608: show_text_position 10.0 LINE text "031B: Car primary colour is not 6"
+return
+
+:IS_SECOND_CAR_COLOUR
+if
+    00E0:   player $PLAYER_CHAR driving
+then
+    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    if
+        031C:   car PLAYER_CAR secondary_color 75
+    then
+        0608: show_text_position 10.0 LINE text "031C: Car secondary colour is 75"
+        return
+    end
+end
+0608: show_text_position 10.0 LINE text "031C: Car secondary colour is not 75"
+return
+
+:IS_CHAR_IN_ANY_BOAT
+if
+    04A7:   actor $PLAYER_ACTOR in_any_boat
+then
+    0608: show_text_position 10.0 LINE text "04A7: Player character is in any boat"
+else
+    0608: show_text_position 10.0 LINE text "04A7: Player character is not in any boat"
+end
+return
