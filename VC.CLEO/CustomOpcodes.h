@@ -64,6 +64,7 @@ class CustomOpcodes
 	static eOpcodeResult WINAPI RETURN_FALSE(CScript *script);
 	static eOpcodeResult WINAPI GET_PAD_STATE(CScript *script);
 	static eOpcodeResult WINAPI ADD_AMMO_TO_PLAYER(CScript *script);
+	static eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script);
 	static eOpcodeResult WINAPI HAS_PLAYER_BEEN_ARRESTED(CScript *script);
 	static eOpcodeResult WINAPI CHANGE_CAR_LOCK(CScript *script);
 	static eOpcodeResult WINAPI SHAKE_CAM_WITH_POINT(CScript *script);
@@ -74,9 +75,12 @@ class CustomOpcodes
 	static eOpcodeResult WINAPI IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script);
 	static eOpcodeResult WINAPI IS_CAR_ARMED_WITH_BOMB(CScript *script);
 	static eOpcodeResult WINAPI ARM_CAR_WITH_BOMB(CScript *script);
+	static eOpcodeResult WINAPI DROP_MINE(CScript *script);
+	static eOpcodeResult WINAPI DROP_NAUTICAL_MINE(CScript *script);
 	static eOpcodeResult WINAPI IS_FIRST_CAR_COLOUR(CScript *script);
 	static eOpcodeResult WINAPI IS_SECOND_CAR_COLOUR(CScript *script);
 	static eOpcodeResult WINAPI IS_CHAR_IN_ANY_BOAT(CScript *script);
+	static eOpcodeResult WINAPI GET_MAX_WANTED_LEVEL(CScript *script);
 	static eOpcodeResult WINAPI OPCODE_0A8E(CScript *script);
 	static eOpcodeResult WINAPI OPCODE_0A8F(CScript *script);
 	static eOpcodeResult WINAPI OPCODE_0A90(CScript *script);

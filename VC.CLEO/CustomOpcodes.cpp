@@ -191,6 +191,7 @@ void CustomOpcodes::Register()
 	Opcodes::RegisterOpcode(0x00C6, RETURN_FALSE);
 	Opcodes::RegisterOpcode(0x00E2, GET_PAD_STATE);
 	Opcodes::RegisterOpcode(0x0113, ADD_AMMO_TO_PLAYER);
+	Opcodes::RegisterOpcode(0x0116, IS_PLAYER_STILL_ALIVE);
 	Opcodes::RegisterOpcode(0x0130, HAS_PLAYER_BEEN_ARRESTED);
 	Opcodes::RegisterOpcode(0x0135, CHANGE_CAR_LOCK);
 	Opcodes::RegisterOpcode(0x0136, SHAKE_CAM_WITH_POINT);
@@ -201,9 +202,12 @@ void CustomOpcodes::Register()
 	Opcodes::RegisterOpcode(0x0220, IS_CAR_ARMED_WITH_ANY_BOMB);
 	Opcodes::RegisterOpcode(0x0228, IS_CAR_ARMED_WITH_BOMB);
 	Opcodes::RegisterOpcode(0x0242, ARM_CAR_WITH_BOMB);
+	Opcodes::RegisterOpcode(0x02F0, DROP_MINE);
+	Opcodes::RegisterOpcode(0x02F1, DROP_NAUTICAL_MINE);
 	Opcodes::RegisterOpcode(0x031B, IS_FIRST_CAR_COLOUR);
 	Opcodes::RegisterOpcode(0x031C, IS_SECOND_CAR_COLOUR);
 	Opcodes::RegisterOpcode(0x04A7, IS_CHAR_IN_ANY_BOAT);
+	Opcodes::RegisterOpcode(0x050F, GET_MAX_WANTED_LEVEL);
 }
 
 eOpcodeResult CustomOpcodes::DUMMY(CScript *script)
@@ -1086,9 +1090,9 @@ eOpcodeResult CustomOpcodes::SET_TEXT_DRAW_FONT(CScript *script)
 eOpcodeResult CustomOpcodes::IS_CHAR_STILL_ALIVE(CScript *script)
 {
 	script->Collect(1);
-	void *character = game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
-	if (*(DWORD *)((uintptr_t)character) != 0) {
-		DWORD state = *(DWORD *)((uintptr_t)character + 0x244);
+	uintptr_t ped = (uintptr_t)game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
+	if (ped != NULL) {
+		DWORD state = *(DWORD *)(ped + 0x244);
 		if (state != 0x37 && state != 0x36) {
 			script->UpdateCompareFlag(true);
 			return OR_CONTINUE;
@@ -1101,12 +1105,12 @@ eOpcodeResult CustomOpcodes::IS_CHAR_STILL_ALIVE(CScript *script)
 eOpcodeResult CustomOpcodes::IS_CAR_STILL_ALIVE(CScript *script)
 {
 	script->Collect(1);
-	void *car = game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
-	if (*(DWORD *)((uintptr_t)car) != 0) {
-		BYTE flag = *(BYTE *)((uintptr_t)car + 0x50);
+	uintptr_t car = (uintptr_t)game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
+	if (car != NULL) {
+		BYTE flag = *(BYTE *)(car + 0x50);
 		flag >>= 3;
 		if (flag != 5) {
-			flag = *(BYTE *)((uintptr_t)car + 0x1FD);
+			flag = *(BYTE *)(car + 0x1FD);
 			flag &= 1;
 			if (flag != 1) {
 				script->UpdateCompareFlag(true);
@@ -1134,23 +1138,7 @@ eOpcodeResult CustomOpcodes::RETURN_FALSE(CScript *script)
 eOpcodeResult CustomOpcodes::GET_PAD_STATE(CScript *script)
 {
 	script->Collect(2);
-	void *func = NULL;
-	switch (game.Version) {
-	case GAME_V1_0:
-	case GAME_V1_1:
-		func = (void *)0x460C00;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	WORD func_result;
-	unsigned int param = game.Scripts.Params[1].nVar;
-	__asm push param
-	param = game.Scripts.Params[0].nVar;
-	__asm push param
-	__asm call func
-	__asm mov func_result, ax
-	game.Scripts.Params[0].nVar = (unsigned int)func_result;
+	game.Scripts.Params[0].nVar = (unsigned int)game.Misc.GetPadState(script, game.Scripts.Params[0].nVar, game.Scripts.Params[1].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -1158,42 +1146,47 @@ eOpcodeResult CustomOpcodes::GET_PAD_STATE(CScript *script)
 eOpcodeResult CustomOpcodes::ADD_AMMO_TO_PLAYER(CScript *script)
 {
 	script->Collect(3);
-	void *func = NULL;
+	game.Misc.GrantAmmo(game.Pools.pCPlayerPedPool[0x2E * game.Scripts.Params[0].nVar], game.Scripts.Params[1].nVar, game.Scripts.Params[2].nVar);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::IS_PLAYER_STILL_ALIVE(CScript *script)
+{
+	script->Collect(1);
+	uintptr_t *address = NULL;
 	switch (game.Version) {
 	case GAME_V1_0:
-		func = (void *)0x4FF840;
+		address = (uintptr_t *)0x94ADF4;
 		break;
 	case GAME_V1_1:
-		func = (void *)0x4FF860;
+		address = (uintptr_t *)0x94ADFC;
 		break;
 	default:
 		return OR_CONTINUE; // todo steam address
 	}
-	unsigned int param = game.Scripts.Params[2].nVar;
-	__asm push param
-	param = game.Scripts.Params[1].nVar;
-	__asm push param
-	DWORD playerObject = game.Pools.pCPlayerPedPool[0x2E * game.Scripts.Params[0].nVar];
-	__asm mov ecx, playerObject
-	__asm call func
+	if ((address[0x2E * game.Scripts.Params[0].nVar]) == 1) {
+		script->UpdateCompareFlag(false);
+		return OR_CONTINUE;
+	}
+	script->UpdateCompareFlag(true);
 	return OR_CONTINUE;
 }
 
 eOpcodeResult CustomOpcodes::HAS_PLAYER_BEEN_ARRESTED(CScript *script)
 {
 	script->Collect(1);
-	void *address = NULL;
+	uintptr_t *address = NULL;
 	switch (game.Version) {
 	case GAME_V1_0:
-		address = (void *)0x94ADF4;
+		address = (uintptr_t *)0x94ADF4;
 		break;
 	case GAME_V1_1:
-		address = (void *)0x94ADFC;
+		address = (uintptr_t *)0x94ADFC;
 		break;
 	default:
 		return OR_CONTINUE; // todo steam address
 	}
-	if ((((uintptr_t *)address)[0x2E * game.Scripts.Params[0].nVar]) == 2) {
+	if ((address[0x2E * game.Scripts.Params[0].nVar]) == 2) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
 	}
@@ -1204,47 +1197,23 @@ eOpcodeResult CustomOpcodes::HAS_PLAYER_BEEN_ARRESTED(CScript *script)
 eOpcodeResult CustomOpcodes::CHANGE_CAR_LOCK(CScript *script)
 {
 	script->Collect(2);
-	void *car = game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
-	*(DWORD *)((uintptr_t)car + 0x230) = game.Scripts.Params[1].nVar;
+	uintptr_t car = (uintptr_t)game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
+	*(DWORD *)(car + 0x230) = game.Scripts.Params[1].nVar;
 	return OR_CONTINUE;
 }
 
 eOpcodeResult CustomOpcodes::SHAKE_CAM_WITH_POINT(CScript *script)
 {
 	script->Collect(4);
-	void *func = NULL;
-	void *cameraObject = NULL;
-	switch (game.Version) {
-	case GAME_V1_0:
-		func = (void *)0x46FF21;
-		cameraObject = (void *)0x7E4688;
-		break;
-	case GAME_V1_1:
-		func = (void *)0x46FF21;
-		cameraObject = (void *)0x7E4690;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	float param = game.Scripts.Params[3].fVar;
-	__asm push param
-	param = game.Scripts.Params[2].fVar;
-	__asm push param
-	param = game.Scripts.Params[1].fVar;
-	__asm push param
-	param = (float)game.Scripts.Params[0].nVar;
-	param *= 1e-3f;
-	__asm push param
-	__asm mov ecx, cameraObject
-	__asm call func
+	game.Misc.CamShake(game.Misc.camera, ((float)game.Scripts.Params[0].nVar) * 1e-3f, game.Scripts.Params[1].fVar, game.Scripts.Params[2].fVar, game.Scripts.Params[3].fVar);
 	return OR_CONTINUE;
 }
 
 eOpcodeResult CustomOpcodes::IS_CAR_IN_AIR(CScript *script)
 {
 	script->Collect(1);
-	void *car = game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
-	if (*(BYTE *)((uintptr_t)car + 0x5C5)) {
+	uintptr_t car = (uintptr_t)game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
+	if (*(BYTE *)(car + 0x5C5)) {
 		script->UpdateCompareFlag(false);
 		return OR_CONTINUE;
 	}
@@ -1255,24 +1224,7 @@ eOpcodeResult CustomOpcodes::IS_CAR_IN_AIR(CScript *script)
 eOpcodeResult CustomOpcodes::SET_CHAR_AMMO(CScript *script)
 {
 	script->Collect(3);
-	void *func = NULL;
-	switch (game.Version) {
-	case GAME_V1_0:
-		func = (void *)0x4FF780;
-		break;
-	case GAME_V1_1:
-		func = (void *)0x4FF7A0;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	unsigned int param = game.Scripts.Params[2].nVar;
-	__asm push param
-	param = game.Scripts.Params[1].nVar;
-	__asm push param
-	void *charObject = game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
-	__asm mov ecx, charObject
-	__asm call func
+	game.Misc.SetAmmo(game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar), game.Scripts.Params[1].nVar, game.Scripts.Params[2].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1323,8 +1275,8 @@ eOpcodeResult CustomOpcodes::SET_ALL_TAXI_LIGHTS(CScript *script)
 eOpcodeResult CustomOpcodes::IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script)
 {
 	script->Collect(1);
-	void *car = game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
-	if (*(BYTE *)((uintptr_t)car + 0x1FE) & 7) {
+	uintptr_t car = (uintptr_t)game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
+	if (*(BYTE *)(car + 0x1FE) & 7) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
 	}
@@ -1335,8 +1287,8 @@ eOpcodeResult CustomOpcodes::IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script)
 eOpcodeResult CustomOpcodes::IS_CAR_ARMED_WITH_BOMB(CScript *script)
 {
 	script->Collect(2);
-	void *car = game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
-	if ((*(BYTE *)((uintptr_t)car + 0x1FE) & 7) == game.Scripts.Params[1].nVar) {
+	uintptr_t car = (uintptr_t)game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
+	if ((*(BYTE *)(car + 0x1FE) & 7) == game.Scripts.Params[1].nVar) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
 	}
@@ -1347,19 +1299,57 @@ eOpcodeResult CustomOpcodes::IS_CAR_ARMED_WITH_BOMB(CScript *script)
 eOpcodeResult CustomOpcodes::ARM_CAR_WITH_BOMB(CScript *script)
 {
 	script->Collect(2);
-	void *car = game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
+	uintptr_t car = (uintptr_t)game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
 	BYTE input = ((BYTE)game.Scripts.Params[1].nVar) & 7;
-	BYTE state = (*(BYTE *)((uintptr_t)car + 0x1FE) & 0xF8);
+	BYTE state = (*(BYTE *)(car + 0x1FE) & 0xF8);
 	state |= input;
-	*(BYTE *)((uintptr_t)car + 0x1FE) = state;
+	*(BYTE *)(car + 0x1FE) = state;
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::DROP_MINE(CScript *script)
+{
+	script->Collect(3);
+	DWORD *barrel = NULL;
+	switch (game.Version) {
+	case GAME_V1_0:
+	case GAME_V1_1:
+		barrel = (DWORD *)0x68E8B0;
+		break;
+	default:
+		return OR_CONTINUE; // todo steam address
+	}
+	if (game.Scripts.Params[2].fVar == -100.0) {
+		game.Scripts.Params[2].fVar = game.Misc.FindGroundZForCoord(game.Scripts.Params[0].fVar, game.Scripts.Params[1].fVar) + 0.5f;
+	}
+	game.Misc.CreatePickup(game.Scripts.Params[0].fVar, game.Scripts.Params[1].fVar, game.Scripts.Params[2].fVar, *barrel, 9, 0, 0, 0, 0);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::DROP_NAUTICAL_MINE(CScript *script)
+{
+	script->Collect(3);
+	DWORD *barrel = NULL;
+	switch (game.Version) {
+	case GAME_V1_0:
+	case GAME_V1_1:
+		barrel = (DWORD *)0x68E910;
+		break;
+	default:
+		return OR_CONTINUE; // todo steam address
+	}
+	if (game.Scripts.Params[2].fVar == -100.0) {
+		game.Scripts.Params[2].fVar = game.Misc.FindGroundZForCoord(game.Scripts.Params[0].fVar, game.Scripts.Params[1].fVar) + 0.5f;
+	}
+	game.Misc.CreatePickup(game.Scripts.Params[0].fVar, game.Scripts.Params[1].fVar, game.Scripts.Params[2].fVar, *barrel, 11, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
 eOpcodeResult CustomOpcodes::IS_FIRST_CAR_COLOUR(CScript *script)
 {
 	script->Collect(2);
-	void *car = game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
-	if ((DWORD)*(BYTE *)((uintptr_t)car + 0x1A0) == game.Scripts.Params[1].nVar) {
+	uintptr_t car = (uintptr_t)game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
+	if ((DWORD)*(BYTE *)(car + 0x1A0) == game.Scripts.Params[1].nVar) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
 	}
@@ -1370,8 +1360,8 @@ eOpcodeResult CustomOpcodes::IS_FIRST_CAR_COLOUR(CScript *script)
 eOpcodeResult CustomOpcodes::IS_SECOND_CAR_COLOUR(CScript *script)
 {
 	script->Collect(2);
-	void *car = game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
-	if ((DWORD)*(BYTE *)((uintptr_t)car + 0x1A1) == game.Scripts.Params[1].nVar) {
+	uintptr_t car = (uintptr_t)game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
+	if ((DWORD)*(BYTE *)(car + 0x1A1) == game.Scripts.Params[1].nVar) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
 	}
@@ -1382,20 +1372,40 @@ eOpcodeResult CustomOpcodes::IS_SECOND_CAR_COLOUR(CScript *script)
 eOpcodeResult CustomOpcodes::IS_CHAR_IN_ANY_BOAT(CScript *script)
 {
 	script->Collect(1);
-	void *character = game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
-	if (*(BYTE *)((uintptr_t)character + 0x3AC)) {
-		DWORD car = *(DWORD *)((uintptr_t)character + 0x3A8);
-		if (car != 0) {
-			DWORD handling = *(DWORD *)(car + 0x120);
-			DWORD flags = *(DWORD *)(handling + 0xCC);
-			flags &= 0xF0000;
-			if (flags == 0x80000) {
-				script->UpdateCompareFlag(true);
-				return OR_CONTINUE;
+	uintptr_t ped = (uintptr_t)game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
+	if (ped != NULL) {
+		if (*(BYTE *)(ped + 0x3AC)) {
+			uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
+			if (car != NULL) {
+				DWORD handling = *(DWORD *)(car + 0x120);
+				DWORD flags = *(DWORD *)(handling + 0xCC);
+				flags &= 0xF0000;
+				if (flags == 0x80000) {
+					script->UpdateCompareFlag(true);
+					return OR_CONTINUE;
+				}
 			}
 		}
 	}
 	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::GET_MAX_WANTED_LEVEL(CScript *script)
+{
+	void *address = NULL;
+	switch (game.Version) {
+	case GAME_V1_0:
+		address = (void *)0x6910D8;
+		break;
+	case GAME_V1_1:
+		address = (void *)0x6910D8;
+		break;
+	default:
+		return OR_CONTINUE; // todo steam address
+	}
+	game.Scripts.Params[0].nVar = *(DWORD *)address;
+	script->Store(1);
 	return OR_CONTINUE;
 }
 

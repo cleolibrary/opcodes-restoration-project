@@ -159,6 +159,14 @@ public:
 		char*(__cdecl *pfGetUserDirectory)();
 		void(__cdecl *pfSpawnCar)(unsigned int);
 		int(__cdecl *pfCAnimManagerBlendAnimation)(int pRpClump, int dwAnimGroupId, int dwAnimId, float fSpeed);
+
+		WORD(__thiscall *GetPadState)(CScript *, DWORD, DWORD);
+		void(__thiscall *GrantAmmo)(uintptr_t, DWORD, DWORD);
+		uintptr_t *camera;
+		void(__thiscall *CamShake)(void *, float, float, float, float);
+		void(__thiscall *SetAmmo)(void *, DWORD, DWORD);
+		float(__cdecl *FindGroundZForCoord)(float, float);
+		void(__cdecl *CreatePickup)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD);
 	} Misc;
 };
 
