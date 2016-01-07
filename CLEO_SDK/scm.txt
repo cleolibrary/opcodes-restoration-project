@@ -5,6 +5,7 @@
 00C6=0,  false
 00E2=3,get_player %1d% key %2d% state_to %3d%
 0113=3,add_ammo_to_player %1d% weapon %2h% ammo %3d%
+0116=1,  player %1d% alive
 0130=1,  player %1d% busted
 0135=2,change_car %1d% lock %2d%
 0136=4,shake_camera %1d% with_point %2d% %3d% %4d%
@@ -16,10 +17,13 @@
 0220=1,  car %1d% has_car_bomb
 0228=2,  car %1d% bomb_status == %2d%
 0242=2,set_car %1d% bomb_status_to %2d%
+02F0=3,create_explosive_barrel_at %1d% %2d% %3d%
+02F1=3,create_explosive_barrel_at %1d% %2d% %3d%
 031B=2,  car %1d% primary_color %2d%
 031C=2,  car %1d% secondary_color %2d%
 0349=1,text_draw_style = %1d%
 04A7=1,  actor %1d% in_any_boat
+050f=1,get_max_wanted_level_to %1d%
 }
 { GTA3 only
 04C2=7,create_coordinate %5d% %6d% %7d% from_object %1d% offset %2d% %3d% %4d% ;0400 in VC

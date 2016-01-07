@@ -14,6 +14,7 @@ KEYC       = 8@
 PLAYER_CAR = 9@
 FREEBOMB   = 10@
 SETTAXI    = 11@
+MAXWANTED  = 12@
 end
 
 while true
@@ -69,6 +70,9 @@ while true
     gosub @ADD_AMMO_TO_PLAYER
     0343: set_text_linewidth 500.0
     LINE += 10.0
+    gosub @IS_PLAYER_STILL_ALIVE
+    0343: set_text_linewidth 500.0
+    LINE += 10.0
     gosub @HAS_PLAYER_BEEN_ARRESTED
     gosub @CHANGE_CAR_LOCK
     gosub @SHAKE_CAM_WITH_POINT
@@ -85,6 +89,8 @@ while true
     LINE += 10.0
     gosub @IS_CAR_ARMED_WITH_BOMB
     gosub @ARM_CAR_WITH_BOMB
+    gosub @DROP_MINE
+    gosub @DROP_NAUTICAL_MINE
     0343: set_text_linewidth 500.0
     LINE += 10.0
     gosub @IS_FIRST_CAR_COLOUR
@@ -94,7 +100,8 @@ while true
     0343: set_text_linewidth 500.0
     LINE += 10.0
     gosub @IS_CHAR_IN_ANY_BOAT
-
+    gosub @GET_MAX_WANTED_LEVEL
+    
     if and
         00E1:   player 0 pressed_button 4 // action
         80E0:   not player $PLAYER_CHAR driving
@@ -104,8 +111,8 @@ while true
         05DC: end_custom_thread
     end
 
-
-    0308: text_6numbers 'HJSTATW' KEYA KEYB KEYC 0 0 0 time 10 flag 5 // aim forward jump
+    // aim.forward.jump.maxwanted
+    0308: text_6numbers 'HJSTATW' KEYA KEYB KEYC MAXWANTED 0 0 time 10 flag 5
 end
 
 :IS_CHAR_STILL_ALIVE
@@ -160,6 +167,16 @@ if
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0113: add_ammo_to_player $PLAYER_CHAR weapon 17 ammo 10
+end
+return
+
+:IS_PLAYER_STILL_ALIVE
+if
+    0116:   player $PLAYER_CHAR alive
+then
+    0608: show_text_position 10.0 LINE text "0116: Player is alive"
+else
+    0608: show_text_position 10.0 LINE text "0116: Player is dead"
 end
 return
 
@@ -286,6 +303,26 @@ end
 0608: show_text_position 10.0 LINE text "0228: Car is not armed with bomb 4"
 return
 
+:DROP_MINE
+if
+    0ADC: test_cheat "MINEA"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+    02F0: create_explosive_barrel_at POSX POSY -100.0
+end
+return
+
+:DROP_NAUTICAL_MINE
+if
+    0ADC: test_cheat "MINEB"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+    02F1: create_explosive_barrel_at POSX POSY -100.0
+end
+return
+
 :ARM_CAR_WITH_BOMB
 if
     00E0:   player $PLAYER_CHAR driving
@@ -338,4 +375,8 @@ then
 else
     0608: show_text_position 10.0 LINE text "04A7: Player character is not in any boat"
 end
+return
+
+:GET_MAX_WANTED_LEVEL
+050F: get_max_wanted_level_to MAXWANTED
 return

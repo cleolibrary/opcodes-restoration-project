@@ -24,7 +24,7 @@ enum gameVersion{ V1_0, V1_1, VSTEAM, VSTEAMENC, VUNKOWN = -1 };
 
 int getGameVersion()
 {
-	int version = -1;
+	int version = VUNKOWN;
 	switch ((*(unsigned int *)0x61C11C)) { // get version signature
 	case 0x74FF5064:
 		version = V1_0;
@@ -38,9 +38,6 @@ int getGameVersion()
 	case 0x24E58287:
 		version = VSTEAMENC;
 		break;
-	default:
-		version = VUNKOWN;
-		break;
 	}
 	return version;
 }
@@ -49,7 +46,6 @@ uintptr_t getPedStruct(unsigned int param)
 {
 	void *func = NULL;
 	void *pedPool = NULL;
-	uintptr_t ped = NULL;
 	switch (getGameVersion()) {
 	case V1_0:
 		func = (void *)0x451CB0;
@@ -64,18 +60,14 @@ uintptr_t getPedStruct(unsigned int param)
 		pedPool = *(void **)0xA0EDEC;
 		break;
 	}
-	__asm push param // ped handle
-	__asm mov ecx, pedPool // this ped pool
-	__asm call func // cpool_cped_cplayerped::getat
-	__asm mov ped, eax // get ped struct
-	return ped;
+	auto pfPedPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))func; // cpool_cped_cplayerped::getat
+	return pfPedPoolGetStruct(pedPool, param);
 }
 
 uintptr_t getVehicleStruct(unsigned int param)
 {
 	void *func = NULL;
 	void *carPool = NULL;
-	uintptr_t car = NULL;
 	switch (getGameVersion()) {
 	case V1_0:
 		func = (void *)0x451C70;
@@ -90,11 +82,8 @@ uintptr_t getVehicleStruct(unsigned int param)
 		carPool = *(void **)0xA0EDEC;
 		break;
 	}
-	__asm push param // vehicle handle
-	__asm mov ecx, carPool // this vehicle pool
-	__asm call func // cpool_cvehicle_cautomobile::getat
-	__asm mov car, eax // get vehicle struct
-	return car;
+	auto pfVehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))func; // cpool_cvehicle_cautomobile::getat
+	return pfVehiclePoolGetStruct(carPool, param);
 }
 
 DWORD getPlayerPed(unsigned int param)
@@ -170,7 +159,6 @@ eOpcodeResult WINAPI GET_PAD_STATE(CScript *script)
 {
 	script->Collect(2);
 	void *func = NULL;
-	WORD func_result;
 	switch (getGameVersion()) {
 	case V1_0:
 	case V1_1:
@@ -179,13 +167,8 @@ eOpcodeResult WINAPI GET_PAD_STATE(CScript *script)
 	default:
 		return OR_CONTINUE; // todo steam address
 	}
-	unsigned int param = Params[1].nVar;
-	__asm push param // state
-	param = Params[0].nVar;
-	__asm push param // pad
-	__asm call func
-	__asm mov func_result, ax
-	Params[0].nVar = (unsigned int)func_result;
+	auto getPadState = (WORD(__thiscall *)(CScript *, DWORD, DWORD))func; // crunningscript::getpadstate
+	Params[0].nVar = (unsigned int)getPadState(script, Params[0].nVar, Params[1].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -205,13 +188,31 @@ eOpcodeResult WINAPI ADD_AMMO_TO_PLAYER(CScript *script)
 	default:
 		return OR_CONTINUE; // todo steam address
 	}
-	unsigned int param = Params[2].nVar;
-	__asm push param // ammo
-	param = Params[1].nVar;
-	__asm push param // weapon
-	DWORD player = getPlayerPed(Params[0].nVar);
-	__asm mov ecx, player // this player
-	__asm call func // cped::grantammo
+	auto grantAmmo = (void(__thiscall *)(DWORD, DWORD, DWORD))func; // cped::grantammo
+	grantAmmo(getPlayerPed(Params[0].nVar), Params[1].nVar, Params[2].nVar);
+	return OR_CONTINUE;
+}
+
+/* 0116 */
+eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script)
+{
+	script->Collect(1);
+	uintptr_t *address = NULL;
+	switch (getGameVersion()) {
+	case V1_0:
+		address = (uintptr_t *)0x94ADF4;
+		break;
+	case V1_1:
+		address = (uintptr_t *)0x94ADFC;
+		break;
+	default:
+		return OR_CONTINUE; // todo steam address
+	}
+	if ((address[0x2E * Params[0].nVar]) == 1) {
+		script->UpdateCompareFlag(false);
+		return OR_CONTINUE;
+	}
+	script->UpdateCompareFlag(true);
 	return OR_CONTINUE;
 }
 
@@ -267,17 +268,8 @@ eOpcodeResult WINAPI SHAKE_CAM_WITH_POINT(CScript *script)
 	default:
 		return OR_CONTINUE; // todo steam address
 	}
-	float param = Params[3].fVar;
-	__asm push param // z
-	param = Params[2].fVar;
-	__asm push param // y
-	param = Params[1].fVar;
-	__asm push param // x
-	param = (float)Params[0].nVar;
-	param *= 1e-3f;
-	__asm push param // duration
-	__asm mov ecx, camera // this camera
-	__asm call func // ccamera::camshake
+	auto camShake = (void(__thiscall *)(void *, float, float, float, float))func; // ccamera::camshake
+	camShake(camera, ((float)Params[0].nVar) * 1e-3f, Params[1].fVar, Params[2].fVar, Params[3].fVar);
 	return OR_CONTINUE;
 }
 
@@ -309,13 +301,8 @@ eOpcodeResult WINAPI SET_CHAR_AMMO(CScript *script)
 	default:
 		return OR_CONTINUE; // todo steam address
 	}
-	unsigned int param = Params[2].nVar;
-	__asm push param // ammo
-	param = Params[1].nVar;
-	__asm push param // weapon
-	uintptr_t ped = getPedStruct(Params[0].nVar);
-	__asm mov ecx, ped
-	__asm call func // cped::setammo
+	auto setAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))func; // cped::setammo
+	setAmmo(getPedStruct(Params[0].nVar), Params[1].nVar, Params[2].nVar);
 	return OR_CONTINUE;
 }
 
@@ -403,6 +390,66 @@ eOpcodeResult WINAPI ARM_CAR_WITH_BOMB(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 02F0 */
+eOpcodeResult WINAPI DROP_MINE(CScript *script)
+{
+	script->Collect(3);
+	void *func = NULL;
+	void *groundz = NULL;
+	DWORD *barrel = NULL;
+	switch (getGameVersion()) {
+	case V1_0:
+		func = (void *)0x4418C0;
+		barrel = (DWORD *)0x68E8B0;
+		groundz = (void *)0x4D5540;
+		break;
+	case V1_1:
+		func = (void *)0x4418C0;
+		barrel = (DWORD *)0x68E8B0;
+		groundz = (void *)0x4D5560;
+		break;
+	default:
+		return OR_CONTINUE; // todo steam address
+	}
+	if (Params[2].fVar == -100.0) {
+		auto findGroundZForCoord = (float(__cdecl *)(float, float))groundz; // cworld::findgroundzforcoord
+		Params[2].fVar = findGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
+	}
+	auto CreatePickup = (void(__cdecl *)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))func; // cpickups::generatenewone
+	CreatePickup(Params[0].fVar, Params[1].fVar, Params[2].fVar, *barrel, 9, 0, 0, 0, 0);
+	return OR_CONTINUE;
+}
+
+/* 02F1 */
+eOpcodeResult WINAPI DROP_NAUTICAL_MINE(CScript *script)
+{
+	script->Collect(3);
+	void *func = NULL;
+	void *groundz = NULL;
+	DWORD *barrel = NULL;
+	switch (getGameVersion()) {
+	case V1_0:
+		func = (void *)0x4418C0;
+		barrel = (DWORD *)0x68E910;
+		groundz = (void *)0x4D5540;
+		break;
+	case V1_1:
+		func = (void *)0x4418C0;
+		barrel = (DWORD *)0x68E910;
+		groundz = (void *)0x4D5560;
+		break;
+	default:
+		return OR_CONTINUE; // todo steam address
+	}
+	if (Params[2].fVar == -100.0) {
+		auto findGroundZForCoord = (float(__cdecl *)(float, float))groundz; // cworld::findgroundzforcoord
+		Params[2].fVar = findGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
+	}
+	auto CreatePickup = (void(__cdecl *)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))func; // cpickups::generatenewone
+	CreatePickup(Params[0].fVar, Params[1].fVar, Params[2].fVar, *barrel, 11, 0, 0, 0, 0);
+	return OR_CONTINUE;
+}
+
 /* 031B */
 eOpcodeResult WINAPI IS_FIRST_CAR_COLOUR(CScript *script)
 {
@@ -450,6 +497,25 @@ eOpcodeResult WINAPI IS_CHAR_IN_ANY_BOAT(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 050F */
+eOpcodeResult WINAPI GET_MAX_WANTED_LEVEL(CScript *script)
+{
+	void *address = NULL;
+	switch (getGameVersion()) {
+	case V1_0:
+		address = (void *)0x6910D8;
+		break;
+	case V1_1:
+		address = (void *)0x6910D8;
+		break;
+	default:
+		return OR_CONTINUE; // todo steam address
+	}
+	Params[0].nVar = *(DWORD *)address;
+	script->Store(1);
+	return OR_CONTINUE;
+}
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 {
 	if (reason == DLL_PROCESS_ATTACH)
@@ -467,6 +533,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x00C6, RETURN_FALSE);
 		Opcodes::RegisterOpcode(0x00E2, GET_PAD_STATE);
 		Opcodes::RegisterOpcode(0x0113, ADD_AMMO_TO_PLAYER);
+		Opcodes::RegisterOpcode(0x0116, IS_PLAYER_STILL_ALIVE);
 		Opcodes::RegisterOpcode(0x0130, HAS_PLAYER_BEEN_ARRESTED);
 		Opcodes::RegisterOpcode(0x0135, CHANGE_CAR_LOCK);
 		Opcodes::RegisterOpcode(0x0136, SHAKE_CAM_WITH_POINT);
@@ -477,9 +544,12 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x0220, IS_CAR_ARMED_WITH_ANY_BOMB);
 		Opcodes::RegisterOpcode(0x0228, IS_CAR_ARMED_WITH_BOMB);
 		Opcodes::RegisterOpcode(0x0242, ARM_CAR_WITH_BOMB);
+		Opcodes::RegisterOpcode(0x02F0, DROP_MINE);
+		Opcodes::RegisterOpcode(0x02F1, DROP_NAUTICAL_MINE);
 		Opcodes::RegisterOpcode(0x031B, IS_FIRST_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x031C, IS_SECOND_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x04A7, IS_CHAR_IN_ANY_BOAT);
+		Opcodes::RegisterOpcode(0x050F, GET_MAX_WANTED_LEVEL);
 	}
 	return TRUE;
 }
