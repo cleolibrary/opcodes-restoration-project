@@ -10,20 +10,30 @@
 0135=2,change_car %1d% lock %2d%
 0136=4,shake_camera %1d% with_point %2d% %3d% %4d%
 015E=1,  car %1d% in_air
+0178=2,  player %1d% touching_object %2d%
+0179=2,  actor %1d% touching_object %2d%
 017B=3,set_actor %1d% weapon %2d% ammo_to %3d%
 016F=10,draw_shadow %1d% at %2d% %3d% %4d% angle %5d% size %6d% intensity %7d% colour %8d% %9d% %10d%
 021D=1,set_free_bomb_shop_to %1d%
 021F=1,set_all_taxi_lights %1d%
 0220=1,  car %1d% has_car_bomb
 0228=2,  car %1d% bomb_status == %2d%
+023A=2,  player %1d% touching_object %2d% on_foot
+023B=2,  actor %1d% touching_object %2d% on_foot
 0242=2,set_car %1d% bomb_status_to %2d%
+029C=1,  is %1d% boat
+02A0=1,  actor %1d% stopped
 02F0=3,create_explosive_barrel_at %1d% %2d% %3d%
 02F1=3,create_explosive_barrel_at %1d% %2d% %3d%
 031B=2,  car %1d% primary_color %2d%
 031C=2,  car %1d% secondary_color %2d%
 0349=1,text_draw_style = %1d%
 04A7=1,  actor %1d% in_any_boat
+04A9=1,  actor %1d% in_any_heli
+04AB=1,  actor %1d% in_any_plane
+04C8=1,  actor %1d% in_flying_vehicle
 050f=1,get_max_wanted_level_to %1d%
+0547=2,  actor %1d% touching_car %2d%
 }
 { GTA3 only
 04C2=7,create_coordinate %5d% %6d% %7d% from_object %1d% offset %2d% %3d% %4d% ;0400 in VC
