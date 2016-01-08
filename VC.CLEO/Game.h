@@ -167,6 +167,7 @@ public:
 		void(__thiscall *SetAmmo)(void *, DWORD, DWORD);
 		float(__cdecl *FindGroundZForCoord)(float, float);
 		void(__cdecl *CreatePickup)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD);
+		BYTE(__thiscall *GetHasCollidedWith)(uintptr_t, uintptr_t);
 	} Misc;
 };
 

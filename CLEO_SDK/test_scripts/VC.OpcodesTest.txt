@@ -15,6 +15,7 @@ PLAYER_CAR = 9@
 FREEBOMB   = 10@
 SETTAXI    = 11@
 MAXWANTED  = 12@
+SPAWN_OBJ  = 13@
 end
 
 while true
@@ -42,11 +43,13 @@ end
 0247: request_model #MALE01
 0247: request_model #DINGHY
 038B: load_requested_models
-POSX += 5.0
+POSX += 4.0
 009A: SPAWN_CHAR = create_actor_pedtype 4 model #MALE01 at POSX POSY POSZ
-POSX += 5.0
+POSX += 4.0
 00A5: SPAWN_CAR = create_car #DINGHY at POSX POSY POSZ
 0229: set_car SPAWN_CAR color_to 6 75
+POSX += 4.0
+029B: SPAWN_OBJ = init_object #ELECTRICGATE at POSX POSY POSZ
 01B1: give_player $PLAYER_CHAR weapon 17 ammo 10
 FREEBOMB = 0
 SETTAXI = 0
@@ -54,53 +57,40 @@ SETTAXI = 0
 while true
     wait 10
     03F0: enable_text_draw 0
-    0343: set_text_linewidth 500.0
-    LINE = 10.0
+    LINE = 0
     gosub @IS_CHAR_STILL_ALIVE
-    0343: set_text_linewidth 500.0
-    LINE += 10.0
     gosub @IS_CAR_STILL_ALIVE
-    0343: set_text_linewidth 500.0
-    LINE += 10.0
     gosub @RETURN_TRUE
-    0343: set_text_linewidth 500.0
-    LINE += 10.0
     gosub @RETURN_FALSE
     gosub @GET_PAD_STATE
     gosub @ADD_AMMO_TO_PLAYER
-    0343: set_text_linewidth 500.0
-    LINE += 10.0
     gosub @IS_PLAYER_STILL_ALIVE
-    0343: set_text_linewidth 500.0
-    LINE += 10.0
     gosub @HAS_PLAYER_BEEN_ARRESTED
     gosub @CHANGE_CAR_LOCK
     gosub @SHAKE_CAM_WITH_POINT
-    0343: set_text_linewidth 500.0
-    LINE += 10.0
     gosub @IS_CAR_IN_AIR
+    gosub @IS_PLAYER_TOUCHING_OBJECT
+    gosub @IS_CHAR_TOUCHING_OBJECT
     gosub @SET_CHAR_AMMO
     gosub @SET_FREE_BOMBS
     gosub @SET_ALL_TAXI_LIGHTS
-    0343: set_text_linewidth 500.0
-    LINE += 10.0
     gosub @IS_CAR_ARMED_WITH_ANY_BOMB
-    0343: set_text_linewidth 500.0
-    LINE += 10.0
     gosub @IS_CAR_ARMED_WITH_BOMB
+    gosub @IS_PLAYER_TOUCHING_OBJECT_ON_FOOT
+    gosub @IS_CHAR_TOUCHING_OBJECT_ON_FOOT
     gosub @ARM_CAR_WITH_BOMB
+    gosub @IS_BOAT
+    gosub @IS_CHAR_STOPPED
     gosub @DROP_MINE
     gosub @DROP_NAUTICAL_MINE
-    0343: set_text_linewidth 500.0
-    LINE += 10.0
     gosub @IS_FIRST_CAR_COLOUR
-    0343: set_text_linewidth 500.0
-    LINE += 10.0
     gosub @IS_SECOND_CAR_COLOUR
-    0343: set_text_linewidth 500.0
-    LINE += 10.0
     gosub @IS_CHAR_IN_ANY_BOAT
+    gosub @IS_CHAR_IN_ANY_HELI
+    gosub @IS_CHAR_IN_ANY_PLANE
+    gosub @IS_CHAR_IN_FLYING_VEHICLE
     gosub @GET_MAX_WANTED_LEVEL
+    gosub @IS_CHAR_TOUCHING_VEHICLE
     
     if and
         00E1:   player 0 pressed_button 4 // action
@@ -115,27 +105,36 @@ while true
     0308: text_6numbers 'HJSTATW' KEYA KEYB KEYC MAXWANTED 0 0 time 10 flag 5
 end
 
+:TEXT_STYLE
+0343: set_text_linewidth 500.0
+033F: set_text_draw_letter_width_height 0.3 1.2
+LINE += 11.0
+return
+
 :IS_CHAR_STILL_ALIVE
+gosub @TEXT_STYLE
 if
     00A2:   actor SPAWN_CHAR alive
 then
-    0608: show_text_position 10.0 LINE text "00A2: Character is still alive"
+    0608: show_text_position 10.0 LINE text "00A2: Spawned character is still alive"
 else
-    0608: show_text_position 10.0 LINE text "00A2: Character is dead"
+    0608: show_text_position 10.0 LINE text "00A2: Spawned character is dead"
 end
 return
 
 :IS_CAR_STILL_ALIVE
+gosub @TEXT_STYLE
 if
     00AC:   car SPAWN_CAR alive
 then
-    0608: show_text_position 10.0 LINE text "00AC: Car is still alive"
+    0608: show_text_position 10.0 LINE text "00AC: Spawned car is still alive"
 else
-    0608: show_text_position 10.0 LINE text "00AC: Car is dead"
+    0608: show_text_position 10.0 LINE text "00AC: Spawned car is dead"
 end
 return
 
 :RETURN_TRUE
+gosub @TEXT_STYLE
 if
     00C5:   true
 then
@@ -146,6 +145,7 @@ end
 return
 
 :RETURN_FALSE
+gosub @TEXT_STYLE
 if
     00C6:   false
 then
@@ -171,6 +171,7 @@ end
 return
 
 :IS_PLAYER_STILL_ALIVE
+gosub @TEXT_STYLE
 if
     0116:   player $PLAYER_CHAR alive
 then
@@ -181,6 +182,7 @@ end
 return
 
 :HAS_PLAYER_BEEN_ARRESTED
+gosub @TEXT_STYLE
 if
     0130:   player $PLAYER_CHAR busted
 then
@@ -216,6 +218,7 @@ end
 return
 
 :IS_CAR_IN_AIR
+gosub @TEXT_STYLE
 if
     00E0:   player $PLAYER_CHAR driving
 then
@@ -228,6 +231,28 @@ then
     end
 end
 0608: show_text_position 10.0 LINE text "015E: Car is not in air"
+return
+
+:IS_PLAYER_TOUCHING_OBJECT
+gosub @TEXT_STYLE
+if
+    0178:   player $PLAYER_CHAR touching_object SPAWN_OBJ
+then
+    0608: show_text_position 10.0 LINE text "0178: Player is touching spawned object"
+else
+    0608: show_text_position 10.0 LINE text "0178: Player is not touching spawned object"
+end
+return
+
+:IS_CHAR_TOUCHING_OBJECT
+gosub @TEXT_STYLE
+if
+    0179:   actor $PLAYER_ACTOR touching_object SPAWN_OBJ
+then
+    0608: show_text_position 10.0 LINE text "0179: Player character is touching spawned object"
+else
+    0608: show_text_position 10.0 LINE text "0179: Player character is not touching spawned object"
+end
 return
 
 :SET_CHAR_AMMO
@@ -274,6 +299,7 @@ end
 return
 
 :IS_CAR_ARMED_WITH_ANY_BOMB
+gosub @TEXT_STYLE
 if
     00E0:   player $PLAYER_CHAR driving
 then
@@ -289,6 +315,7 @@ end
 return
 
 :IS_CAR_ARMED_WITH_BOMB
+gosub @TEXT_STYLE
 if
     00E0:   player $PLAYER_CHAR driving
 then
@@ -301,6 +328,69 @@ then
     end
 end
 0608: show_text_position 10.0 LINE text "0228: Car is not armed with bomb 4"
+return
+
+:IS_PLAYER_TOUCHING_OBJECT_ON_FOOT
+gosub @TEXT_STYLE
+if
+    023A:   player $PLAYER_CHAR touching_object SPAWN_OBJ on_foot
+then
+    0608: show_text_position 10.0 LINE text "023A: Player is touching spawned object on foot"
+else
+    0608: show_text_position 10.0 LINE text "023A: Player is not touching spawned object on foot"
+end
+return
+
+:IS_CHAR_TOUCHING_OBJECT_ON_FOOT
+gosub @TEXT_STYLE
+if
+    023B:   actor $PLAYER_ACTOR touching_object SPAWN_OBJ on_foot
+then
+    0608: show_text_position 10.0 LINE text "023B: Player character is touching spawned object on foot"
+else
+    0608: show_text_position 10.0 LINE text "023B: Player character is not touching spawned object on foot"
+end
+return
+
+:ARM_CAR_WITH_BOMB
+if
+    00E0:   player $PLAYER_CHAR driving
+then
+    if
+        0ADC: test_cheat "ARMBOMB"
+    then
+        018C: play_sound 1 at 0.0 0.0 0.0
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        0242: set_car PLAYER_CAR bomb_status_to 1
+    end
+end
+return
+
+:IS_BOAT
+gosub @TEXT_STYLE
+if
+    00E0:   player $PLAYER_CHAR driving
+then
+    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    if
+        029C:   is PLAYER_CAR boat
+    then
+        0608: show_text_position 10.0 LINE text "029C: Is a boat"
+        return
+    end
+end
+0608: show_text_position 10.0 LINE text "029C: Is not a boat"
+return
+
+:IS_CHAR_STOPPED
+gosub @TEXT_STYLE
+if
+    02A0:   actor $PLAYER_ACTOR stopped
+then
+    0608: show_text_position 10.0 LINE text "02A0: Player character is 'stopped'"
+else
+    0608: show_text_position 10.0 LINE text "02A0: Player character is not 'stopped'"
+end
 return
 
 :DROP_MINE
@@ -323,21 +413,8 @@ then
 end
 return
 
-:ARM_CAR_WITH_BOMB
-if
-    00E0:   player $PLAYER_CHAR driving
-then
-    if
-        0ADC: test_cheat "ARMBOMB"
-    then
-        018C: play_sound 1 at 0.0 0.0 0.0
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
-        0242: set_car PLAYER_CAR bomb_status_to 1
-    end
-end
-return
-
 :IS_FIRST_CAR_COLOUR
+gosub @TEXT_STYLE
 if
     00E0:   player $PLAYER_CHAR driving
 then
@@ -353,6 +430,7 @@ end
 return
 
 :IS_SECOND_CAR_COLOUR
+gosub @TEXT_STYLE
 if
     00E0:   player $PLAYER_CHAR driving
 then
@@ -368,6 +446,7 @@ end
 return
 
 :IS_CHAR_IN_ANY_BOAT
+gosub @TEXT_STYLE
 if
     04A7:   actor $PLAYER_ACTOR in_any_boat
 then
@@ -377,6 +456,50 @@ else
 end
 return
 
+:IS_CHAR_IN_ANY_HELI
+gosub @TEXT_STYLE
+if
+    04A9:   actor $PLAYER_ACTOR in_any_heli
+then
+    0608: show_text_position 10.0 LINE text "04A9: Player character is in any heli"
+else
+    0608: show_text_position 10.0 LINE text "04A9: Player character is not in any heli"
+end
+return
+
+:IS_CHAR_IN_ANY_PLANE
+gosub @TEXT_STYLE
+if
+    04AB:   actor $PLAYER_ACTOR in_any_plane
+then
+    0608: show_text_position 10.0 LINE text "04AB: Player character is in any plane"
+else
+    0608: show_text_position 10.0 LINE text "04AB: Player character is not in any plane"
+end
+return
+
+:IS_CHAR_IN_FLYING_VEHICLE
+gosub @TEXT_STYLE
+if
+    04C8:   actor $PLAYER_ACTOR in_flying_vehicle
+then
+    0608: show_text_position 10.0 LINE text "04C8: Player character is in flying vehicle"
+else
+    0608: show_text_position 10.0 LINE text "04C8: Player character is not in flying vehicle"
+end
+return
+
 :GET_MAX_WANTED_LEVEL
 050F: get_max_wanted_level_to MAXWANTED
+return
+
+:IS_CHAR_TOUCHING_VEHICLE
+gosub @TEXT_STYLE
+if
+    0547:   actor $PLAYER_ACTOR touching_car SPAWN_CAR
+then
+    0608: show_text_position 10.0 LINE text "0547: Player character is touching spawned vehicle"
+else
+    0608: show_text_position 10.0 LINE text "0547: Player character is not touching spawned vehicle"
+end
 return

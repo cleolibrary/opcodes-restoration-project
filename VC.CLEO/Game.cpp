@@ -187,6 +187,7 @@ void GtaGame::InitAndPatch()
 		this->Misc.SetAmmo = (void(__thiscall *)(void *, DWORD, DWORD))0x4FF780;
 		this->Misc.FindGroundZForCoord = (float(__cdecl *)(float, float))0x4D5540;
 		this->Misc.CreatePickup = (void(__cdecl *)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
+		this->Misc.GetHasCollidedWith = (BYTE(__thiscall *)(uintptr_t, uintptr_t))0x4B9010;
 		break;
 	case GAME_V1_1:
 		// Scripts
@@ -300,6 +301,7 @@ void GtaGame::InitAndPatch()
 		this->Misc.SetAmmo = (void(__thiscall *)(void *, DWORD, DWORD))0x4FF7A0;
 		this->Misc.FindGroundZForCoord = (float(__cdecl *)(float, float))0x4D5560;
 		this->Misc.CreatePickup = (void(__cdecl *)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
+		this->Misc.GetHasCollidedWith = (BYTE(__thiscall *)(uintptr_t, uintptr_t))0x4B9030;
 		break;
 	case GAME_VSTEAM:
 		// Scripts

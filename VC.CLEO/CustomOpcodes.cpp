@@ -196,18 +196,28 @@ void CustomOpcodes::Register()
 	Opcodes::RegisterOpcode(0x0135, CHANGE_CAR_LOCK);
 	Opcodes::RegisterOpcode(0x0136, SHAKE_CAM_WITH_POINT);
 	Opcodes::RegisterOpcode(0x015E, IS_CAR_IN_AIR);
+	Opcodes::RegisterOpcode(0x0178, IS_PLAYER_TOUCHING_OBJECT);
+	Opcodes::RegisterOpcode(0x0179, IS_CHAR_TOUCHING_OBJECT);
 	Opcodes::RegisterOpcode(0x017B, SET_CHAR_AMMO);
 	Opcodes::RegisterOpcode(0x021D, SET_FREE_BOMBS);
 	Opcodes::RegisterOpcode(0x021F, SET_ALL_TAXI_LIGHTS);
 	Opcodes::RegisterOpcode(0x0220, IS_CAR_ARMED_WITH_ANY_BOMB);
 	Opcodes::RegisterOpcode(0x0228, IS_CAR_ARMED_WITH_BOMB);
+	Opcodes::RegisterOpcode(0x023A, IS_PLAYER_TOUCHING_OBJECT_ON_FOOT);
+	Opcodes::RegisterOpcode(0x023B, IS_CHAR_TOUCHING_OBJECT_ON_FOOT);
 	Opcodes::RegisterOpcode(0x0242, ARM_CAR_WITH_BOMB);
+	Opcodes::RegisterOpcode(0x029C, IS_BOAT);
+	Opcodes::RegisterOpcode(0x02A0, IS_CHAR_STOPPED);
 	Opcodes::RegisterOpcode(0x02F0, DROP_MINE);
 	Opcodes::RegisterOpcode(0x02F1, DROP_NAUTICAL_MINE);
 	Opcodes::RegisterOpcode(0x031B, IS_FIRST_CAR_COLOUR);
 	Opcodes::RegisterOpcode(0x031C, IS_SECOND_CAR_COLOUR);
 	Opcodes::RegisterOpcode(0x04A7, IS_CHAR_IN_ANY_BOAT);
+	Opcodes::RegisterOpcode(0x04A9, IS_CHAR_IN_ANY_HELI);
+	Opcodes::RegisterOpcode(0x04AB, IS_CHAR_IN_ANY_PLANE);
+	Opcodes::RegisterOpcode(0x04C8, IS_CHAR_IN_FLYING_VEHICLE);
 	Opcodes::RegisterOpcode(0x050F, GET_MAX_WANTED_LEVEL);
+	Opcodes::RegisterOpcode(0x0547, IS_CHAR_TOUCHING_VEHICLE);
 }
 
 eOpcodeResult CustomOpcodes::DUMMY(CScript *script)
@@ -1221,6 +1231,44 @@ eOpcodeResult CustomOpcodes::IS_CAR_IN_AIR(CScript *script)
 	return OR_CONTINUE;
 }
 
+eOpcodeResult CustomOpcodes::IS_PLAYER_TOUCHING_OBJECT(CScript *script)
+{
+	script->Collect(2);
+	DWORD source = game.Pools.pCPlayerPedPool[0x2E * game.Scripts.Params[0].nVar];
+	uintptr_t target = (uintptr_t)game.Pools.pfObjectPoolGetStruct(*game.Pools.pObjectPool, game.Scripts.Params[1].nVar);
+	if (*(BYTE *)(source + 0x3AC)) {
+		uintptr_t car = *(uintptr_t *)(source + 0x3A8);
+		if (car != NULL) {
+			source = car;
+		}
+	}
+	if (game.Misc.GetHasCollidedWith(source, target)) {
+		script->UpdateCompareFlag(true);
+		return OR_CONTINUE;
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::IS_CHAR_TOUCHING_OBJECT(CScript *script)
+{
+	script->Collect(2);
+	uintptr_t source = (uintptr_t)game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
+	uintptr_t target = (uintptr_t)game.Pools.pfObjectPoolGetStruct(*game.Pools.pObjectPool, game.Scripts.Params[1].nVar);
+	if (*(BYTE *)(source + 0x3AC)) {
+		uintptr_t car = *(uintptr_t *)(source + 0x3A8);
+		if (car != NULL) {
+			source = car;
+		}
+	}
+	if (game.Misc.GetHasCollidedWith(source, target)) {
+		script->UpdateCompareFlag(true);
+		return OR_CONTINUE;
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
 eOpcodeResult CustomOpcodes::SET_CHAR_AMMO(CScript *script)
 {
 	script->Collect(3);
@@ -1296,6 +1344,36 @@ eOpcodeResult CustomOpcodes::IS_CAR_ARMED_WITH_BOMB(CScript *script)
 	return OR_CONTINUE;
 }
 
+eOpcodeResult CustomOpcodes::IS_PLAYER_TOUCHING_OBJECT_ON_FOOT(CScript *script)
+{
+	script->Collect(2);
+	DWORD player = game.Pools.pCPlayerPedPool[0x2E * game.Scripts.Params[0].nVar];
+	uintptr_t object = (uintptr_t)game.Pools.pfObjectPoolGetStruct(*game.Pools.pObjectPool, game.Scripts.Params[1].nVar);
+	if (!*(BYTE *)(player + 0x3AC)) {
+		if (game.Misc.GetHasCollidedWith(player, object)) {
+			script->UpdateCompareFlag(true);
+			return OR_CONTINUE;
+		}
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::IS_CHAR_TOUCHING_OBJECT_ON_FOOT(CScript *script)
+{
+	script->Collect(2);
+	uintptr_t ped = (uintptr_t)game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
+	uintptr_t object = (uintptr_t)game.Pools.pfObjectPoolGetStruct(*game.Pools.pObjectPool, game.Scripts.Params[1].nVar);
+	if (!*(BYTE *)(ped + 0x3AC)) {
+		if (game.Misc.GetHasCollidedWith(ped, object)) {
+			script->UpdateCompareFlag(true);
+			return OR_CONTINUE;
+		}
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
 eOpcodeResult CustomOpcodes::ARM_CAR_WITH_BOMB(CScript *script)
 {
 	script->Collect(2);
@@ -1304,6 +1382,39 @@ eOpcodeResult CustomOpcodes::ARM_CAR_WITH_BOMB(CScript *script)
 	BYTE state = (*(BYTE *)(car + 0x1FE) & 0xF8);
 	state |= input;
 	*(BYTE *)(car + 0x1FE) = state;
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::IS_BOAT(CScript *script)
+{
+	script->Collect(1);
+	uintptr_t car = (uintptr_t)game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[0].nVar);
+	if (*(DWORD *)(car + 0x29C) == 1) {
+		script->UpdateCompareFlag(true);
+		return OR_CONTINUE;
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::IS_CHAR_STOPPED(CScript *script)
+{
+	script->Collect(1);
+	uintptr_t ped = (uintptr_t)game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
+	if (*(BYTE *)(ped + 0x3AC)) {
+		uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
+		if (*(float *)(car + 0x100) == 0.0) {
+			script->UpdateCompareFlag(true);
+			return OR_CONTINUE;
+		}
+	}
+	else {
+		if (*(DWORD *)(ped + 0x24C) <= 1) {
+			script->UpdateCompareFlag(true);
+			return OR_CONTINUE;
+		}
+	}
+	script->UpdateCompareFlag(false);
 	return OR_CONTINUE;
 }
 
@@ -1391,6 +1502,72 @@ eOpcodeResult CustomOpcodes::IS_CHAR_IN_ANY_BOAT(CScript *script)
 	return OR_CONTINUE;
 }
 
+eOpcodeResult CustomOpcodes::IS_CHAR_IN_ANY_HELI(CScript *script)
+{
+	script->Collect(1);
+	uintptr_t ped = (uintptr_t)game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
+	if (ped != NULL) {
+		if (*(BYTE *)(ped + 0x3AC)) {
+			uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
+			if (car != NULL) {
+				DWORD handling = *(DWORD *)(car + 0x120);
+				DWORD flags = *(DWORD *)(handling + 0xCC);
+				flags &= 0xF0000;
+				if (flags == 0x20000) {
+					script->UpdateCompareFlag(true);
+					return OR_CONTINUE;
+				}
+			}
+		}
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::IS_CHAR_IN_ANY_PLANE(CScript *script)
+{
+	script->Collect(1);
+	uintptr_t ped = (uintptr_t)game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
+	if (ped != NULL) {
+		if (*(BYTE *)(ped + 0x3AC)) {
+			uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
+			if (car != NULL) {
+				DWORD handling = *(DWORD *)(car + 0x120);
+				DWORD flags = *(DWORD *)(handling + 0xCC);
+				flags &= 0xF0000;
+				if (flags == 0x40000) {
+					script->UpdateCompareFlag(true);
+					return OR_CONTINUE;
+				}
+			}
+		}
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::IS_CHAR_IN_FLYING_VEHICLE(CScript *script)
+{
+	script->Collect(1);
+	uintptr_t ped = (uintptr_t)game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
+	if (ped != NULL) {
+		if (*(BYTE *)(ped + 0x3AC)) {
+			uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
+			if (car != NULL) {
+				DWORD handling = *(DWORD *)(car + 0x120);
+				DWORD flags = *(DWORD *)(handling + 0xCC);
+				flags &= 0xF0000;
+				if (flags == 0x20000 || flags == 0x40000) {
+					script->UpdateCompareFlag(true);
+					return OR_CONTINUE;
+				}
+			}
+		}
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
 eOpcodeResult CustomOpcodes::GET_MAX_WANTED_LEVEL(CScript *script)
 {
 	void *address = NULL;
@@ -1406,6 +1583,25 @@ eOpcodeResult CustomOpcodes::GET_MAX_WANTED_LEVEL(CScript *script)
 	}
 	game.Scripts.Params[0].nVar = *(DWORD *)address;
 	script->Store(1);
+	return OR_CONTINUE;
+}
+
+eOpcodeResult CustomOpcodes::IS_CHAR_TOUCHING_VEHICLE(CScript *script)
+{
+	script->Collect(2);
+	uintptr_t source = (uintptr_t)game.Pools.pfPedPoolGetStruct(*game.Pools.pPedPool, game.Scripts.Params[0].nVar);
+	uintptr_t target = (uintptr_t)game.Pools.pfVehiclePoolGetStruct(*game.Pools.pVehiclePool, game.Scripts.Params[1].nVar);
+	if (*(BYTE *)(source + 0x3AC)) {
+		uintptr_t car = *(uintptr_t *)(source + 0x3A8);
+		if (car != NULL) {
+			source = car;
+		}
+	}
+	if (game.Misc.GetHasCollidedWith(source, target)) {
+		script->UpdateCompareFlag(true);
+		return OR_CONTINUE;
+	}
+	script->UpdateCompareFlag(false);
 	return OR_CONTINUE;
 }
 
