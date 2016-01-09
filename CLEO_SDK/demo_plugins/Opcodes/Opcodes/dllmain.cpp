@@ -20,115 +20,108 @@
 
 tScriptVar *Params;
 
-enum gameVersion{ V1_0, V1_1, VSTEAM, VSTEAMENC, VUNKOWN = -1 };
+enum gameVersion{ V1_0, V1_1, VSTEAM, VUNKOWN = -1 };
 
-int getGameVersion()
+class GtaGame
 {
-	int version = VUNKOWN;
+public:
+	gameVersion version;
+	GtaGame();
+};
+
+GtaGame game;
+
+void(__cdecl *CreatePickup)(FLOAT, FLOAT, FLOAT, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD); // cpickups::generatenewone
+uintptr_t(__thiscall *ObjectPoolGetStruct)(void *, DWORD); // cpool_cobject_ccutscenehead::getat
+uintptr_t(__thiscall *VehiclePoolGetStruct)(void *, DWORD); // cpool_cvehicle_cautomobile::getat
+uintptr_t(__thiscall *PedPoolGetStruct)(void *, DWORD); // cpool_cped_cplayerped::getat
+WORD(__thiscall *GetPadState)(CScript *, DWORD, DWORD); // crunningscript::getpadstate
+void(__thiscall *CamShake)(void *, FLOAT, FLOAT, FLOAT, FLOAT); // ccamera::camshake
+BYTE(__thiscall *GetHasCollidedWith)(DWORD, uintptr_t); // cphysical::gethascollidedwith
+FLOAT(__cdecl *FindGroundZForCoord)(FLOAT, FLOAT); // cworld::findgroundzforcoord
+void(__thiscall *SetAmmo)(uintptr_t, DWORD, DWORD); // cped::setammo
+void(__thiscall *GrantAmmo)(DWORD, DWORD, DWORD); // cped::grantammo
+DWORD *barrel1 = NULL;
+DWORD *barrel2 = NULL;
+DWORD *maxWantedLevel = NULL;
+void *camera = NULL;
+uintptr_t *playerPedPool = NULL;
+uintptr_t *playerPedState = NULL;
+void **objectPool = NULL;
+void **pedPool = NULL;
+void *allTaxiLights = NULL;
+void *freeBombs = NULL;
+void **carPool = NULL;
+
+GtaGame::GtaGame()
+{
+	version = VUNKOWN;
 	switch ((*(unsigned int *)0x61C11C)) { // get version signature
 	case 0x74FF5064:
 		version = V1_0;
+		CreatePickup = (void(__cdecl *)(FLOAT, FLOAT, FLOAT, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
+		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451C30;
+		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451C70;
+		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451CB0;
+		GetPadState = (WORD(__thiscall *)(CScript *, DWORD, DWORD))0x460C00;
+		CamShake = (void(__thiscall *)(void *, FLOAT, FLOAT, FLOAT, FLOAT))0x46FF21;
+		GetHasCollidedWith = (BYTE(__thiscall *)(DWORD, uintptr_t))0x4B9010;
+		FindGroundZForCoord = (FLOAT(__cdecl *)(FLOAT, FLOAT))0x4D5540;
+		SetAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))0x4FF780;
+		GrantAmmo = (void(__thiscall *)(DWORD, DWORD, DWORD))0x4FF840;
+		barrel1 = (DWORD *)0x68E8B0;
+		barrel2 = (DWORD *)0x68E910;
+		maxWantedLevel = (DWORD *)0x6910D8;
+		camera = (void *)0x7E4688;
+		playerPedPool = (uintptr_t *)0x94AD28;
+		playerPedState = (uintptr_t *)0x94ADF4;
+		objectPool = (void **)0x94DBE0;
+		pedPool = (void **)0x97F2AC;
+		allTaxiLights = (void *)0xA10ABB;
+		freeBombs = (void *)0xA10B32;
+		carPool = (void **)0xA0FDE4;
 		break;
 	case 0x00408DC0:
 		version = V1_1;
+		CreatePickup = (void(__cdecl *)(FLOAT, FLOAT, FLOAT, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
+		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451C30;
+		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451C70;
+		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451CB0;
+		GetPadState = (WORD(__thiscall *)(CScript *, DWORD, DWORD))0x460C00;
+		CamShake = (void(__thiscall *)(void *, FLOAT, FLOAT, FLOAT, FLOAT))0x46FF21;
+		GetHasCollidedWith = (BYTE(__thiscall *)(DWORD, uintptr_t))(0x4B9010 + 0x20);
+		FindGroundZForCoord = (FLOAT(__cdecl *)(FLOAT, FLOAT))(0x4D5540 + 0x20);
+		SetAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))(0x4FF780 + 0x20);
+		GrantAmmo = (void(__thiscall *)(DWORD, DWORD, DWORD))(0x4FF840 + 0x20);
+		barrel1 = (DWORD *)0x68E8B0;
+		barrel2 = (DWORD *)0x68E910;
+		maxWantedLevel = (DWORD *)0x6910D8;
+		camera = (void *)(0x7E4688 + 8);
+		playerPedPool = (uintptr_t *)(0x94AD28 + 8);
+		playerPedState = (uintptr_t *)(0x94ADF4 + 8);
+		objectPool = (void **)(0x94DBE0 + 8);
+		pedPool = (void **)(0x97F2AC + 8);
+		allTaxiLights = (void *)(0xA10ABB + 8);
+		freeBombs = (void *)(0xA10B32 + 8);
+		carPool = (void **)(0xA0FDE4 + 8);
 		break;
 	case 0x00004824:
 		version = VSTEAM;
-		break;
-	case 0x24E58287:
-		version = VSTEAMENC;
-		break;
-	}
-	return version;
-}
-
-uintptr_t getPedStruct(unsigned int param)
-{
-	void *func = NULL;
-	void *pedPool = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x451CB0;
-		pedPool = *(void **)0x97F2AC;
-		break;
-	case V1_1:
-		func = (void *)0x451CB0;
-		pedPool = *(void **)0x97F2B4;
-		break;
-	case VSTEAM:
-		func = (void *)0x97E2B4;
-		pedPool = *(void **)0xA0EDEC;
+		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451B10;
+		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451B50;
+		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451B90;
+		objectPool = (void **)0x94CBE8;
+		pedPool = (void **)0x97E2B4;
+		carPool = (void **)0xA0EDEC;
 		break;
 	}
-	auto pfPedPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))func; // cpool_cped_cplayerped::getat
-	return pfPedPoolGetStruct(pedPool, param);
-}
-
-uintptr_t getVehicleStruct(unsigned int param)
-{
-	void *func = NULL;
-	void *carPool = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x451C70;
-		carPool = *(void **)0xA0FDE4;
-		break;
-	case V1_1:
-		func = (void *)0x451C70;
-		carPool = *(void **)0xA0FDEC;
-		break;
-	case VSTEAM:
-		func = (void *)0x451B50;
-		carPool = *(void **)0xA0EDEC;
-		break;
-	}
-	auto pfVehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))func; // cpool_cvehicle_cautomobile::getat
-	return pfVehiclePoolGetStruct(carPool, param);
-}
-
-uintptr_t getObjectStruct(unsigned int param)
-{
-	void *func = NULL;
-	void *objectPool = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x451C30;
-		objectPool = *(void **)0x94DBE0;
-		break;
-	case V1_1:
-		func = (void *)0x451C30;
-		objectPool = *(void **)0x94DBE8;
-		break;
-	case VSTEAM:
-		func = (void *)0x451B10;
-		objectPool = *(void **)0x94CBE8;
-		break;
-	}
-	auto pfObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))func; // cpool_cobject_ccutscenehead::getat
-	return pfObjectPoolGetStruct(objectPool, param);
-}
-
-DWORD getPlayerPed(unsigned int param)
-{
-	uintptr_t *address = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		address = (uintptr_t *)0x94AD28;
-		break;
-	case V1_1:
-		address = (uintptr_t *)0x94AD30;
-		break;
-	case VSTEAM: // todo steam address
-		break;
-	}
-	return address[0x2E * param];
 }
 
 /* 00A2 */
 eOpcodeResult WINAPI IS_CHAR_STILL_ALIVE(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t ped = getPedStruct(Params[0].nVar);
+	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
 	if (ped != NULL) {
 		DWORD state = *(DWORD *)(ped + 0x244);
 		if (state != 0x37 && state != 0x36) {
@@ -144,7 +137,7 @@ eOpcodeResult WINAPI IS_CHAR_STILL_ALIVE(CScript *script)
 eOpcodeResult WINAPI IS_CAR_STILL_ALIVE(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t car = getVehicleStruct(Params[0].nVar);
+	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
 	if (car != NULL) {
 		BYTE flag = *(BYTE *)(car + 0x50);
 		flag >>= 3;
@@ -156,7 +149,6 @@ eOpcodeResult WINAPI IS_CAR_STILL_ALIVE(CScript *script)
 				return OR_CONTINUE;
 			}
 		}
-
 	}
 	script->UpdateCompareFlag(false);
 	return OR_CONTINUE;
@@ -180,17 +172,7 @@ eOpcodeResult WINAPI RETURN_FALSE(CScript *script)
 eOpcodeResult WINAPI GET_PAD_STATE(CScript *script)
 {
 	script->Collect(2);
-	void *func = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-	case V1_1:
-		func = (void *)0x460C00;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	auto getPadState = (WORD(__thiscall *)(CScript *, DWORD, DWORD))func; // crunningscript::getpadstate
-	Params[0].nVar = (unsigned int)getPadState(script, Params[0].nVar, Params[1].nVar);
+	Params[0].nVar = (unsigned int)GetPadState(script, Params[0].nVar, Params[1].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -199,19 +181,7 @@ eOpcodeResult WINAPI GET_PAD_STATE(CScript *script)
 eOpcodeResult WINAPI ADD_AMMO_TO_PLAYER(CScript *script)
 {
 	script->Collect(3);
-	void *func = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x4FF840;
-		break;
-	case V1_1:
-		func = (void *)0x4FF860;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	auto grantAmmo = (void(__thiscall *)(DWORD, DWORD, DWORD))func; // cped::grantammo
-	grantAmmo(getPlayerPed(Params[0].nVar), Params[1].nVar, Params[2].nVar);
+	GrantAmmo(playerPedPool[0x2E * Params[0].nVar], Params[1].nVar, Params[2].nVar);
 	return OR_CONTINUE;
 }
 
@@ -219,18 +189,7 @@ eOpcodeResult WINAPI ADD_AMMO_TO_PLAYER(CScript *script)
 eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t *address = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		address = (uintptr_t *)0x94ADF4;
-		break;
-	case V1_1:
-		address = (uintptr_t *)0x94ADFC;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	if ((address[0x2E * Params[0].nVar]) == 1) {
+	if (playerPedState[0x2E * Params[0].nVar] == 1) {
 		script->UpdateCompareFlag(false);
 		return OR_CONTINUE;
 	}
@@ -242,18 +201,7 @@ eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script)
 eOpcodeResult WINAPI HAS_PLAYER_BEEN_ARRESTED(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t *address = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		address = (uintptr_t *)0x94ADF4;
-		break;
-	case V1_1:
-		address = (uintptr_t *)0x94ADFC;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	if ((address[0x2E * Params[0].nVar]) == 2) {
+	if (playerPedState[0x2E * Params[0].nVar] == 2) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
 	}
@@ -266,7 +214,7 @@ eOpcodeResult WINAPI CHANGE_CAR_LOCK(CScript *script)
 {
 	script->Collect(2);
 	uintptr_t car;
-	if ((car = getVehicleStruct(Params[0].nVar)) != NULL) {
+	if ((car = VehiclePoolGetStruct(*carPool, Params[0].nVar)) != NULL) {
 		*(DWORD *)(car + 0x230) = Params[1].nVar;
 	}
 	return OR_CONTINUE;
@@ -276,22 +224,7 @@ eOpcodeResult WINAPI CHANGE_CAR_LOCK(CScript *script)
 eOpcodeResult WINAPI SHAKE_CAM_WITH_POINT(CScript *script)
 {
 	script->Collect(4);
-	void *func = NULL;
-	void *camera = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x46FF21;
-		camera = (void *)0x7E4688;
-		break;
-	case V1_1:
-		func = (void *)0x46FF21;
-		camera = (void *)0x7E4690;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	auto camShake = (void(__thiscall *)(void *, float, float, float, float))func; // ccamera::camshake
-	camShake(camera, ((float)Params[0].nVar) * 1e-3f, Params[1].fVar, Params[2].fVar, Params[3].fVar);
+	CamShake(camera, ((float)Params[0].nVar) * 1e-3f, Params[1].fVar, Params[2].fVar, Params[3].fVar);
 	return OR_CONTINUE;
 }
 
@@ -299,7 +232,7 @@ eOpcodeResult WINAPI SHAKE_CAM_WITH_POINT(CScript *script)
 eOpcodeResult WINAPI IS_CAR_IN_AIR(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t car = getVehicleStruct(Params[0].nVar);
+	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
 	if (*(BYTE *)(car + 0x5C5)) {
 		script->UpdateCompareFlag(false);
 		return OR_CONTINUE;
@@ -312,26 +245,14 @@ eOpcodeResult WINAPI IS_CAR_IN_AIR(CScript *script)
 eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT(CScript *script)
 {
 	script->Collect(2);
-	void *func = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x4B9010;
-		break;
-	case V1_1:
-		func = (void *)0x4B9030;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	DWORD source = getPlayerPed(Params[0].nVar);
-	uintptr_t target = getObjectStruct(Params[1].nVar);
+	DWORD source = playerPedPool[0x2E * Params[0].nVar];
+	uintptr_t target = ObjectPoolGetStruct(*objectPool, Params[1].nVar);
 	if (*(BYTE *)(source + 0x3AC)) {
 		uintptr_t car = *(uintptr_t *)(source + 0x3A8);
 		if (car != NULL) {
 			source = car;
 		}
 	}
-	auto GetHasCollidedWith = (BYTE(__thiscall *)(DWORD, uintptr_t))func; // cphysical::gethascollidedwith
 	if (GetHasCollidedWith(source, target)) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
@@ -344,26 +265,14 @@ eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT(CScript *script)
 {
 	script->Collect(2);
-	void *func = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x4B9010;
-		break;
-	case V1_1:
-		func = (void *)0x4B9030;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	uintptr_t source = getPedStruct(Params[0].nVar);
-	uintptr_t target = getObjectStruct(Params[1].nVar);
+	uintptr_t source = PedPoolGetStruct(*pedPool, Params[0].nVar);
+	uintptr_t target = ObjectPoolGetStruct(*objectPool, Params[1].nVar);
 	if (*(BYTE *)(source + 0x3AC)) {
 		uintptr_t car = *(uintptr_t *)(source + 0x3A8);
 		if (car != NULL) {
 			source = car;
 		}
 	}
-	auto GetHasCollidedWith = (BYTE(__thiscall *)(uintptr_t, uintptr_t))func; // cphysical::gethascollidedwith
 	if (GetHasCollidedWith(source, target)) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
@@ -376,19 +285,7 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT(CScript *script)
 eOpcodeResult WINAPI SET_CHAR_AMMO(CScript *script)
 {
 	script->Collect(3);
-	void *func = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x4FF780;
-		break;
-	case V1_1:
-		func = (void *)0x4FF7A0;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	auto setAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))func; // cped::setammo
-	setAmmo(getPedStruct(Params[0].nVar), Params[1].nVar, Params[2].nVar);
+	SetAmmo(PedPoolGetStruct(*pedPool, Params[0].nVar), Params[1].nVar, Params[2].nVar);
 	return OR_CONTINUE;
 }
 
@@ -396,22 +293,11 @@ eOpcodeResult WINAPI SET_CHAR_AMMO(CScript *script)
 eOpcodeResult WINAPI SET_FREE_BOMBS(CScript *script)
 {
 	script->Collect(1);
-	void *address = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		address = (void *)0xA10B32;
-		break;
-	case V1_1:
-		address = (void *)0xA10B3A;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
 	DWORD param = Params[0].nVar;
 	if (param) {
 		param = 1;
 	}
-	*(BYTE *)address = (BYTE)param;
+	*(BYTE *)freeBombs = (BYTE)param;
 	return OR_CONTINUE;
 }
 
@@ -419,22 +305,11 @@ eOpcodeResult WINAPI SET_FREE_BOMBS(CScript *script)
 eOpcodeResult WINAPI SET_ALL_TAXI_LIGHTS(CScript *script)
 {
 	script->Collect(1);
-	void *address = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		address = (void *)0xA10ABB;
-		break;
-	case V1_1:
-		address = (void *)0xA10AC3;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
 	DWORD param = Params[0].nVar;
 	if (param) {
 		param = 1;
 	}
-	*(BYTE *)address = (BYTE)param;
+	*(BYTE *)allTaxiLights = (BYTE)param;
 	return OR_CONTINUE;
 }
 
@@ -442,7 +317,7 @@ eOpcodeResult WINAPI SET_ALL_TAXI_LIGHTS(CScript *script)
 eOpcodeResult WINAPI IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t car = getVehicleStruct(Params[0].nVar);
+	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
 	if (*(BYTE *)(car + 0x1FE) & 7) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
@@ -455,7 +330,7 @@ eOpcodeResult WINAPI IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script)
 eOpcodeResult WINAPI IS_CAR_ARMED_WITH_BOMB(CScript *script)
 {
 	script->Collect(2);
-	uintptr_t car = getVehicleStruct(Params[0].nVar);
+	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
 	if ((*(BYTE *)(car + 0x1FE) & 7) == Params[1].nVar) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
@@ -468,21 +343,9 @@ eOpcodeResult WINAPI IS_CAR_ARMED_WITH_BOMB(CScript *script)
 eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 {
 	script->Collect(2);
-	void *func = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x4B9010;
-		break;
-	case V1_1:
-		func = (void *)0x4B9030;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	DWORD player = getPlayerPed(Params[0].nVar);
-	uintptr_t object = getObjectStruct(Params[1].nVar);
+	DWORD player = playerPedPool[0x2E * Params[0].nVar];
+	uintptr_t object = ObjectPoolGetStruct(*objectPool, Params[1].nVar);
 	if (!*(BYTE *)(player + 0x3AC)) {
-		auto GetHasCollidedWith = (BYTE(__thiscall *)(DWORD, uintptr_t))func; // cphysical::gethascollidedwith
 		if (GetHasCollidedWith(player, object)) {
 			script->UpdateCompareFlag(true);
 			return OR_CONTINUE;
@@ -496,21 +359,9 @@ eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 {
 	script->Collect(2);
-	void *func = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x4B9010;
-		break;
-	case V1_1:
-		func = (void *)0x4B9030;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	uintptr_t ped = getPedStruct(Params[0].nVar);
-	uintptr_t object = getObjectStruct(Params[1].nVar);
+	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
+	uintptr_t object = ObjectPoolGetStruct(*objectPool, Params[1].nVar);
 	if (!*(BYTE *)(ped + 0x3AC)) {
-		auto GetHasCollidedWith = (BYTE(__thiscall *)(uintptr_t, uintptr_t))func; // cphysical::gethascollidedwith
 		if (GetHasCollidedWith(ped, object)) {
 			script->UpdateCompareFlag(true);
 			return OR_CONTINUE;
@@ -524,7 +375,7 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 eOpcodeResult WINAPI ARM_CAR_WITH_BOMB(CScript *script)
 {
 	script->Collect(2);
-	uintptr_t car = getVehicleStruct(Params[0].nVar);
+	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
 	BYTE input = ((BYTE)Params[1].nVar) & 7;
 	BYTE state = (*(BYTE *)(car + 0x1FE) & 0xF8);
 	state |= input;
@@ -536,7 +387,7 @@ eOpcodeResult WINAPI ARM_CAR_WITH_BOMB(CScript *script)
 eOpcodeResult WINAPI IS_BOAT(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t car = getVehicleStruct(Params[0].nVar);
+	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
 	if (*(DWORD *)(car + 0x29C) == 1) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
@@ -549,7 +400,7 @@ eOpcodeResult WINAPI IS_BOAT(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_STOPPED(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t ped = getPedStruct(Params[0].nVar);
+	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
 	if (*(BYTE *)(ped + 0x3AC)) {
 		uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
 		if (*(float *)(car + 0x100) == 0.0) {
@@ -570,29 +421,10 @@ eOpcodeResult WINAPI IS_CHAR_STOPPED(CScript *script)
 eOpcodeResult WINAPI DROP_MINE(CScript *script)
 {
 	script->Collect(3);
-	void *func = NULL;
-	void *groundz = NULL;
-	DWORD *barrel = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x4418C0;
-		barrel = (DWORD *)0x68E8B0;
-		groundz = (void *)0x4D5540;
-		break;
-	case V1_1:
-		func = (void *)0x4418C0;
-		barrel = (DWORD *)0x68E8B0;
-		groundz = (void *)0x4D5560;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
 	if (Params[2].fVar == -100.0) {
-		auto findGroundZForCoord = (float(__cdecl *)(float, float))groundz; // cworld::findgroundzforcoord
-		Params[2].fVar = findGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
+		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
 	}
-	auto CreatePickup = (void(__cdecl *)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))func; // cpickups::generatenewone
-	CreatePickup(Params[0].fVar, Params[1].fVar, Params[2].fVar, *barrel, 9, 0, 0, 0, 0);
+	CreatePickup(Params[0].fVar, Params[1].fVar, Params[2].fVar, *barrel1, 9, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -600,29 +432,10 @@ eOpcodeResult WINAPI DROP_MINE(CScript *script)
 eOpcodeResult WINAPI DROP_NAUTICAL_MINE(CScript *script)
 {
 	script->Collect(3);
-	void *func = NULL;
-	void *groundz = NULL;
-	DWORD *barrel = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x4418C0;
-		barrel = (DWORD *)0x68E910;
-		groundz = (void *)0x4D5540;
-		break;
-	case V1_1:
-		func = (void *)0x4418C0;
-		barrel = (DWORD *)0x68E910;
-		groundz = (void *)0x4D5560;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
 	if (Params[2].fVar == -100.0) {
-		auto findGroundZForCoord = (float(__cdecl *)(float, float))groundz; // cworld::findgroundzforcoord
-		Params[2].fVar = findGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
+		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
 	}
-	auto CreatePickup = (void(__cdecl *)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))func; // cpickups::generatenewone
-	CreatePickup(Params[0].fVar, Params[1].fVar, Params[2].fVar, *barrel, 11, 0, 0, 0, 0);
+	CreatePickup(Params[0].fVar, Params[1].fVar, Params[2].fVar, *barrel2, 11, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -630,7 +443,7 @@ eOpcodeResult WINAPI DROP_NAUTICAL_MINE(CScript *script)
 eOpcodeResult WINAPI IS_FIRST_CAR_COLOUR(CScript *script)
 {
 	script->Collect(2);
-	if ((DWORD)*(BYTE *)(getVehicleStruct(Params[0].nVar) + 0x1A0) == Params[1].nVar) {
+	if ((DWORD)*(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x1A0) == Params[1].nVar) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
 	}
@@ -642,7 +455,7 @@ eOpcodeResult WINAPI IS_FIRST_CAR_COLOUR(CScript *script)
 eOpcodeResult WINAPI IS_SECOND_CAR_COLOUR(CScript *script)
 {
 	script->Collect(2);
-	if ((DWORD)*(BYTE *)(getVehicleStruct(Params[0].nVar) + 0x1A1) == Params[1].nVar) {
+	if ((DWORD)*(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x1A1) == Params[1].nVar) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
 	}
@@ -654,7 +467,7 @@ eOpcodeResult WINAPI IS_SECOND_CAR_COLOUR(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_ANY_BOAT(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t ped = getPedStruct(Params[0].nVar);
+	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
 	if (ped != NULL) {
 		if (*(BYTE *)(ped + 0x3AC)) {
 			uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
@@ -677,7 +490,7 @@ eOpcodeResult WINAPI IS_CHAR_IN_ANY_BOAT(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_ANY_HELI(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t ped = getPedStruct(Params[0].nVar);
+	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
 	if (ped != NULL) {
 		if (*(BYTE *)(ped + 0x3AC)) {
 			uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
@@ -700,7 +513,7 @@ eOpcodeResult WINAPI IS_CHAR_IN_ANY_HELI(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_ANY_PLANE(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t ped = getPedStruct(Params[0].nVar);
+	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
 	if (ped != NULL) {
 		if (*(BYTE *)(ped + 0x3AC)) {
 			uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
@@ -723,7 +536,7 @@ eOpcodeResult WINAPI IS_CHAR_IN_ANY_PLANE(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_FLYING_VEHICLE(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t ped = getPedStruct(Params[0].nVar);
+	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
 	if (ped != NULL) {
 		if (*(BYTE *)(ped + 0x3AC)) {
 			uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
@@ -745,18 +558,7 @@ eOpcodeResult WINAPI IS_CHAR_IN_FLYING_VEHICLE(CScript *script)
 /* 050F */
 eOpcodeResult WINAPI GET_MAX_WANTED_LEVEL(CScript *script)
 {
-	void *address = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		address = (void *)0x6910D8;
-		break;
-	case V1_1:
-		address = (void *)0x6910D8;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	Params[0].nVar = *(DWORD *)address;
+	Params[0].nVar = *maxWantedLevel;
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -765,26 +567,14 @@ eOpcodeResult WINAPI GET_MAX_WANTED_LEVEL(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_TOUCHING_VEHICLE(CScript *script)
 {
 	script->Collect(2);
-	void *func = NULL;
-	switch (getGameVersion()) {
-	case V1_0:
-		func = (void *)0x4B9010;
-		break;
-	case V1_1:
-		func = (void *)0x4B9030;
-		break;
-	default:
-		return OR_CONTINUE; // todo steam address
-	}
-	uintptr_t source = getPedStruct(Params[0].nVar);
-	uintptr_t target = getVehicleStruct(Params[1].nVar);
+	uintptr_t source = PedPoolGetStruct(*pedPool, Params[0].nVar);
+	uintptr_t target = VehiclePoolGetStruct(*carPool, Params[1].nVar);
 	if (*(BYTE *)(source + 0x3AC)) {
 		uintptr_t car = *(uintptr_t *)(source + 0x3A8);
 		if (car != NULL) {
 			source = car;
 		}
 	}
-	auto GetHasCollidedWith = (BYTE(__thiscall *)(uintptr_t, uintptr_t))func; // cphysical::gethascollidedwith
 	if (GetHasCollidedWith(source, target)) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
