@@ -22,17 +22,27 @@
 023B=2,  actor %1d% touching_object %2d% on_foot
 0242=2,set_car %1d% bomb_status_to %2d%
 029C=1,  is %1d% boat
+0299=1,activate_garage %1d%
+02B9=1,deactivate_garage %1d%
 02A0=1,  actor %1d% stopped
 02F0=3,create_explosive_barrel_at %1d% %2d% %3d%
 02F1=3,create_explosive_barrel_at %1d% %2d% %3d%
 031B=2,  car %1d% primary_color %2d%
 031C=2,  car %1d% secondary_color %2d%
+0367=9,init_headshot_rampage %1g% weapon %2d% time %3d% targets %4d% %5d% %6d% %7d% %8d% %9d%
 0349=1,text_draw_style = %1d%
+047D=2,get_number_of_seats_in_model %1d% store_to %2d%
 04A7=1,  actor %1d% in_any_boat
 04A9=1,  actor %1d% in_any_heli
 04AB=1,  actor %1d% in_any_plane
 04C8=1,  actor %1d% in_flying_vehicle
-050f=1,get_max_wanted_level_to %1d%
+050F=1,get_max_wanted_level_to %1d%
+052D=2,get_player %1d% drunkenness_to %2d%
+0530=1,add_loan_shark_visits %1d%
+0532=1,add_movie_stunts %1d%
+0535=1,add_garbage_pickups %1d%
+0537=1,set_top_shooting_range_score %1d%
+0538=1,add_shooting_range_rank %1d%
 0547=2,  actor %1d% touching_car %2d%
 }
 { GTA3 only

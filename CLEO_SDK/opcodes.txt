@@ -22,17 +22,27 @@
 023B:   actor 0@ touching_object 1@ on_foot
 0242: set_car 0@ bomb_status_to 1
 029C:   is 0@ boat
+0299: activate_garage $655
+02B9: deactivate_garage $655
 02A0:   actor 0@ stopped
 02F0: create_explosive_barrel_at 0.0 0.0 0.0
 02F1: create_explosive_barrel_at 0.0 0.0 0.0
 031B:   car 0@ primary_color 0
 031C:   car 0@ secondary_color 0
+0367: init_headshot_rampage 'RAMPAGE' weapon 26 time 120000 targets 10 -1 -1 -1 -1 0
 0349: text_draw_style = 3
+047D: get_number_of_seats_in_model #ADMIRAL store_to 0@
 04A7:   actor 0@ in_any_boat
 04A9:   actor 0@ in_any_heli
 04AB:   actor 0@ in_any_plane
 04C8:   actor 0@ in_flying_vehicle
 050F: get_max_wanted_level_to 0@
+052D: get_player $PLAYER_CHAR drunkenness_to 0@
+0530: add_loan_shark_visits 10
+0532: add_movie_stunts 10
+0535: add_garbage_pickups 10
+0537: set_top_shooting_range_score 10
+0538: add_shooting_range_rank 10
 0547:   actor 0@ touching_car 1@
 }
 { GTA3 only

@@ -12,17 +12,20 @@ KEYA       = 6@
 KEYB       = 7@
 KEYC       = 8@
 PLAYER_CAR = 9@
+RAMPAGE    = 9@
 FREEBOMB   = 10@
 SETTAXI    = 11@
 MAXWANTED  = 12@
 SPAWN_OBJ  = 13@
+DRUNK      = 14@
+SEATS      = 15@
 end
 
 while true
     wait 0
     if and
         00E1:   player 0 pressed_button 4 // action
-        80E0:   not player $PLAYER_CHAR driving
+        80E0:   not player $PLAYER_CHAR in_any_car
     then
         break
     end
@@ -85,24 +88,32 @@ while true
     gosub @DROP_NAUTICAL_MINE
     gosub @IS_FIRST_CAR_COLOUR
     gosub @IS_SECOND_CAR_COLOUR
+    gosub @START_KILL_FRENZY_HEADSHOT
+    gosub @GET_NUMBER_OF_SEATS_IN_MODEL
     gosub @IS_CHAR_IN_ANY_BOAT
     gosub @IS_CHAR_IN_ANY_HELI
     gosub @IS_CHAR_IN_ANY_PLANE
     gosub @IS_CHAR_IN_FLYING_VEHICLE
     gosub @GET_MAX_WANTED_LEVEL
+    gosub @GET_PLAYER_DRUNKENNESS
+    gosub @ADD_LOAN_SHARK_VISITS
+    gosub @ADD_MOVIE_STUNTS
+    gosub @ADD_GARBAGE_PICKUPS
+    gosub @SET_TOP_SHOOTING_RANGE_SCORE
+    gosub @ADD_SHOOTING_RANGE_RANK
     gosub @IS_CHAR_TOUCHING_VEHICLE
-    
+
     if and
         00E1:   player 0 pressed_button 4 // action
-        80E0:   not player $PLAYER_CHAR driving
+        80E0:   not player $PLAYER_CHAR in_any_car
     then
-        01C2: remove_references_to_actor SPAWN_CHAR
-        01C3: remove_references_to_car SPAWN_CAR
+        01C2: mark_actor_as_no_longer_needed SPAWN_CHAR
+        01C3: mark_car_as_no_longer_needed SPAWN_CAR
         05DC: end_custom_thread
     end
 
-    // aim.forward.jump.maxwanted
-    0308: text_6numbers 'HJSTATW' KEYA KEYB KEYC MAXWANTED 0 0 time 10 flag 5
+    // aim.forward.jump.maxwanted.drunk.seats
+    0308: text_6numbers 'HJSTATW' KEYA KEYB KEYC MAXWANTED DRUNK SEATS time 10 flag 5
 end
 
 :TEXT_STYLE
@@ -194,7 +205,7 @@ return
 
 :CHANGE_CAR_LOCK
 if
-    00E0:   player $PLAYER_CHAR driving
+    00E0:   player $PLAYER_CHAR in_any_car
 then
     if
         0ADC: test_cheat "LOCK"
@@ -220,7 +231,7 @@ return
 :IS_CAR_IN_AIR
 gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR driving
+    00E0:   player $PLAYER_CHAR in_any_car
 then
     03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
     if
@@ -301,7 +312,7 @@ return
 :IS_CAR_ARMED_WITH_ANY_BOMB
 gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR driving
+    00E0:   player $PLAYER_CHAR in_any_car
 then
     03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
     if
@@ -317,7 +328,7 @@ return
 :IS_CAR_ARMED_WITH_BOMB
 gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR driving
+    00E0:   player $PLAYER_CHAR in_any_car
 then
     03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
     if
@@ -354,7 +365,7 @@ return
 
 :ARM_CAR_WITH_BOMB
 if
-    00E0:   player $PLAYER_CHAR driving
+    00E0:   player $PLAYER_CHAR in_any_car
 then
     if
         0ADC: test_cheat "ARMBOMB"
@@ -369,7 +380,7 @@ return
 :IS_BOAT
 gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR driving
+    00E0:   player $PLAYER_CHAR in_any_car
 then
     03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
     if
@@ -416,7 +427,7 @@ return
 :IS_FIRST_CAR_COLOUR
 gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR driving
+    00E0:   player $PLAYER_CHAR in_any_car
 then
     03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
     if
@@ -432,7 +443,7 @@ return
 :IS_SECOND_CAR_COLOUR
 gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR driving
+    00E0:   player $PLAYER_CHAR in_any_car
 then
     03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
     if
@@ -443,6 +454,32 @@ then
     end
 end
 0608: show_text_position 10.0 LINE text "031C: Car secondary colour is not 75"
+return
+
+:START_KILL_FRENZY_HEADSHOT
+01FA: RAMPAGE = rampage_status
+if and
+    0ADC: test_cheat "RAMPAGE"
+    not RAMPAGE == 1
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0247: request_model #M4
+    038B: load_requested_models
+    0367: init_headshot_rampage 'RAMPAGE' weapon 26 time 120000 targets 10 -1 -1 -1 -1 0
+    0249: release_model #M4
+end
+return
+
+:GET_NUMBER_OF_SEATS_IN_MODEL
+if
+    00E0:   player $PLAYER_CHAR in_any_car
+then
+    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    0441: PLAYER_CAR = car PLAYER_CAR model
+    047D: get_number_of_seats_in_model PLAYER_CAR store_to SEATS
+else
+    SEATS = 0
+end
 return
 
 :IS_CHAR_IN_ANY_BOAT
@@ -491,6 +528,67 @@ return
 
 :GET_MAX_WANTED_LEVEL
 050F: get_max_wanted_level_to MAXWANTED
+return
+
+:GET_PLAYER_DRUNKENNESS
+052D: get_player $PLAYER_CHAR drunkenness_to DRUNK
+if
+    0ADC: test_cheat "DRUNK"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    if
+        DRUNK == 0
+    then
+        052C: set_player $PLAYER_CHAR drunk_visuals 255
+    else
+        052C: set_player $PLAYER_CHAR drunk_visuals 0
+    end
+end
+return
+
+:ADD_LOAN_SHARK_VISITS
+if
+    0ADC: test_cheat "LOAN"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0530: add_loan_shark_visits 10
+end
+return
+
+:ADD_MOVIE_STUNTS
+if
+    0ADC: test_cheat "MOVIE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0532: add_movie_stunts 10
+end
+return
+
+:ADD_GARBAGE_PICKUPS
+if
+    0ADC: test_cheat "GARBAGE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0535: add_garbage_pickups 10
+end
+return
+
+:SET_TOP_SHOOTING_RANGE_SCORE
+if
+    0ADC: test_cheat "RANGESCORE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0537: set_top_shooting_range_score 10
+end
+return
+
+:ADD_SHOOTING_RANGE_RANK
+if
+    0ADC: test_cheat "RANGERANK"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0538: add_shooting_range_rank 10
+end
 return
 
 :IS_CHAR_TOUCHING_VEHICLE

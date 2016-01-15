@@ -31,27 +31,37 @@ public:
 
 GtaGame game;
 
+void(__cdecl *StartFrenzy)(DWORD, INT, WORD, DWORD, CHAR *, INT, INT, INT, BYTE, BYTE); // cdarkel::startfrenzy
 void(__cdecl *CreatePickup)(FLOAT, FLOAT, FLOAT, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD); // cpickups::generatenewone
-uintptr_t(__thiscall *ObjectPoolGetStruct)(void *, DWORD); // cpool_cobject_ccutscenehead::getat
-uintptr_t(__thiscall *VehiclePoolGetStruct)(void *, DWORD); // cpool_cvehicle_cautomobile::getat
-uintptr_t(__thiscall *PedPoolGetStruct)(void *, DWORD); // cpool_cped_cplayerped::getat
+uintptr_t(__thiscall *ObjectPoolGetStruct)(void *, INT); // cpool_cobject_ccutscenehead::getat
+uintptr_t(__thiscall *VehiclePoolGetStruct)(void *, INT); // cpool_cvehicle_cautomobile::getat
+uintptr_t(__thiscall *PedPoolGetStruct)(void *, INT); // cpool_cped_cplayerped::getat
 WORD(__thiscall *GetPadState)(CScript *, DWORD, DWORD); // crunningscript::getpadstate
-void(__thiscall *CamShake)(void *, FLOAT, FLOAT, FLOAT, FLOAT); // ccamera::camshake
+void(__thiscall *CamShake)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT); // ccamera::camshake
 BYTE(__thiscall *GetHasCollidedWith)(DWORD, uintptr_t); // cphysical::gethascollidedwith
 FLOAT(__cdecl *FindGroundZForCoord)(FLOAT, FLOAT); // cworld::findgroundzforcoord
 void(__thiscall *SetAmmo)(uintptr_t, DWORD, DWORD); // cped::setammo
 void(__thiscall *GrantAmmo)(DWORD, DWORD, DWORD); // cped::grantammo
+DWORD(__cdecl *GetVehicleTypeId)(DWORD); // cvehiclemodelinfo::getvehicletypeid
+char *(__thiscall *GetText)(uintptr_t, char *); // ctext::get
 DWORD *barrel1 = NULL;
 DWORD *barrel2 = NULL;
 DWORD *maxWantedLevel = NULL;
-void *camera = NULL;
+uintptr_t ccamera = NULL;
+uintptr_t garage = NULL;
 uintptr_t *playerPedPool = NULL;
 uintptr_t *playerPedState = NULL;
+uintptr_t ctext = NULL;
 void **objectPool = NULL;
+FLOAT *shootingRangeRank = NULL;
+FLOAT *garbagePickups = NULL;
+FLOAT *loanSharkVisits = NULL;
 void **pedPool = NULL;
-void *allTaxiLights = NULL;
-void *freeBombs = NULL;
+FLOAT *topShootingRangeScore = NULL;
+FLOAT *movieStunts = NULL;
 void **carPool = NULL;
+BYTE *allTaxiLights = NULL;
+BYTE *freeBombs = NULL;
 
 GtaGame::GtaGame()
 {
@@ -59,60 +69,85 @@ GtaGame::GtaGame()
 	switch ((*(unsigned int *)0x61C11C)) { // get version signature
 	case 0x74FF5064:
 		version = V1_0;
+		StartFrenzy = (void(__cdecl *)(DWORD, INT, WORD, DWORD, CHAR *, INT, INT, INT, BYTE, BYTE))0x429B60;
 		CreatePickup = (void(__cdecl *)(FLOAT, FLOAT, FLOAT, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
-		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451C30;
-		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451C70;
-		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451CB0;
+		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C30;
+		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C70;
+		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451CB0;
 		GetPadState = (WORD(__thiscall *)(CScript *, DWORD, DWORD))0x460C00;
-		CamShake = (void(__thiscall *)(void *, FLOAT, FLOAT, FLOAT, FLOAT))0x46FF21;
+		CamShake = (void(__thiscall *)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT))0x46FF21;
 		GetHasCollidedWith = (BYTE(__thiscall *)(DWORD, uintptr_t))0x4B9010;
 		FindGroundZForCoord = (FLOAT(__cdecl *)(FLOAT, FLOAT))0x4D5540;
 		SetAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))0x4FF780;
 		GrantAmmo = (void(__thiscall *)(DWORD, DWORD, DWORD))0x4FF840;
+		GetVehicleTypeId = (DWORD(__cdecl *)(DWORD))0x578A70;
+		GetText = (char *(__thiscall *)(uintptr_t, char *))0x584F30;
 		barrel1 = (DWORD *)0x68E8B0;
 		barrel2 = (DWORD *)0x68E910;
 		maxWantedLevel = (DWORD *)0x6910D8;
-		camera = (void *)0x7E4688;
+		ccamera = 0x7E4688;
+		garage = 0x812668;
 		playerPedPool = (uintptr_t *)0x94AD28;
 		playerPedState = (uintptr_t *)0x94ADF4;
+		ctext = 0x94B220;
 		objectPool = (void **)0x94DBE0;
+		shootingRangeRank = (FLOAT *)0x974B08;
+		garbagePickups = (FLOAT *)0x974C00;
+		loanSharkVisits = (FLOAT*)0x974C28;
 		pedPool = (void **)0x97F2AC;
-		allTaxiLights = (void *)0xA10ABB;
-		freeBombs = (void *)0xA10B32;
+		topShootingRangeScore = (FLOAT *)0xA0D8A4;
+		movieStunts = (FLOAT *)0xA0FC8C;
 		carPool = (void **)0xA0FDE4;
+		allTaxiLights = (BYTE *)0xA10ABB;
+		freeBombs = (BYTE *)0xA10B32;
 		break;
 	case 0x00408DC0:
 		version = V1_1;
+		StartFrenzy = (void(__cdecl *)(DWORD, INT, WORD, DWORD, CHAR *, INT, INT, INT, BYTE, BYTE))0x429B60;
 		CreatePickup = (void(__cdecl *)(FLOAT, FLOAT, FLOAT, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
-		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451C30;
-		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451C70;
-		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451CB0;
+		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C30;
+		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C70;
+		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451CB0;
 		GetPadState = (WORD(__thiscall *)(CScript *, DWORD, DWORD))0x460C00;
-		CamShake = (void(__thiscall *)(void *, FLOAT, FLOAT, FLOAT, FLOAT))0x46FF21;
+		CamShake = (void(__thiscall *)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT))0x46FF21;
 		GetHasCollidedWith = (BYTE(__thiscall *)(DWORD, uintptr_t))(0x4B9010 + 0x20);
 		FindGroundZForCoord = (FLOAT(__cdecl *)(FLOAT, FLOAT))(0x4D5540 + 0x20);
 		SetAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))(0x4FF780 + 0x20);
 		GrantAmmo = (void(__thiscall *)(DWORD, DWORD, DWORD))(0x4FF840 + 0x20);
+		GetVehicleTypeId = (DWORD(__cdecl *)(DWORD))(0x578A70 + 0x20);
+		GetText = (char *(__thiscall *)(uintptr_t, char *))(0x584F30 + 0x20);
 		barrel1 = (DWORD *)0x68E8B0;
 		barrel2 = (DWORD *)0x68E910;
 		maxWantedLevel = (DWORD *)0x6910D8;
-		camera = (void *)(0x7E4688 + 8);
+		ccamera = 0x7E4688 + 8;
+		garage = 0x812668 + 8;
 		playerPedPool = (uintptr_t *)(0x94AD28 + 8);
 		playerPedState = (uintptr_t *)(0x94ADF4 + 8);
+		ctext = 0x94B220 + 8;
 		objectPool = (void **)(0x94DBE0 + 8);
+		shootingRangeRank = (FLOAT *)(0x974B08 + 8);
+		garbagePickups = (FLOAT *)(0x974C00 + 8);
+		loanSharkVisits = (FLOAT*)(0x974C28 + 8);
 		pedPool = (void **)(0x97F2AC + 8);
-		allTaxiLights = (void *)(0xA10ABB + 8);
-		freeBombs = (void *)(0xA10B32 + 8);
+		topShootingRangeScore = (FLOAT *)(0xA0D8A4 + 8);
+		movieStunts = (FLOAT *)(0xA0FC8C + 8);
 		carPool = (void **)(0xA0FDE4 + 8);
+		allTaxiLights = (BYTE *)(0xA10ABB + 8);
+		freeBombs = (BYTE *)(0xA10B32 + 8);
 		break;
 	case 0x00004824:
 		version = VSTEAM;
-		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451B10;
-		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451B50;
-		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, DWORD))0x451B90;
-		objectPool = (void **)0x94CBE8;
-		pedPool = (void **)0x97E2B4;
-		carPool = (void **)0xA0EDEC;
+		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))(0x451C30 - 0x120);
+		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))(0x451C70 - 0x120);
+		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))(0x451CB0 - 0x120);
+		objectPool = (void **)(0x94DBE0 - 0xFF8);
+		shootingRangeRank = (FLOAT *)(0x974B08 - 0xFF8);
+		garbagePickups = (FLOAT *)(0x974C00 - 0xFF8);
+		loanSharkVisits = (FLOAT*)(0x974C28 - 0xFF8);
+		pedPool = (void **)(0x97F2AC - 0xFF8);
+		topShootingRangeScore = (FLOAT *)(0xA0D8A4 - 0xFF8);
+		movieStunts = (FLOAT *)(0xA0FC8C - 0xFF8);
+		carPool = (void **)(0xA0FDE4 - 0xFF8);
 		break;
 	}
 }
@@ -224,7 +259,7 @@ eOpcodeResult WINAPI CHANGE_CAR_LOCK(CScript *script)
 eOpcodeResult WINAPI SHAKE_CAM_WITH_POINT(CScript *script)
 {
 	script->Collect(4);
-	CamShake(camera, ((float)Params[0].nVar) * 1e-3f, Params[1].fVar, Params[2].fVar, Params[3].fVar);
+	CamShake(ccamera, ((float)Params[0].nVar) * 1e-3f, Params[1].fVar, Params[2].fVar, Params[3].fVar);
 	return OR_CONTINUE;
 }
 
@@ -297,7 +332,7 @@ eOpcodeResult WINAPI SET_FREE_BOMBS(CScript *script)
 	if (param) {
 		param = 1;
 	}
-	*(BYTE *)freeBombs = (BYTE)param;
+	*freeBombs = (BYTE)param;
 	return OR_CONTINUE;
 }
 
@@ -309,7 +344,7 @@ eOpcodeResult WINAPI SET_ALL_TAXI_LIGHTS(CScript *script)
 	if (param) {
 		param = 1;
 	}
-	*(BYTE *)allTaxiLights = (BYTE)param;
+	*allTaxiLights = (BYTE)param;
 	return OR_CONTINUE;
 }
 
@@ -396,6 +431,28 @@ eOpcodeResult WINAPI IS_BOAT(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 0299 */
+eOpcodeResult WINAPI ACTIVATE_GARAGE(CScript *script)
+{
+	script->Collect(1);
+	BYTE *pgarage = (BYTE *)(Params[0].nVar * 0xA8 + garage);
+	if (*pgarage == 11) {
+		if (*(pgarage + 1) == 0) {
+			*(pgarage + 1) = 3;
+		}
+	}
+	*(pgarage + 5) = 0;
+	return OR_CONTINUE;
+}
+
+/* 02B9 */
+eOpcodeResult WINAPI DEACTIVATE_GARAGE(CScript *script)
+{
+	script->Collect(1);
+	*((BYTE *)(Params[0].nVar * 0xA8 + garage + 5)) = 1;
+	return OR_CONTINUE;
+}
+
 /* 02A0 */
 eOpcodeResult WINAPI IS_CHAR_STOPPED(CScript *script)
 {
@@ -421,7 +478,7 @@ eOpcodeResult WINAPI IS_CHAR_STOPPED(CScript *script)
 eOpcodeResult WINAPI DROP_MINE(CScript *script)
 {
 	script->Collect(3);
-	if (Params[2].fVar == -100.0) {
+	if (Params[2].fVar <= -100.0) {
 		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
 	}
 	CreatePickup(Params[0].fVar, Params[1].fVar, Params[2].fVar, *barrel1, 9, 0, 0, 0, 0);
@@ -432,7 +489,7 @@ eOpcodeResult WINAPI DROP_MINE(CScript *script)
 eOpcodeResult WINAPI DROP_NAUTICAL_MINE(CScript *script)
 {
 	script->Collect(3);
-	if (Params[2].fVar == -100.0) {
+	if (Params[2].fVar <= -100.0) {
 		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
 	}
 	CreatePickup(Params[0].fVar, Params[1].fVar, Params[2].fVar, *barrel2, 11, 0, 0, 0, 0);
@@ -460,6 +517,29 @@ eOpcodeResult WINAPI IS_SECOND_CAR_COLOUR(CScript *script)
 		return OR_CONTINUE;
 	}
 	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+/* 0367 */
+eOpcodeResult WINAPI START_KILL_FRENZY_HEADSHOT(CScript *script)
+{
+	char gxt[8];
+	script->ReadShortString(gxt);
+	char *string = GetText(ctext, (char *)gxt);
+	script->Collect(8);
+	if (Params[7].nVar) {
+		Params[7].nVar = 1;
+	}
+	StartFrenzy(Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, string, Params[4].nVar, Params[5].nVar, Params[6].nVar, Params[7].nVar, 1);
+	return OR_CONTINUE;
+}
+
+/* 047D */
+eOpcodeResult WINAPI GET_NUMBER_OF_SEATS_IN_MODEL(CScript *script)
+{
+	script->Collect(1);
+	Params[0].nVar = GetVehicleTypeId(Params[0].nVar) + 1;
+	script->Store(1);
 	return OR_CONTINUE;
 }
 
@@ -563,6 +643,58 @@ eOpcodeResult WINAPI GET_MAX_WANTED_LEVEL(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 052D */
+eOpcodeResult WINAPI GET_PLAYER_DRUNKENNESS(CScript *script)
+{
+	script->Collect(1);
+	DWORD player = playerPedPool[0x2E * Params[0].nVar];
+	Params[0].nVar = (DWORD)*(BYTE *)(player + 0x638);
+	script->Store(1);
+	return OR_CONTINUE;
+}
+
+/* 0530 */
+eOpcodeResult WINAPI ADD_LOAN_SHARK_VISITS(CScript *script)
+{
+	script->Collect(1);
+	*loanSharkVisits += (FLOAT)Params[0].nVar;
+	return OR_CONTINUE;
+}
+
+/* 0532 */
+eOpcodeResult WINAPI ADD_MOVIE_STUNTS(CScript *script)
+{
+	script->Collect(1);
+	*movieStunts += (FLOAT)Params[0].nVar;
+	return OR_CONTINUE;
+}
+
+/* 0535 */
+eOpcodeResult WINAPI ADD_GARBAGE_PICKUPS(CScript *script)
+{
+	script->Collect(1);
+	*garbagePickups += (FLOAT)Params[0].nVar;
+	return OR_CONTINUE;
+}
+
+/* 0537 */
+eOpcodeResult WINAPI SET_TOP_SHOOTING_RANGE_SCORE(CScript *script)
+{
+	script->Collect(1);
+	if ((FLOAT)Params[0].nVar > *topShootingRangeScore) {
+		*topShootingRangeScore = (FLOAT)Params[0].nVar;
+	}
+	return OR_CONTINUE;
+}
+
+/* 0538 */
+eOpcodeResult WINAPI ADD_SHOOTING_RANGE_RANK(CScript *script)
+{
+	script->Collect(1);
+	*shootingRangeRank += (FLOAT)Params[0].nVar;
+	return OR_CONTINUE;
+}
+
 /* 0547 */
 eOpcodeResult WINAPI IS_CHAR_TOUCHING_VEHICLE(CScript *script)
 {
@@ -616,16 +748,26 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x023B, IS_CHAR_TOUCHING_OBJECT_ON_FOOT);
 		Opcodes::RegisterOpcode(0x0242, ARM_CAR_WITH_BOMB);
 		Opcodes::RegisterOpcode(0x029C, IS_BOAT);
+		Opcodes::RegisterOpcode(0x0299, ACTIVATE_GARAGE);
+		Opcodes::RegisterOpcode(0x02B9, DEACTIVATE_GARAGE);
 		Opcodes::RegisterOpcode(0x02A0, IS_CHAR_STOPPED);
 		Opcodes::RegisterOpcode(0x02F0, DROP_MINE);
 		Opcodes::RegisterOpcode(0x02F1, DROP_NAUTICAL_MINE);
 		Opcodes::RegisterOpcode(0x031B, IS_FIRST_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x031C, IS_SECOND_CAR_COLOUR);
+		Opcodes::RegisterOpcode(0x0367, START_KILL_FRENZY_HEADSHOT);
+		Opcodes::RegisterOpcode(0x047D, GET_NUMBER_OF_SEATS_IN_MODEL);
 		Opcodes::RegisterOpcode(0x04A7, IS_CHAR_IN_ANY_BOAT);
 		Opcodes::RegisterOpcode(0x04A9, IS_CHAR_IN_ANY_HELI);
 		Opcodes::RegisterOpcode(0x04AB, IS_CHAR_IN_ANY_PLANE);
 		Opcodes::RegisterOpcode(0x04C8, IS_CHAR_IN_FLYING_VEHICLE);
 		Opcodes::RegisterOpcode(0x050F, GET_MAX_WANTED_LEVEL);
+		Opcodes::RegisterOpcode(0x052D, GET_PLAYER_DRUNKENNESS);
+		Opcodes::RegisterOpcode(0x0530, ADD_LOAN_SHARK_VISITS);
+		Opcodes::RegisterOpcode(0x0532, ADD_MOVIE_STUNTS);
+		Opcodes::RegisterOpcode(0x0535, ADD_GARBAGE_PICKUPS);
+		Opcodes::RegisterOpcode(0x0537, SET_TOP_SHOOTING_RANGE_SCORE);
+		Opcodes::RegisterOpcode(0x0538, ADD_SHOOTING_RANGE_RANK);
 		Opcodes::RegisterOpcode(0x0547, IS_CHAR_TOUCHING_VEHICLE);
 	}
 	return TRUE;
