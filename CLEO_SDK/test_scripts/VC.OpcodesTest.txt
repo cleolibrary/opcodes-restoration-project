@@ -3,16 +3,17 @@
 0000:
 const
 POSX       = 0@
+PLAYER_CAR = 0@
+RAMPAGE    = 0@
 POSY       = 1@
 POSZ       = 2@
 SPAWN_CHAR = 3@
 SPAWN_CAR  = 4@
 LINE       = 5@
-KEYA       = 6@
-KEYB       = 7@
-KEYC       = 8@
-PLAYER_CAR = 9@
-RAMPAGE    = 9@
+AIM_KEY    = 6@
+ARMY_REQ   = 7@
+FBI_REQ    = 8@
+SWAT_REQ   = 9@
 FREEBOMB   = 10@
 SETTAXI    = 11@
 MAXWANTED  = 12@
@@ -53,9 +54,14 @@ POSX += 4.0
 0229: set_car SPAWN_CAR color_to 6 75
 POSX += 4.0
 029B: SPAWN_OBJ = init_object #ELECTRICGATE at POSX POSY POSZ
+0249: release_model #COLT45
+0249: release_model #DINGHY
 01B1: give_player $PLAYER_CHAR weapon 17 ammo 10
 FREEBOMB = 0
 SETTAXI = 0
+SWAT_REQ = 0
+FBI_REQ = 0
+ARMY_REQ = 0
 
 while true
     wait 10
@@ -83,12 +89,18 @@ while true
     gosub @IS_CHAR_TOUCHING_OBJECT_ON_FOOT
     gosub @ARM_CAR_WITH_BOMB
     gosub @IS_BOAT
+    gosub @SET_SWAT_REQUIRED
+    gosub @SET_FBI_REQUIRED
+    gosub @SET_ARMY_REQUIRED
     gosub @IS_CHAR_STOPPED
     gosub @DROP_MINE
     gosub @DROP_NAUTICAL_MINE
     gosub @IS_FIRST_CAR_COLOUR
     gosub @IS_SECOND_CAR_COLOUR
     gosub @START_KILL_FRENZY_HEADSHOT
+    gosub @IS_COLLISION_IN_MEMORY
+    gosub @IS_CAR_VISIBLY_DAMAGED
+    gosub @SET_GET_OUT_OF_JAIL_FREE
     gosub @GET_NUMBER_OF_SEATS_IN_MODEL
     gosub @IS_CHAR_IN_ANY_BOAT
     gosub @IS_CHAR_IN_ANY_HELI
@@ -109,11 +121,11 @@ while true
     then
         01C2: mark_actor_as_no_longer_needed SPAWN_CHAR
         01C3: mark_car_as_no_longer_needed SPAWN_CAR
+        01C4: mark_object_as_no_longer_needed SPAWN_OBJ
         05DC: end_custom_thread
     end
 
-    // aim.forward.jump.maxwanted.drunk.seats
-    0308: text_6numbers 'HJSTATW' KEYA KEYB KEYC MAXWANTED DRUNK SEATS time 10 flag 5
+    0308: text_6numbers 'HJSTATW' AIM_KEY MAXWANTED DRUNK SEATS 0 0 time 10 flag 5
 end
 
 :TEXT_STYLE
@@ -167,9 +179,7 @@ end
 return
 
 :GET_PAD_STATE
-00E2: get_player 0 key 6 state_to KEYA
-00E2: get_player 0 key 8 state_to KEYB
-00E2: get_player 0 key 14 state_to KEYC
+00E2: get_player 0 key 6 state_to AIM_KEY
 return
 
 :ADD_AMMO_TO_PLAYER
@@ -279,6 +289,7 @@ return
 if
     0ADC: test_cheat "FREEBOMBS"
 then
+    018C: play_sound 1 at 0.0 0.0 0.0
     if
         FREEBOMB == 0
     then
@@ -288,7 +299,6 @@ then
         FREEBOMB = 0
         021D: set_free_bomb_shop_to 0
     end
-    018C: play_sound 1 at 0.0 0.0 0.0
 end
 return
 
@@ -296,6 +306,7 @@ return
 if
     0ADC: test_cheat "TAXI"
 then
+    018C: play_sound 1 at 0.0 0.0 0.0
     if
         SETTAXI == 0
     then
@@ -305,7 +316,6 @@ then
         SETTAXI = 0
         021F: set_all_taxi_lights 0
     end
-    018C: play_sound 1 at 0.0 0.0 0.0
 end
 return
 
@@ -393,6 +403,57 @@ end
 0608: show_text_position 10.0 LINE text "029C: Is not a boat"
 return
 
+:SET_SWAT_REQUIRED
+if
+    0ADC: test_cheat "SWATREQ"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    if
+        SWAT_REQ == 0
+    then
+        SWAT_REQ = 1
+        02BC: set_swat_required 1
+    else
+        SWAT_REQ = 0
+        02BC: set_swat_required 0
+    end
+end
+return
+
+:SET_FBI_REQUIRED
+if
+    0ADC: test_cheat "FBIREQ"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    if
+        FBI_REQ == 0
+    then
+        FBI_REQ = 1
+        02BD: set_fbi_required 1
+    else
+        FBI_REQ = 0
+        02BD: set_fbi_required 0
+    end
+end
+return
+
+:SET_ARMY_REQUIRED
+if
+    0ADC: test_cheat "ARMYREQ"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    if
+        ARMY_REQ == 0
+    then
+        ARMY_REQ = 1
+        02BE: set_army_required 1
+    else
+        ARMY_REQ = 0
+        02BE: set_army_required 0
+    end
+end
+return
+
 :IS_CHAR_STOPPED
 gosub @TEXT_STYLE
 if
@@ -467,6 +528,42 @@ then
     038B: load_requested_models
     0367: init_headshot_rampage 'RAMPAGE' weapon 26 time 120000 targets 10 -1 -1 -1 -1 0
     0249: release_model #M4
+end
+return
+
+:IS_COLLISION_IN_MEMORY
+gosub @TEXT_STYLE
+if
+    03C6:   current_island == 1
+then
+    0608: show_text_position 10.0 LINE text "03C6: Level 1 is in memory"
+else
+    0608: show_text_position 10.0 LINE text "03C6: Level 1 is not in memory"
+end
+return
+
+:IS_CAR_VISIBLY_DAMAGED
+gosub @TEXT_STYLE
+if
+    00E0:   player $PLAYER_CHAR in_any_car
+then
+    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    if
+        03C9:   car PLAYER_CAR visibly_damaged
+    then
+        0608: show_text_position 10.0 LINE text "03C9: Car is visibly damaged"
+        return
+    end
+end
+0608: show_text_position 10.0 LINE text "03C9: Car is not visibly damaged"
+return
+
+:SET_GET_OUT_OF_JAIL_FREE
+if
+    0ADC: test_cheat "JAILFREE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0413: set_player $PLAYER_CHAR get_out_of_jail_free 1
 end
 return
 

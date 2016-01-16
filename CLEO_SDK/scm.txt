@@ -24,13 +24,19 @@
 029C=1,  is %1d% boat
 0299=1,activate_garage %1d%
 02B9=1,deactivate_garage %1d%
+02BC=1,set_swat_required %1d%
+02BD=1,set_fbi_required %1d%
+02BE=1,set_army_required %1d%
 02A0=1,  actor %1d% stopped
 02F0=3,create_explosive_barrel_at %1d% %2d% %3d%
 02F1=3,create_explosive_barrel_at %1d% %2d% %3d%
 031B=2,  car %1d% primary_color %2d%
 031C=2,  car %1d% secondary_color %2d%
 0367=9,init_headshot_rampage %1g% weapon %2d% time %3d% targets %4d% %5d% %6d% %7d% %8d% %9d%
+03C6=1,  current_island == %1d%
+03C9=1,  car %1d% visibly_damaged
 0349=1,text_draw_style = %1d%
+0413=2,set_player %1d% get_out_of_jail_free %2d%
 047D=2,get_number_of_seats_in_model %1d% store_to %2d%
 04A7=1,  actor %1d% in_any_boat
 04A9=1,  actor %1d% in_any_heli

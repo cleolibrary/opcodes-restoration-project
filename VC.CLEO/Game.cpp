@@ -140,7 +140,6 @@ void GtaGame::InitAndPatch()
 		this->Pools.pPedPool = (GamePool **)0x97F2AC;
 		this->Pools.pVehiclePool = (GamePool **)0xA0FDE4;
 		this->Pools.pObjectPool = (GamePool **)0x94DBE0;
-		this->Pools.pCPlayerPedPool = (uintptr_t *)0x94AD28;
 		this->Pools.pfPedPoolGetStruct = (void* (__thiscall *)(GamePool *, int))0x451CB0;
 		this->Pools.pfVehiclePoolGetStruct = (void* (__thiscall *)(GamePool *, int))0x451C70;
 		this->Pools.pfObjectPoolGetStruct = (void* (__thiscall *)(GamePool *, int))0x451C30;
@@ -179,15 +178,6 @@ void GtaGame::InitAndPatch()
 		this->Misc.pfGetUserDirectory = (char*(__cdecl *)()) 0x602240;
 		this->Misc.pfSpawnCar = (void(__cdecl *)(unsigned int modelID)) 0x4AE8F0;
 		this->Misc.pfCAnimManagerBlendAnimation = (int(__cdecl *)(int pRpClump, int dwAnimGroupId, int dwAnimId, float fSpeed)) 0x405640;
-
-		this->Misc.GetPadState = (WORD(__thiscall *)(CScript *, DWORD, DWORD))0x460C00;
-		this->Misc.GrantAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))0x4FF840;
-		this->Misc.camera = (uintptr_t *)0x7E4688;
-		this->Misc.CamShake = (void(__thiscall *)(void *, float, float, float, float))0x46FF21;
-		this->Misc.SetAmmo = (void(__thiscall *)(void *, DWORD, DWORD))0x4FF780;
-		this->Misc.FindGroundZForCoord = (float(__cdecl *)(float, float))0x4D5540;
-		this->Misc.CreatePickup = (void(__cdecl *)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
-		this->Misc.GetHasCollidedWith = (BYTE(__thiscall *)(uintptr_t, uintptr_t))0x4B9010;
 		break;
 	case GAME_V1_1:
 		// Scripts
@@ -254,7 +244,6 @@ void GtaGame::InitAndPatch()
 		this->Pools.pPedPool = (GamePool **)(0x97F2AC + 0x8);
 		this->Pools.pVehiclePool = (GamePool **)(0xA0FDE4 + 0x8);
 		this->Pools.pObjectPool = (GamePool **)(0x94DBE0 + 0x8);
-		this->Pools.pCPlayerPedPool = (uintptr_t *)0x94AD30;
 		this->Pools.pfPedPoolGetStruct = (void* (__thiscall *)(GamePool *, int))0x451CB0;
 		this->Pools.pfVehiclePoolGetStruct = (void* (__thiscall *)(GamePool *, int))0x451C70;
 		this->Pools.pfObjectPoolGetStruct = (void* (__thiscall *)(GamePool *, int))0x451C30;
@@ -293,15 +282,6 @@ void GtaGame::InitAndPatch()
 		this->Misc.pfGetUserDirectory = (char*(__cdecl *)()) 0x602220;
 		this->Misc.pfSpawnCar = (void(__cdecl *)(unsigned int modelID)) 0x4AE7D0;
 		this->Misc.pfCAnimManagerBlendAnimation = (int(__cdecl *)(int pRpClump, int dwAnimGroupId, int dwAnimId, float fSpeed)) 0x405640;
-
-		this->Misc.GetPadState = (WORD(__thiscall *)(CScript *, DWORD, DWORD))0x460C00;
-		this->Misc.GrantAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))0x4FF860;
-		this->Misc.camera = (uintptr_t *)0x7E4690;
-		this->Misc.CamShake = (void(__thiscall *)(void *, float, float, float, float))0x46FF21;
-		this->Misc.SetAmmo = (void(__thiscall *)(void *, DWORD, DWORD))0x4FF7A0;
-		this->Misc.FindGroundZForCoord = (float(__cdecl *)(float, float))0x4D5560;
-		this->Misc.CreatePickup = (void(__cdecl *)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
-		this->Misc.GetHasCollidedWith = (BYTE(__thiscall *)(uintptr_t, uintptr_t))0x4B9030;
 		break;
 	case GAME_VSTEAM:
 		// Scripts
