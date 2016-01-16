@@ -3,13 +3,6 @@
 // active solution platform: x86
 
 #include "stdafx.h"
-#if _VC
-#pragma comment (lib, "..\\..\\..\\VC.CLEO.lib")
-#include "..\\..\\..\\VC.CLEO.h"
-#else if _III
-#pragma comment (lib, "..\\..\\..\\III.CLEO.lib")
-#include "..\\..\\..\\III.CLEO.h"
-#endif
 
 #define CLEO_VERSION_MAIN    2
 #define CLEO_VERSION_MAJOR   0
@@ -17,6 +10,10 @@
 #define CLEO_VERSION_BINARY  3
 
 #define CLEO_VERSION ((CLEO_VERSION_MAIN << 16)|(CLEO_VERSION_MAJOR << 12)|(CLEO_VERSION_MINOR << 8)|(CLEO_VERSION_BINARY))
+
+#if _VC
+#pragma comment (lib, "..\\..\\..\\VC.CLEO.lib")
+#include "..\\..\\..\\VC.CLEO.h"
 
 tScriptVar *Params;
 
@@ -39,6 +36,7 @@ uintptr_t(__thiscall *PedPoolGetStruct)(void *, INT); // cpool_cped_cplayerped::
 WORD(__thiscall *GetPadState)(CScript *, DWORD, DWORD); // crunningscript::getpadstate
 void(__thiscall *CamShake)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT); // ccamera::camshake
 BYTE(__thiscall *GetHasCollidedWith)(DWORD, uintptr_t); // cphysical::gethascollidedwith
+DWORD(__cdecl *FindPlayerPed)(void); // findplayerped
 FLOAT(__cdecl *FindGroundZForCoord)(FLOAT, FLOAT); // cworld::findgroundzforcoord
 void(__thiscall *SetAmmo)(uintptr_t, DWORD, DWORD); // cped::setammo
 void(__thiscall *GrantAmmo)(DWORD, DWORD, DWORD); // cped::grantammo
@@ -58,6 +56,7 @@ FLOAT *garbagePickups = NULL;
 FLOAT *loanSharkVisits = NULL;
 void **pedPool = NULL;
 FLOAT *topShootingRangeScore = NULL;
+DWORD *levelName = NULL;
 FLOAT *movieStunts = NULL;
 void **carPool = NULL;
 BYTE *allTaxiLights = NULL;
@@ -77,6 +76,7 @@ GtaGame::GtaGame()
 		GetPadState = (WORD(__thiscall *)(CScript *, DWORD, DWORD))0x460C00;
 		CamShake = (void(__thiscall *)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT))0x46FF21;
 		GetHasCollidedWith = (BYTE(__thiscall *)(DWORD, uintptr_t))0x4B9010;
+		FindPlayerPed = (DWORD(__cdecl *)(void))0x4BC120;
 		FindGroundZForCoord = (FLOAT(__cdecl *)(FLOAT, FLOAT))0x4D5540;
 		SetAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))0x4FF780;
 		GrantAmmo = (void(__thiscall *)(DWORD, DWORD, DWORD))0x4FF840;
@@ -96,6 +96,7 @@ GtaGame::GtaGame()
 		loanSharkVisits = (FLOAT*)0x974C28;
 		pedPool = (void **)0x97F2AC;
 		topShootingRangeScore = (FLOAT *)0xA0D8A4;
+		levelName = (DWORD *)0xA0D9AC;
 		movieStunts = (FLOAT *)0xA0FC8C;
 		carPool = (void **)0xA0FDE4;
 		allTaxiLights = (BYTE *)0xA10ABB;
@@ -130,6 +131,7 @@ GtaGame::GtaGame()
 		loanSharkVisits = (FLOAT*)(0x974C28 + 8);
 		pedPool = (void **)(0x97F2AC + 8);
 		topShootingRangeScore = (FLOAT *)(0xA0D8A4 + 8);
+		levelName = (DWORD *)(0xA0D9AC + 8);
 		movieStunts = (FLOAT *)(0xA0FC8C + 8);
 		carPool = (void **)(0xA0FDE4 + 8);
 		allTaxiLights = (BYTE *)(0xA10ABB + 8);
@@ -146,6 +148,7 @@ GtaGame::GtaGame()
 		loanSharkVisits = (FLOAT*)(0x974C28 - 0xFF8);
 		pedPool = (void **)(0x97F2AC - 0xFF8);
 		topShootingRangeScore = (FLOAT *)(0xA0D8A4 - 0xFF8);
+		levelName = (DWORD *)(0xA0D9AC - 0xFF8);
 		movieStunts = (FLOAT *)(0xA0FC8C - 0xFF8);
 		carPool = (void **)(0xA0FDE4 - 0xFF8);
 		break;
@@ -267,8 +270,7 @@ eOpcodeResult WINAPI SHAKE_CAM_WITH_POINT(CScript *script)
 eOpcodeResult WINAPI IS_CAR_IN_AIR(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
-	if (*(BYTE *)(car + 0x5C5)) {
+	if (*(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x5C5)) {
 		script->UpdateCompareFlag(false);
 		return OR_CONTINUE;
 	}
@@ -352,8 +354,7 @@ eOpcodeResult WINAPI SET_ALL_TAXI_LIGHTS(CScript *script)
 eOpcodeResult WINAPI IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
-	if (*(BYTE *)(car + 0x1FE) & 7) {
+	if (*(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x1FE) & 7) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
 	}
@@ -365,8 +366,7 @@ eOpcodeResult WINAPI IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script)
 eOpcodeResult WINAPI IS_CAR_ARMED_WITH_BOMB(CScript *script)
 {
 	script->Collect(2);
-	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
-	if ((*(BYTE *)(car + 0x1FE) & 7) == Params[1].nVar) {
+	if ((*(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x1FE) & 7) == Params[1].nVar) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
 	}
@@ -422,8 +422,7 @@ eOpcodeResult WINAPI ARM_CAR_WITH_BOMB(CScript *script)
 eOpcodeResult WINAPI IS_BOAT(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
-	if (*(DWORD *)(car + 0x29C) == 1) {
+	if (*(DWORD *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x29C) == 1) {
 		script->UpdateCompareFlag(true);
 		return OR_CONTINUE;
 	}
@@ -450,6 +449,51 @@ eOpcodeResult WINAPI DEACTIVATE_GARAGE(CScript *script)
 {
 	script->Collect(1);
 	*((BYTE *)(Params[0].nVar * 0xA8 + garage + 5)) = 1;
+	return OR_CONTINUE;
+}
+
+/* 02BC */
+eOpcodeResult WINAPI SET_SWAT_REQUIRED(CScript *script)
+{
+	script->Collect(1);
+	DWORD player = FindPlayerPed();
+	DWORD police = *(DWORD *)(player + 0x5F4);
+	BYTE swat = *(BYTE *)(police + 0x1E);
+	swat &= 0xFB;
+	if (Params[0].nVar) {
+		swat |= 4;
+	}
+	*(BYTE *)(police + 0x1E) = swat;
+	return OR_CONTINUE;
+}
+
+/* 02BD */
+eOpcodeResult WINAPI SET_FBI_REQUIRED(CScript *script)
+{
+	script->Collect(1);
+	DWORD player = FindPlayerPed();
+	DWORD police = *(DWORD *)(player + 0x5F4);
+	BYTE fbi = *(BYTE *)(police + 0x1E);
+	fbi &= 0xF7;
+	if (Params[0].nVar) {
+		fbi |= 8;
+	}
+	*(BYTE *)(police + 0x1E) = fbi;
+	return OR_CONTINUE;
+}
+
+/* 02BE */
+eOpcodeResult WINAPI SET_ARMY_REQUIRED(CScript *script)
+{
+	script->Collect(1);
+	DWORD player = FindPlayerPed();
+	DWORD police = *(DWORD *)(player + 0x5F4);
+	BYTE army = *(BYTE *)(police + 0x1E);
+	army &= 0xEF;
+	if (Params[0].nVar) {
+		army |= 16;
+	}
+	*(BYTE *)(police + 0x1E) = army;
 	return OR_CONTINUE;
 }
 
@@ -531,6 +575,44 @@ eOpcodeResult WINAPI START_KILL_FRENZY_HEADSHOT(CScript *script)
 		Params[7].nVar = 1;
 	}
 	StartFrenzy(Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, string, Params[4].nVar, Params[5].nVar, Params[6].nVar, Params[7].nVar, 1);
+	return OR_CONTINUE;
+}
+
+/* 03C6 */
+eOpcodeResult WINAPI IS_COLLISION_IN_MEMORY(CScript *script)
+{
+	script->Collect(1);
+	if (Params[0].nVar == *levelName) {
+		script->UpdateCompareFlag(true);
+		return OR_CONTINUE;
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+/* 03C9 */
+eOpcodeResult WINAPI IS_CAR_VISIBLY_DAMAGED(CScript *script)
+{
+	script->Collect(1);
+	BYTE flag = *(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x1FB);
+	flag >>= 1;
+	flag &= 1;
+	if (flag == 1) {
+		script->UpdateCompareFlag(true);
+		return OR_CONTINUE;
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+/* 0413 */
+eOpcodeResult WINAPI SET_GET_OUT_OF_JAIL_FREE(CScript *script)
+{
+	script->Collect(2);
+	if (Params[1].nVar) {
+		Params[1].nVar = 1;
+	}
+	*(BYTE *)(Params[0].nVar * 0x170 + (DWORD)playerPedPool + 0x145) = (BYTE)Params[1].nVar;
 	return OR_CONTINUE;
 }
 
@@ -750,12 +832,18 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x029C, IS_BOAT);
 		Opcodes::RegisterOpcode(0x0299, ACTIVATE_GARAGE);
 		Opcodes::RegisterOpcode(0x02B9, DEACTIVATE_GARAGE);
+		Opcodes::RegisterOpcode(0x02BC, SET_SWAT_REQUIRED);
+		Opcodes::RegisterOpcode(0x02BD, SET_FBI_REQUIRED);
+		Opcodes::RegisterOpcode(0x02BE, SET_ARMY_REQUIRED);
 		Opcodes::RegisterOpcode(0x02A0, IS_CHAR_STOPPED);
 		Opcodes::RegisterOpcode(0x02F0, DROP_MINE);
 		Opcodes::RegisterOpcode(0x02F1, DROP_NAUTICAL_MINE);
 		Opcodes::RegisterOpcode(0x031B, IS_FIRST_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x031C, IS_SECOND_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x0367, START_KILL_FRENZY_HEADSHOT);
+		Opcodes::RegisterOpcode(0x03C6, IS_COLLISION_IN_MEMORY);
+		Opcodes::RegisterOpcode(0x03C9, IS_CAR_VISIBLY_DAMAGED);
+		Opcodes::RegisterOpcode(0x0413, SET_GET_OUT_OF_JAIL_FREE);
 		Opcodes::RegisterOpcode(0x047D, GET_NUMBER_OF_SEATS_IN_MODEL);
 		Opcodes::RegisterOpcode(0x04A7, IS_CHAR_IN_ANY_BOAT);
 		Opcodes::RegisterOpcode(0x04A9, IS_CHAR_IN_ANY_HELI);
@@ -772,3 +860,26 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 	}
 	return TRUE;
 }
+
+#else if _III
+#pragma comment (lib, "..\\..\\..\\III.CLEO.lib")
+#include "..\\..\\..\\III.CLEO.h"
+
+tScriptVar *Params;
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
+{
+	if (reason == DLL_PROCESS_ATTACH)
+	{
+		if (CLEO_GetVersion() < CLEO_VERSION)
+		{
+			MessageBox(HWND_DESKTOP, TEXT("An incorrect version of CLEO was loaded."), TEXT("Opcodes.cleo"), MB_ICONERROR);
+			return FALSE;
+		}
+
+		Params = CLEO_GetParamsAddress();
+	}
+	return TRUE;
+}
+
+#endif
