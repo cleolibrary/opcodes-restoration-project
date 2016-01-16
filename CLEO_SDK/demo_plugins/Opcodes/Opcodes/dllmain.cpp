@@ -227,11 +227,7 @@ eOpcodeResult WINAPI ADD_AMMO_TO_PLAYER(CScript *script)
 eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script)
 {
 	script->Collect(1);
-	if (playerPedState[0x2E * Params[0].nVar] == 1) {
-		script->UpdateCompareFlag(false);
-		return OR_CONTINUE;
-	}
-	script->UpdateCompareFlag(true);
+    script->UpdateCompareFlag(playerPedState[0x2E * Params[0].nVar] != 1);
 	return OR_CONTINUE;
 }
 
@@ -239,11 +235,7 @@ eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script)
 eOpcodeResult WINAPI HAS_PLAYER_BEEN_ARRESTED(CScript *script)
 {
 	script->Collect(1);
-	if (playerPedState[0x2E * Params[0].nVar] == 2) {
-		script->UpdateCompareFlag(true);
-		return OR_CONTINUE;
-	}
-	script->UpdateCompareFlag(false);
+    script->UpdateCompareFlag(playerPedState[0x2E * Params[0].nVar] == 2);
 	return OR_CONTINUE;
 }
 
