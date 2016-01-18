@@ -21,6 +21,8 @@
 023A=2,  player %1d% touching_object %2d% on_foot
 023B=2,  actor %1d% touching_object %2d% on_foot
 0242=2,set_car %1d% bomb_status_to %2d%
+024B=2,set_phone %1d% message_repeated %2g%
+024C=2,set_phone %1d% message %2g%
 029C=1,  is %1d% boat
 0299=1,activate_garage %1d%
 02B9=1,deactivate_garage %1d%
@@ -33,10 +35,21 @@
 031B=2,  car %1d% primary_color %2d%
 031C=2,  car %1d% secondary_color %2d%
 0367=9,init_headshot_rampage %1g% weapon %2d% time %3d% targets %4d% %5d% %6d% %7d% %8d% %9d%
+0378=3,set_phone %1d% 2messages_repeated %2g% %3g%
+0379=3,set_phone %1d% 2messages %2g% %3g%
+037A=4,set_phone %1d% 3messages_repeated %2g% %3g% %4g%
+037B=4,set_phone %1d% 3messages %2g% %3g% %4g%
+037C=5,set_phone %1d% 4messages_repeated %2g% %3g% %4g% %5g%
+037D=5,set_phone %1d% 4messages %2g% %3g% %4g% %5g%
+0386=6,set_phone %1d% 5messages_repeated %2g% %3g% %4g% %5g% %6g%
+0387=6,set_phone %1d% 5messages %2g% %3g% %4g% %5g% %6g%
+0388=7,set_phone %1d% 6messages_repeated %2g% %3g% %4g% %5g% %6g% %7g%
+0389=7,set_phone %1d% 6messages %2g% %3g% %4g% %5g% %6g% %7g%
 03C6=1,  current_island == %1d%
 03C9=1,  car %1d% visibly_damaged
 0349=1,text_draw_style = %1d%
 0413=2,set_player %1d% get_out_of_jail_free %2d%
+0447=1,  player %1d% lifting_a_phone
 047D=2,get_number_of_seats_in_model %1d% store_to %2d%
 04A7=1,  actor %1d% in_any_boat
 04A9=1,  actor %1d% in_any_heli

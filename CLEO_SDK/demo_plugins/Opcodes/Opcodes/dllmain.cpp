@@ -28,7 +28,8 @@ public:
 
 GtaGame game;
 
-void(__cdecl *StartFrenzy)(DWORD, INT, WORD, DWORD, CHAR *, INT, INT, INT, BYTE, BYTE); // cdarkel::startfrenzy
+void(__cdecl *StartFrenzy)(DWORD, INT, WORD, DWORD, wchar_t *, INT, INT, INT, BYTE, BYTE); // cdarkel::startfrenzy
+void(__thiscall *SetPhoneMessage_JustOnce)(uintptr_t, DWORD, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *); // cphoneinfo::setphonemessage_justonce
 void(__cdecl *CreatePickup)(FLOAT, FLOAT, FLOAT, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD); // cpickups::generatenewone
 uintptr_t(__thiscall *ObjectPoolGetStruct)(void *, INT); // cpool_cobject_ccutscenehead::getat
 uintptr_t(__thiscall *VehiclePoolGetStruct)(void *, INT); // cpool_cvehicle_cautomobile::getat
@@ -41,12 +42,13 @@ FLOAT(__cdecl *FindGroundZForCoord)(FLOAT, FLOAT); // cworld::findgroundzforcoor
 void(__thiscall *SetAmmo)(uintptr_t, DWORD, DWORD); // cped::setammo
 void(__thiscall *GrantAmmo)(DWORD, DWORD, DWORD); // cped::grantammo
 DWORD(__cdecl *GetVehicleTypeId)(DWORD); // cvehiclemodelinfo::getvehicletypeid
-char *(__thiscall *GetText)(uintptr_t, char *); // ctext::get
+wchar_t *(__thiscall *GetText)(uintptr_t, char *); // ctext::get
 DWORD *barrel1 = NULL;
 DWORD *barrel2 = NULL;
 DWORD *maxWantedLevel = NULL;
 uintptr_t ccamera = NULL;
 uintptr_t garage = NULL;
+uintptr_t cphoneinfo = NULL;
 uintptr_t *playerPedPool = NULL;
 uintptr_t *playerPedState = NULL;
 uintptr_t ctext = NULL;
@@ -68,7 +70,8 @@ GtaGame::GtaGame()
 	switch ((*(unsigned int *)0x61C11C)) { // get version signature
 	case 0x74FF5064:
 		version = V1_0;
-		StartFrenzy = (void(__cdecl *)(DWORD, INT, WORD, DWORD, CHAR *, INT, INT, INT, BYTE, BYTE))0x429B60;
+		StartFrenzy = (void(__cdecl *)(DWORD, INT, WORD, DWORD, wchar_t *, INT, INT, INT, BYTE, BYTE))0x429B60;
+		SetPhoneMessage_JustOnce = (void(__thiscall *)(uintptr_t, DWORD, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *))0x43C430;
 		CreatePickup = (void(__cdecl *)(FLOAT, FLOAT, FLOAT, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
 		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C30;
 		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C70;
@@ -81,12 +84,13 @@ GtaGame::GtaGame()
 		SetAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))0x4FF780;
 		GrantAmmo = (void(__thiscall *)(DWORD, DWORD, DWORD))0x4FF840;
 		GetVehicleTypeId = (DWORD(__cdecl *)(DWORD))0x578A70;
-		GetText = (char *(__thiscall *)(uintptr_t, char *))0x584F30;
+		GetText = (wchar_t *(__thiscall *)(uintptr_t, char *))0x584F30;
 		barrel1 = (DWORD *)0x68E8B0;
 		barrel2 = (DWORD *)0x68E910;
 		maxWantedLevel = (DWORD *)0x6910D8;
 		ccamera = 0x7E4688;
 		garage = 0x812668;
+		cphoneinfo = 0x817CF0;
 		playerPedPool = (uintptr_t *)0x94AD28;
 		playerPedState = (uintptr_t *)0x94ADF4;
 		ctext = 0x94B220;
@@ -104,7 +108,8 @@ GtaGame::GtaGame()
 		break;
 	case 0x00408DC0:
 		version = V1_1;
-		StartFrenzy = (void(__cdecl *)(DWORD, INT, WORD, DWORD, CHAR *, INT, INT, INT, BYTE, BYTE))0x429B60;
+		StartFrenzy = (void(__cdecl *)(DWORD, INT, WORD, DWORD, wchar_t *, INT, INT, INT, BYTE, BYTE))0x429B60;
+		SetPhoneMessage_JustOnce = (void(__thiscall *)(uintptr_t, DWORD, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *))0x43C430;
 		CreatePickup = (void(__cdecl *)(FLOAT, FLOAT, FLOAT, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
 		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C30;
 		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C70;
@@ -116,12 +121,13 @@ GtaGame::GtaGame()
 		SetAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))(0x4FF780 + 0x20);
 		GrantAmmo = (void(__thiscall *)(DWORD, DWORD, DWORD))(0x4FF840 + 0x20);
 		GetVehicleTypeId = (DWORD(__cdecl *)(DWORD))(0x578A70 + 0x20);
-		GetText = (char *(__thiscall *)(uintptr_t, char *))(0x584F30 + 0x20);
+		GetText = (wchar_t *(__thiscall *)(uintptr_t, char *))(0x584F30 + 0x20);
 		barrel1 = (DWORD *)0x68E8B0;
 		barrel2 = (DWORD *)0x68E910;
 		maxWantedLevel = (DWORD *)0x6910D8;
 		ccamera = 0x7E4688 + 8;
 		garage = 0x812668 + 8;
+		cphoneinfo = 0x817CF0 + 8;
 		playerPedPool = (uintptr_t *)(0x94AD28 + 8);
 		playerPedState = (uintptr_t *)(0x94ADF4 + 8);
 		ctext = 0x94B220 + 8;
@@ -153,6 +159,18 @@ GtaGame::GtaGame()
 		carPool = (void **)(0xA0FDE4 - 0xFF8);
 		break;
 	}
+}
+
+void SetPhoneMessage_Repeatedly(uintptr_t cphoneinfo, DWORD phone, wchar_t *string1, wchar_t *string2, wchar_t *string3, wchar_t *string4, wchar_t *string5, wchar_t *string6)
+{
+	phone *= 0x34;
+	*(wchar_t **)(cphoneinfo + phone + 0x14) = string1;
+	*(wchar_t **)(cphoneinfo + phone + 0x18) = string2;
+	*(wchar_t **)(cphoneinfo + phone + 0x1C) = string3;
+	*(wchar_t **)(cphoneinfo + phone + 0x20) = string4;
+	*(wchar_t **)(cphoneinfo + phone + 0x24) = string5;
+	*(wchar_t **)(cphoneinfo + phone + 0x28) = string6;
+	*(DWORD *)(cphoneinfo + phone + 0x34) = 5;
 }
 
 /* 00A2 */
@@ -227,7 +245,7 @@ eOpcodeResult WINAPI ADD_AMMO_TO_PLAYER(CScript *script)
 eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script)
 {
 	script->Collect(1);
-    script->UpdateCompareFlag(playerPedState[0x2E * Params[0].nVar] != 1);
+	script->UpdateCompareFlag(playerPedState[0x2E * Params[0].nVar] != 1);
 	return OR_CONTINUE;
 }
 
@@ -235,7 +253,7 @@ eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script)
 eOpcodeResult WINAPI HAS_PLAYER_BEEN_ARRESTED(CScript *script)
 {
 	script->Collect(1);
-    script->UpdateCompareFlag(playerPedState[0x2E * Params[0].nVar] == 2);
+	script->UpdateCompareFlag(playerPedState[0x2E * Params[0].nVar] == 2);
 	return OR_CONTINUE;
 }
 
@@ -410,6 +428,28 @@ eOpcodeResult WINAPI ARM_CAR_WITH_BOMB(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 024B */
+eOpcodeResult WINAPI SET_REPEATED_PHONE_MESSAGE(CScript *script)
+{
+	script->Collect(1);
+	char gxt[8];
+	script->ReadShortString(gxt);
+	wchar_t *string = GetText(ctext, gxt);
+	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string, NULL, NULL, NULL, NULL, NULL);
+	return OR_CONTINUE;
+}
+
+/* 024C */
+eOpcodeResult WINAPI SET_PHONE_MESSAGE(CScript *script)
+{
+	script->Collect(1);
+	char gxt[8];
+	script->ReadShortString(gxt);
+	wchar_t *string = GetText(ctext, gxt);
+	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string, NULL, NULL, NULL, NULL, NULL);
+	return OR_CONTINUE;
+}
+
 /* 029C */
 eOpcodeResult WINAPI IS_BOAT(CScript *script)
 {
@@ -561,12 +601,192 @@ eOpcodeResult WINAPI START_KILL_FRENZY_HEADSHOT(CScript *script)
 {
 	char gxt[8];
 	script->ReadShortString(gxt);
-	char *string = GetText(ctext, (char *)gxt);
+	wchar_t *string = GetText(ctext, gxt);
 	script->Collect(8);
 	if (Params[7].nVar) {
 		Params[7].nVar = 1;
 	}
 	StartFrenzy(Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, string, Params[4].nVar, Params[5].nVar, Params[6].nVar, Params[7].nVar, 1);
+	return OR_CONTINUE;
+}
+
+/* 0378 */
+eOpcodeResult WINAPI SET_2_REPEATED_PHONE_MESSAGES(CScript *script)
+{
+	script->Collect(1);
+	char gxt[8];
+	wchar_t *string[2];
+	script->ReadShortString(gxt);
+	string[0] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[1] = GetText(ctext, gxt);
+	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], NULL, NULL, NULL, NULL);
+	return OR_CONTINUE;
+}
+
+/* 0379 */
+eOpcodeResult WINAPI SET_2_PHONE_MESSAGES(CScript *script)
+{
+	script->Collect(1);
+	char gxt[8];
+	wchar_t *string[2];
+	script->ReadShortString(gxt);
+	string[0] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[1] = GetText(ctext, gxt);
+	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], NULL, NULL, NULL, NULL);
+	return OR_CONTINUE;
+}
+
+/* 037A */
+eOpcodeResult WINAPI SET_3_REPEATED_PHONE_MESSAGES(CScript *script)
+{
+	script->Collect(1);
+	char gxt[8];
+	wchar_t *string[3];
+	script->ReadShortString(gxt);
+	string[0] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[1] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[2] = GetText(ctext, gxt);
+	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], NULL, NULL, NULL);
+	return OR_CONTINUE;
+}
+
+/* 037B */
+eOpcodeResult WINAPI SET_3_PHONE_MESSAGES(CScript *script)
+{
+	script->Collect(1);
+	char gxt[8];
+	wchar_t *string[3];
+	script->ReadShortString(gxt);
+	string[0] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[1] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[2] = GetText(ctext, gxt);
+	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], NULL, NULL, NULL);
+	return OR_CONTINUE;
+}
+
+/* 037C */
+eOpcodeResult WINAPI SET_4_REPEATED_PHONE_MESSAGES(CScript *script)
+{
+	script->Collect(1);
+	char gxt[8];
+	wchar_t *string[4];
+	script->ReadShortString(gxt);
+	string[0] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[1] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[2] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[3] = GetText(ctext, gxt);
+	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], NULL, NULL);
+	return OR_CONTINUE;
+}
+
+/* 037D */
+eOpcodeResult WINAPI SET_4_PHONE_MESSAGES(CScript *script)
+{
+	script->Collect(1);
+	char gxt[8];
+	wchar_t *string[4];
+	script->ReadShortString(gxt);
+	string[0] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[1] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[2] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[3] = GetText(ctext, gxt);
+	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], NULL, NULL);
+	return OR_CONTINUE;
+}
+
+/* 0386 */
+eOpcodeResult WINAPI SET_5_REPEATED_PHONE_MESSAGES(CScript *script)
+{
+	script->Collect(1);
+	char gxt[8];
+	wchar_t *string[5];
+	script->ReadShortString(gxt);
+	string[0] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[1] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[2] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[3] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[4] = GetText(ctext, gxt);
+	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], string[4], NULL);
+	return OR_CONTINUE;
+}
+
+/* 0387 */
+eOpcodeResult WINAPI SET_5_PHONE_MESSAGES(CScript *script)
+{
+	script->Collect(1);
+	char gxt[8];
+	wchar_t *string[5];
+	script->ReadShortString(gxt);
+	string[0] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[1] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[2] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[3] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[4] = GetText(ctext, gxt);
+	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], string[4], NULL);
+	return OR_CONTINUE;
+}
+
+/* 0388 */
+eOpcodeResult WINAPI SET_6_REPEATED_PHONE_MESSAGES(CScript *script)
+{
+	script->Collect(1);
+	char gxt[8];
+	wchar_t *string[6];
+	script->ReadShortString(gxt);
+	string[0] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[1] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[2] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[3] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[4] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[5] = GetText(ctext, gxt);
+	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], string[4], string[5]);
+	return OR_CONTINUE;
+}
+
+/* 0389 */
+eOpcodeResult WINAPI SET_6_PHONE_MESSAGES(CScript *script)
+{
+	script->Collect(1);
+	char gxt[8];
+	wchar_t *string[6];
+	script->ReadShortString(gxt);
+	string[0] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[1] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[2] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[3] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[4] = GetText(ctext, gxt);
+	script->ReadShortString(gxt);
+	string[5] = GetText(ctext, gxt);
+	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], string[4], string[5]);
 	return OR_CONTINUE;
 }
 
@@ -605,6 +825,15 @@ eOpcodeResult WINAPI SET_GET_OUT_OF_JAIL_FREE(CScript *script)
 		Params[1].nVar = 1;
 	}
 	*(BYTE *)(Params[0].nVar * 0x170 + (DWORD)playerPedPool + 0x145) = (BYTE)Params[1].nVar;
+	return OR_CONTINUE;
+}
+
+/* 0447 */
+eOpcodeResult WINAPI IS_PLAYER_LIFTING_A_PHONE(CScript *script)
+{
+	script->Collect(1);
+	DWORD player = playerPedPool[0x2E * Params[0].nVar];
+	script->UpdateCompareFlag(*(DWORD *)(player + 0x244) == 0x13);
 	return OR_CONTINUE;
 }
 
@@ -821,6 +1050,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x023A, IS_PLAYER_TOUCHING_OBJECT_ON_FOOT);
 		Opcodes::RegisterOpcode(0x023B, IS_CHAR_TOUCHING_OBJECT_ON_FOOT);
 		Opcodes::RegisterOpcode(0x0242, ARM_CAR_WITH_BOMB);
+		Opcodes::RegisterOpcode(0x024B, SET_REPEATED_PHONE_MESSAGE);
+		Opcodes::RegisterOpcode(0x024C, SET_PHONE_MESSAGE);
 		Opcodes::RegisterOpcode(0x029C, IS_BOAT);
 		Opcodes::RegisterOpcode(0x0299, ACTIVATE_GARAGE);
 		Opcodes::RegisterOpcode(0x02B9, DEACTIVATE_GARAGE);
@@ -833,9 +1064,20 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x031B, IS_FIRST_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x031C, IS_SECOND_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x0367, START_KILL_FRENZY_HEADSHOT);
+		Opcodes::RegisterOpcode(0x0378, SET_2_REPEATED_PHONE_MESSAGES);
+		Opcodes::RegisterOpcode(0x0379, SET_2_PHONE_MESSAGES);
+		Opcodes::RegisterOpcode(0x037A, SET_3_REPEATED_PHONE_MESSAGES);
+		Opcodes::RegisterOpcode(0x037B, SET_3_PHONE_MESSAGES);
+		Opcodes::RegisterOpcode(0x037C, SET_4_REPEATED_PHONE_MESSAGES);
+		Opcodes::RegisterOpcode(0x037D, SET_4_PHONE_MESSAGES);
+		Opcodes::RegisterOpcode(0x0386, SET_5_REPEATED_PHONE_MESSAGES);
+		Opcodes::RegisterOpcode(0x0387, SET_5_PHONE_MESSAGES);
+		Opcodes::RegisterOpcode(0x0388, SET_6_REPEATED_PHONE_MESSAGES);
+		Opcodes::RegisterOpcode(0x0389, SET_6_PHONE_MESSAGES);
 		Opcodes::RegisterOpcode(0x03C6, IS_COLLISION_IN_MEMORY);
 		Opcodes::RegisterOpcode(0x03C9, IS_CAR_VISIBLY_DAMAGED);
 		Opcodes::RegisterOpcode(0x0413, SET_GET_OUT_OF_JAIL_FREE);
+		Opcodes::RegisterOpcode(0x0447, IS_PLAYER_LIFTING_A_PHONE);
 		Opcodes::RegisterOpcode(0x047D, GET_NUMBER_OF_SEATS_IN_MODEL);
 		Opcodes::RegisterOpcode(0x04A7, IS_CHAR_IN_ANY_BOAT);
 		Opcodes::RegisterOpcode(0x04A9, IS_CHAR_IN_ANY_HELI);
