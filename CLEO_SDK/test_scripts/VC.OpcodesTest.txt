@@ -6,7 +6,9 @@ POSX       = 0@
 PLAYER_CAR = 0@
 RAMPAGE    = 0@
 POSY       = 1@
+PHONE_A    = 1@
 POSZ       = 2@
+PHONE_B    = 2@
 SPAWN_CHAR = 3@
 SPAWN_CAR  = 4@
 LINE       = 5@
@@ -57,6 +59,8 @@ POSX += 4.0
 0249: release_model #COLT45
 0249: release_model #DINGHY
 01B1: give_player $PLAYER_CHAR weapon 17 ammo 10
+024A: PHONE_A = get_phone_at 38.341 -1023.3
+024A: PHONE_B = get_phone_at 37.62793 -1023.3
 FREEBOMB = 0
 SETTAXI = 0
 SWAT_REQ = 0
@@ -88,6 +92,8 @@ while true
     gosub @IS_PLAYER_TOUCHING_OBJECT_ON_FOOT
     gosub @IS_CHAR_TOUCHING_OBJECT_ON_FOOT
     gosub @ARM_CAR_WITH_BOMB
+    gosub @SET_REPEATED_PHONE_MESSAGE
+    gosub @SET_PHONE_MESSAGE
     gosub @IS_BOAT
     gosub @SET_SWAT_REQUIRED
     gosub @SET_FBI_REQUIRED
@@ -98,9 +104,20 @@ while true
     gosub @IS_FIRST_CAR_COLOUR
     gosub @IS_SECOND_CAR_COLOUR
     gosub @START_KILL_FRENZY_HEADSHOT
+    gosub @SET_2_REPEATED_PHONE_MESSAGES
+    gosub @SET_2_PHONE_MESSAGES
+    gosub @SET_3_REPEATED_PHONE_MESSAGES
+    gosub @SET_3_PHONE_MESSAGES
+    gosub @SET_4_REPEATED_PHONE_MESSAGES
+    gosub @SET_4_PHONE_MESSAGES
+    gosub @SET_5_REPEATED_PHONE_MESSAGES
+    gosub @SET_5_PHONE_MESSAGES
+    gosub @SET_6_REPEATED_PHONE_MESSAGES
+    gosub @SET_6_PHONE_MESSAGES
     gosub @IS_COLLISION_IN_MEMORY
     gosub @IS_CAR_VISIBLY_DAMAGED
     gosub @SET_GET_OUT_OF_JAIL_FREE
+    gosub @IS_PLAYER_LIFTING_A_PHONE
     gosub @GET_NUMBER_OF_SEATS_IN_MODEL
     gosub @IS_CHAR_IN_ANY_BOAT
     gosub @IS_CHAR_IN_ANY_HELI
@@ -124,8 +141,11 @@ while true
         01C4: mark_object_as_no_longer_needed SPAWN_OBJ
         05DC: end_custom_thread
     end
-
-    0308: text_6numbers 'HJSTATW' AIM_KEY MAXWANTED DRUNK SEATS 0 0 time 10 flag 5
+    if
+        8447:   not player $PLAYER_CHAR lifting_a_phone
+    then
+        0308: text_6numbers 'HJSTATW' AIM_KEY MAXWANTED DRUNK SEATS 0 0 time 10 flag 5
+    end
 end
 
 :TEXT_STYLE
@@ -387,6 +407,36 @@ then
 end
 return
 
+:SET_REPEATED_PHONE_MESSAGE
+if
+    0ADC: test_cheat "PHONEA1X"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    024B: set_phone PHONE_A message_repeated 'ADMIRAL'
+end
+if
+    0ADC: test_cheat "PHONEB1X"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    024B: set_phone PHONE_B message_repeated 'BENSON'
+end
+return
+
+:SET_PHONE_MESSAGE
+if
+    0ADC: test_cheat "PHONEA1Y"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    024C: set_phone PHONE_A message 'ADMIRAL'
+end
+if
+    0ADC: test_cheat "PHONEB1Y"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    024C: set_phone PHONE_B message 'BENSON'
+end
+return
+
 :IS_BOAT
 gosub @TEXT_STYLE
 if
@@ -531,6 +581,156 @@ then
 end
 return
 
+:SET_2_REPEATED_PHONE_MESSAGES
+if
+    0ADC: test_cheat "PHONEA2X"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0378: set_phone PHONE_A 2messages_repeated 'ADMIRAL' 'AMBULAN'
+end
+if
+    0ADC: test_cheat "PHONEB2X"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0378: set_phone PHONE_B 2messages_repeated 'BENSON' 'BFINJC'
+end
+return
+
+:SET_2_PHONE_MESSAGES
+if
+    0ADC: test_cheat "PHONEA2Y"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0379: set_phone PHONE_A 2messages 'ADMIRAL' 'AMBULAN'
+end
+if
+    0ADC: test_cheat "PHONEB2Y"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0379: set_phone PHONE_B 2messages 'BENSON' 'BFINJC'
+end
+return
+
+:SET_3_REPEATED_PHONE_MESSAGES
+if
+    0ADC: test_cheat "PHONEA3X"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    037A: set_phone PHONE_A 3messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL'
+end
+if
+    0ADC: test_cheat "PHONEB3X"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    037A: set_phone PHONE_B 3messages_repeated 'BENSON' 'BFINJC' 'BLISTAC'
+end
+return
+
+:SET_3_PHONE_MESSAGES
+if
+    0ADC: test_cheat "PHONEA3Y"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    037B: set_phone PHONE_A 3messages 'ADMIRAL' 'AMBULAN' 'ANGEL'
+end
+if
+    0ADC: test_cheat "PHONEB3Y"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    037B: set_phone PHONE_B 3messages 'BENSON' 'BFINJC' 'BLISTAC'
+end
+return
+
+:SET_4_REPEATED_PHONE_MESSAGES
+if
+    0ADC: test_cheat "PHONEA4X"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    037C: set_phone PHONE_A 4messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE'
+end
+if
+    0ADC: test_cheat "PHONEB4X"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    037C: set_phone PHONE_B 4messages_repeated 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA'
+end
+return
+
+:SET_4_PHONE_MESSAGES
+if
+    0ADC: test_cheat "PHONEA4Y"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    037D: set_phone PHONE_A 4messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE'
+end
+if
+    0ADC: test_cheat "PHONEB4Y"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    037D: set_phone PHONE_B 4messages 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA'
+end
+return
+
+:SET_5_REPEATED_PHONE_MESSAGES
+if
+    0ADC: test_cheat "PHONEA5X"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0386: set_phone PHONE_A 5messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
+end
+if
+    0ADC: test_cheat "PHONEB5X"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0386: set_phone PHONE_B 5messages_repeated 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA' 'BOBCAT'
+end
+return
+
+:SET_5_PHONE_MESSAGES
+if
+    0ADC: test_cheat "PHONEA5Y"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0387: set_phone PHONE_A 5messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
+end
+if
+    0ADC: test_cheat "PHONEB5Y"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0387: set_phone PHONE_B 5messages 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA' 'BOBCAT'
+end
+return
+
+:SET_6_REPEATED_PHONE_MESSAGES
+if
+    0ADC: test_cheat "PHONEA6X"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0388: set_phone PHONE_A 6messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
+end
+if
+    0ADC: test_cheat "PHONEB6X"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0388: set_phone PHONE_B 6messages_repeated 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA' 'BOBCAT' 'BOXVILL'
+end
+return
+
+:SET_6_PHONE_MESSAGES
+if
+    0ADC: test_cheat "PHONEA6Y"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0389: set_phone PHONE_A 6messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
+end
+if
+    0ADC: test_cheat "PHONEB6Y"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0389: set_phone PHONE_B 6messages 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA' 'BOBCAT' 'BOXVILL'
+end
+return
+
 :IS_COLLISION_IN_MEMORY
 gosub @TEXT_STYLE
 if
@@ -564,6 +764,17 @@ if
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0413: set_player $PLAYER_CHAR get_out_of_jail_free 1
+end
+return
+
+:IS_PLAYER_LIFTING_A_PHONE
+gosub @TEXT_STYLE
+if
+    0447:   player $PLAYER_CHAR lifting_a_phone
+then
+    0608: show_text_position 10.0 LINE text "0447: Player is lifting phone"
+else
+    0608: show_text_position 10.0 LINE text "0447: Player is not lifting phone"
 end
 return
 

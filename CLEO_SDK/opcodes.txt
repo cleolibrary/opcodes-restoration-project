@@ -21,6 +21,8 @@
 023A:   player $PLAYER_CHAR touching_object 0@ on_foot
 023B:   actor 0@ touching_object 1@ on_foot
 0242: set_car 0@ bomb_status_to 1
+024B: set_phone 0@ message_repeated 'ADMIRAL'
+024C: set_phone 0@ message 'ADMIRAL'
 029C:   is 0@ boat
 0299: activate_garage $655
 02B9: deactivate_garage $655
@@ -33,10 +35,21 @@
 031B:   car 0@ primary_color 0
 031C:   car 0@ secondary_color 0
 0367: init_headshot_rampage 'RAMPAGE' weapon 26 time 120000 targets 10 -1 -1 -1 -1 0
+0378: set_phone 0@ 2messages_repeated 'ADMIRAL' 'AMBULAN'
+0379: set_phone 0@ 2messages 'ADMIRAL' 'AMBULAN'
+037A: set_phone 0@ 3messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL'
+037B: set_phone 0@ 3messages 'ADMIRAL' 'AMBULAN' 'ANGEL'
+037C: set_phone 0@ 4messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE'
+037D: set_phone 0@ 4messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE'
+0386: set_phone 0@ 5messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
+0387: set_phone 0@ 5messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
+0388: set_phone 0@ 6messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
+0389: set_phone 0@ 6messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
 03C6:   current_island == 1
 03C9:   car 0@ visibly_damaged
 0349: text_draw_style = 3
 0413: set_player $PLAYER_CHAR get_out_of_jail_free 1
+0447:   player $PLAYER_CHAR lifting_a_phone
 047D: get_number_of_seats_in_model #ADMIRAL store_to 0@
 04A7:   actor 0@ in_any_boat
 04A9:   actor 0@ in_any_heli
