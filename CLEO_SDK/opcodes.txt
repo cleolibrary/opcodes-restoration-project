@@ -23,6 +23,9 @@
 0242: set_car 0@ bomb_status_to 1
 024B: set_phone 0@ message_repeated 'ADMIRAL'
 024C: set_phone 0@ message 'ADMIRAL'
+024D:   phone 0@ has_displayed_message
+0255: set_critical_mission_restart_at 0.0 0.0 0.0 angle 0.0
+0295:   is 0@ taxi
 029C:   is 0@ boat
 0299: activate_garage $655
 02B9: deactivate_garage $655
@@ -34,6 +37,7 @@
 02F1: create_explosive_barrel_at 0.0 0.0 0.0
 031B:   car 0@ primary_color 0
 031C:   car 0@ secondary_color 0
+0349: text_draw_style = 3
 0367: init_headshot_rampage 'RAMPAGE' weapon 26 time 120000 targets 10 -1 -1 -1 -1 0
 0378: set_phone 0@ 2messages_repeated 'ADMIRAL' 'AMBULAN'
 0379: set_phone 0@ 2messages 'ADMIRAL' 'AMBULAN'
@@ -45,10 +49,14 @@
 0387: set_phone 0@ 5messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
 0388: set_phone 0@ 6messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
 0389: set_phone 0@ 6messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
+03C2:   phone 0@ displaying_message
 03C6:   current_island == 1
 03C9:   car 0@ visibly_damaged
-0349: text_draw_style = 3
+03EC:   ev_crane_collected_all_cars
 0413: set_player $PLAYER_CHAR get_out_of_jail_free 1
+0421: force_rain 1
+0422:   garage_contain_car $655 0@
+042A:   ped_threat_exists 8 1
 0447:   player $PLAYER_CHAR lifting_a_phone
 047D: get_number_of_seats_in_model #ADMIRAL store_to 0@
 04A7:   actor 0@ in_any_boat

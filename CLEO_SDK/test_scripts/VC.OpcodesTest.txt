@@ -2,26 +2,29 @@
 
 0000:
 const
+TEMP_VAR   = 0@
 POSX       = 0@
 PLAYER_CAR = 0@
-RAMPAGE    = 0@
+RAMP_STATE = 0@
 POSY       = 1@
-PHONE_A    = 1@
 POSZ       = 2@
-PHONE_B    = 2@
 SPAWN_CHAR = 3@
 SPAWN_CAR  = 4@
 LINE       = 5@
 AIM_KEY    = 6@
-ARMY_REQ   = 7@
-FBI_REQ    = 8@
-SWAT_REQ   = 9@
+SPAWN_OBJ  = 7@
+DRUNK      = 8@
+SEATS      = 9@
 FREEBOMB   = 10@
-SETTAXI    = 11@
-MAXWANTED  = 12@
-SPAWN_OBJ  = 13@
-DRUNK      = 14@
-SEATS      = 15@
+SETTAXI    = 10@
+SWAT_REQ   = 10@
+FBI_REQ    = 10@
+ARMY_REQ   = 10@
+FORCERAIN  = 10@
+GANGTHREAT = 10@
+MAXWANTED  = 11@
+PHONE_A    = 12@
+PHONE_B    = 13@
 end
 
 while true
@@ -60,12 +63,16 @@ POSX += 4.0
 0249: release_model #DINGHY
 01B1: give_player $PLAYER_CHAR weapon 17 ammo 10
 024A: PHONE_A = get_phone_at 38.341 -1023.3
+024C: set_phone PHONE_A message 'ADMIRAL'
 024A: PHONE_B = get_phone_at 37.62793 -1023.3
-FREEBOMB = 0
-SETTAXI = 0
-SWAT_REQ = 0
-FBI_REQ = 0
-ARMY_REQ = 0
+10@ = 0 // FREEBOMB, SETTAXI, SWAT_REQ, FBI_REQ, ARMY_REQ, FORCERAIN, GANGTHREAT
+021D: set_free_bomb_shop_to 0
+021F: set_all_taxi_lights 0
+02BC: set_swat_required 0
+02BD: set_fbi_required 0
+02BE: set_army_required 0
+0421: force_rain 0
+03F2: pedgroup 8 remove_threat 1
 
 while true
     wait 10
@@ -94,6 +101,9 @@ while true
     gosub @ARM_CAR_WITH_BOMB
     gosub @SET_REPEATED_PHONE_MESSAGE
     gosub @SET_PHONE_MESSAGE
+    gosub @HAS_PHONE_DISPLAYED_MESSAGE
+    gosub @RESTART_CRITICAL_MISSION
+    gosub @IS_TAXI
     gosub @IS_BOAT
     gosub @SET_SWAT_REQUIRED
     gosub @SET_FBI_REQUIRED
@@ -114,9 +124,13 @@ while true
     gosub @SET_5_PHONE_MESSAGES
     gosub @SET_6_REPEATED_PHONE_MESSAGES
     gosub @SET_6_PHONE_MESSAGES
+    gosub @IS_PHONE_DISPLAYING_MESSAGE
     gosub @IS_COLLISION_IN_MEMORY
     gosub @IS_CAR_VISIBLY_DAMAGED
+    gosub @HAS_MILITARY_CRANE_COLLECTED_ALL_CARS
     gosub @SET_GET_OUT_OF_JAIL_FREE
+    gosub @FORCE_RAIN
+    gosub @IS_THREAT_FOR_PED_TYPE
     gosub @IS_PLAYER_LIFTING_A_PHONE
     gosub @GET_NUMBER_OF_SEATS_IN_MODEL
     gosub @IS_CHAR_IN_ANY_BOAT
@@ -144,7 +158,7 @@ while true
     if
         8447:   not player $PLAYER_CHAR lifting_a_phone
     then
-        0308: text_6numbers 'HJSTATW' AIM_KEY MAXWANTED DRUNK SEATS 0 0 time 10 flag 5
+        0308: text_6numbers 'HJSTATW' AIM_KEY MAXWANTED DRUNK SEATS 10@ 0 time 10 flag 5
     end
 end
 
@@ -310,13 +324,14 @@ if
     0ADC: test_cheat "FREEBOMBS"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
+    05F9: TEMP_VAR = FREEBOMB AND 1
     if
-        FREEBOMB == 0
+        TEMP_VAR == 0
     then
-        FREEBOMB = 1
+        05FA: FREEBOMB = FREEBOMB OR 1
         021D: set_free_bomb_shop_to 1
     else
-        FREEBOMB = 0
+        05F9: FREEBOMB = FREEBOMB AND 0xFE
         021D: set_free_bomb_shop_to 0
     end
 end
@@ -327,13 +342,14 @@ if
     0ADC: test_cheat "TAXI"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
+    05F9: TEMP_VAR = SETTAXI AND 2
     if
-        SETTAXI == 0
+        TEMP_VAR == 0
     then
-        SETTAXI = 1
+        05FA: SETTAXI = SETTAXI OR 2
         021F: set_all_taxi_lights 1
     else
-        SETTAXI = 0
+        05F9: SETTAXI = SETTAXI AND 0xFD
         021F: set_all_taxi_lights 0
     end
 end
@@ -437,6 +453,42 @@ then
 end
 return
 
+:HAS_PHONE_DISPLAYED_MESSAGE
+gosub @TEXT_STYLE
+if
+    024D:   phone PHONE_A has_displayed_message
+then
+    0608: show_text_position 10.0 LINE text "024D: Phone-A has displayed message"
+else
+    0608: show_text_position 10.0 LINE text "024D: Phone-A has not displayed message"
+end
+return
+
+:RESTART_CRITICAL_MISSION
+if
+    0ADC: test_cheat "RESTART"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0255: set_critical_mission_restart_at -1102.4 1331.2 19.0 angle 271.2
+end
+return
+
+:IS_TAXI
+gosub @TEXT_STYLE
+if
+    00E0:   player $PLAYER_CHAR in_any_car
+then
+    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    if
+        0295:   is PLAYER_CAR taxi
+    then
+        0608: show_text_position 10.0 LINE text "0295: Is a taxi"
+        return
+    end
+end
+0608: show_text_position 10.0 LINE text "0295: Is not a taxi"
+return
+
 :IS_BOAT
 gosub @TEXT_STYLE
 if
@@ -458,13 +510,14 @@ if
     0ADC: test_cheat "SWATREQ"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
+    05F9: TEMP_VAR = SWAT_REQ AND 4
     if
-        SWAT_REQ == 0
+        TEMP_VAR == 0
     then
-        SWAT_REQ = 1
+        05FA: SWAT_REQ = SWAT_REQ OR 4
         02BC: set_swat_required 1
     else
-        SWAT_REQ = 0
+        05F9: SWAT_REQ = SWAT_REQ AND 0xFB
         02BC: set_swat_required 0
     end
 end
@@ -475,13 +528,14 @@ if
     0ADC: test_cheat "FBIREQ"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
+    05F9: TEMP_VAR = FBI_REQ AND 8
     if
-        FBI_REQ == 0
+        TEMP_VAR == 0
     then
-        FBI_REQ = 1
+        05FA: FBI_REQ = FBI_REQ OR 8
         02BD: set_fbi_required 1
     else
-        FBI_REQ = 0
+        05F9: FBI_REQ = FBI_REQ AND 0xF7
         02BD: set_fbi_required 0
     end
 end
@@ -492,13 +546,14 @@ if
     0ADC: test_cheat "ARMYREQ"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
+    05F9: TEMP_VAR = ARMY_REQ AND 0x10
     if
-        ARMY_REQ == 0
+        TEMP_VAR == 0
     then
-        ARMY_REQ = 1
+        05FA: ARMY_REQ = ARMY_REQ OR 0x10
         02BE: set_army_required 1
     else
-        ARMY_REQ = 0
+        05F9: ARMY_REQ = ARMY_REQ AND 0xEF
         02BE: set_army_required 0
     end
 end
@@ -568,10 +623,10 @@ end
 return
 
 :START_KILL_FRENZY_HEADSHOT
-01FA: RAMPAGE = rampage_status
+01FA: RAMP_STATE = rampage_status
 if and
     0ADC: test_cheat "RAMPAGE"
-    not RAMPAGE == 1
+    not RAMP_STATE == 1
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0247: request_model #M4
@@ -731,6 +786,17 @@ then
 end
 return
 
+:IS_PHONE_DISPLAYING_MESSAGE
+gosub @TEXT_STYLE
+if
+    03C2:   phone PHONE_A displaying_message
+then
+    0608: show_text_position 10.0 LINE text "03C2: Phone-A is displaying message"
+else
+    0608: show_text_position 10.0 LINE text "03C2: Phone-A is not displaying message"
+end
+return
+
 :IS_COLLISION_IN_MEMORY
 gosub @TEXT_STYLE
 if
@@ -758,12 +824,67 @@ end
 0608: show_text_position 10.0 LINE text "03C9: Car is not visibly damaged"
 return
 
+:HAS_MILITARY_CRANE_COLLECTED_ALL_CARS
+gosub @TEXT_STYLE
+if
+    03EC:   ev_crane_collected_all_cars
+then
+    0608: show_text_position 10.0 LINE text "03EC: Military crane has collected all cars"
+else
+    0608: show_text_position 10.0 LINE text "03EC: Military crane has not collected all cars"
+end
+return
+
 :SET_GET_OUT_OF_JAIL_FREE
 if
     0ADC: test_cheat "JAILFREE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0413: set_player $PLAYER_CHAR get_out_of_jail_free 1
+end
+return
+
+:FORCE_RAIN
+if
+    0ADC: test_cheat "FORCERAIN"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    05F9: TEMP_VAR = FORCERAIN AND 0x20
+    if
+        TEMP_VAR == 0
+    then
+        05FA: FORCERAIN = FORCERAIN OR 0x20
+        0421: force_rain 1
+    else
+        05F9: FORCERAIN = FORCERAIN AND 0xDF
+        0421: force_rain 0
+    end
+end
+return
+
+:IS_THREAT_FOR_PED_TYPE
+gosub @TEXT_STYLE
+if
+    042A:   ped_threat_exists 8 1
+then
+    0608: show_text_position 10.0 LINE text "042A: Ped type 8 is threat to player"
+else
+    0608: show_text_position 10.0 LINE text "042A: Ped type 8 is not threat to player"
+end
+if
+    0ADC: test_cheat "GANGTHREAT"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    05F9: TEMP_VAR = GANGTHREAT AND 0x40
+    if
+        TEMP_VAR == 0
+    then
+        05FA: GANGTHREAT = GANGTHREAT OR 0x40
+        03F1: pedtype 8 add_threat 1
+    else
+        05F9: GANGTHREAT = GANGTHREAT AND 0xBF
+        03F2: pedgroup 8 remove_threat 1
+    end
 end
 return
 

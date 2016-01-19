@@ -23,6 +23,9 @@
 0242=2,set_car %1d% bomb_status_to %2d%
 024B=2,set_phone %1d% message_repeated %2g%
 024C=2,set_phone %1d% message %2g%
+024D=1,  phone %1d% has_displayed_message
+0255=4,set_critical_mission_restart_at %1d% %2d% %3d% angle %4d%
+0295=1,  is %1d% taxi
 029C=1,  is %1d% boat
 0299=1,activate_garage %1d%
 02B9=1,deactivate_garage %1d%
@@ -34,6 +37,7 @@
 02F1=3,create_explosive_barrel_at %1d% %2d% %3d%
 031B=2,  car %1d% primary_color %2d%
 031C=2,  car %1d% secondary_color %2d%
+0349=1,text_draw_style = %1d%
 0367=9,init_headshot_rampage %1g% weapon %2d% time %3d% targets %4d% %5d% %6d% %7d% %8d% %9d%
 0378=3,set_phone %1d% 2messages_repeated %2g% %3g%
 0379=3,set_phone %1d% 2messages %2g% %3g%
@@ -45,10 +49,14 @@
 0387=6,set_phone %1d% 5messages %2g% %3g% %4g% %5g% %6g%
 0388=7,set_phone %1d% 6messages_repeated %2g% %3g% %4g% %5g% %6g% %7g%
 0389=7,set_phone %1d% 6messages %2g% %3g% %4g% %5g% %6g% %7g%
+03C2=1,  phone %1d% displaying_message
 03C6=1,  current_island == %1d%
 03C9=1,  car %1d% visibly_damaged
-0349=1,text_draw_style = %1d%
+03EC=0,  ev_crane_collected_all_cars
 0413=2,set_player %1d% get_out_of_jail_free %2d%
+0421=1,force_rain %1d%
+0422=2,  garage_contain_car %1d% %2d%
+042A=2,  ped_threat_exists %1u% %2u%
 0447=1,  player %1d% lifting_a_phone
 047D=2,get_number_of_seats_in_model %1d% store_to %2d%
 04A7=1,  actor %1d% in_any_boat
