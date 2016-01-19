@@ -26,11 +26,18 @@ public:
 	GtaGame();
 };
 
+struct CVector {
+	float x, y, z;
+};
+
 GtaGame game;
 
 void(__cdecl *StartFrenzy)(DWORD, INT, WORD, DWORD, wchar_t *, INT, INT, INT, BYTE, BYTE); // cdarkel::startfrenzy
+void(__cdecl *ResetOnPlayerDeath)(void); // cdarkel::resetonplayerdeath
+BYTE(__thiscall *IsEntityEntirelyInside3D)(uintptr_t, uintptr_t, FLOAT); // cgarage::isentityentirelyinside3d
 void(__thiscall *SetPhoneMessage_JustOnce)(uintptr_t, DWORD, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *); // cphoneinfo::setphonemessage_justonce
 void(__cdecl *CreatePickup)(FLOAT, FLOAT, FLOAT, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD); // cpickups::generatenewone
+void(__cdecl *OverrideNextRestart)(CVector *, FLOAT); // crestart::overridenextrestart
 uintptr_t(__thiscall *ObjectPoolGetStruct)(void *, INT); // cpool_cobject_ccutscenehead::getat
 uintptr_t(__thiscall *VehiclePoolGetStruct)(void *, INT); // cpool_cvehicle_cautomobile::getat
 uintptr_t(__thiscall *PedPoolGetStruct)(void *, INT); // cpool_cped_cplayerped::getat
@@ -46,6 +53,8 @@ wchar_t *(__thiscall *GetText)(uintptr_t, char *); // ctext::get
 DWORD *barrel1 = NULL;
 DWORD *barrel2 = NULL;
 DWORD *maxWantedLevel = NULL;
+BYTE *phoneDisplayMessage = NULL;
+DWORD *currentPhone = NULL;
 uintptr_t ccamera = NULL;
 uintptr_t garage = NULL;
 uintptr_t cphoneinfo = NULL;
@@ -54,15 +63,20 @@ uintptr_t *playerPedState = NULL;
 uintptr_t ctext = NULL;
 void **objectPool = NULL;
 FLOAT *shootingRangeRank = NULL;
+DWORD *gameTimer = NULL;
 FLOAT *garbagePickups = NULL;
 FLOAT *loanSharkVisits = NULL;
 void **pedPool = NULL;
+DWORD *militaryCraneCollected = NULL;
 FLOAT *topShootingRangeScore = NULL;
 DWORD *levelName = NULL;
+uintptr_t cpedtype = NULL;
 FLOAT *movieStunts = NULL;
 void **carPool = NULL;
 BYTE *allTaxiLights = NULL;
+BYTE *currentPlayer = NULL;
 BYTE *freeBombs = NULL;
+BYTE *forceRain = NULL;
 
 GtaGame::GtaGame()
 {
@@ -71,8 +85,11 @@ GtaGame::GtaGame()
 	case 0x74FF5064:
 		version = V1_0;
 		StartFrenzy = (void(__cdecl *)(DWORD, INT, WORD, DWORD, wchar_t *, INT, INT, INT, BYTE, BYTE))0x429B60;
+		ResetOnPlayerDeath = (void(__cdecl *)(void))0x429F90;
+		IsEntityEntirelyInside3D = (BYTE(__thiscall *)(uintptr_t, uintptr_t, FLOAT))0x430630;
 		SetPhoneMessage_JustOnce = (void(__thiscall *)(uintptr_t, DWORD, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *))0x43C430;
 		CreatePickup = (void(__cdecl *)(FLOAT, FLOAT, FLOAT, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
+		OverrideNextRestart = (void(__cdecl *)(CVector *, FLOAT))0x4429E0;
 		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C30;
 		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C70;
 		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451CB0;
@@ -88,6 +105,8 @@ GtaGame::GtaGame()
 		barrel1 = (DWORD *)0x68E8B0;
 		barrel2 = (DWORD *)0x68E910;
 		maxWantedLevel = (DWORD *)0x6910D8;
+		phoneDisplayMessage = (BYTE *)0x7030E4;
+		currentPhone = (DWORD *)0x7030E8;
 		ccamera = 0x7E4688;
 		garage = 0x812668;
 		cphoneinfo = 0x817CF0;
@@ -96,21 +115,29 @@ GtaGame::GtaGame()
 		ctext = 0x94B220;
 		objectPool = (void **)0x94DBE0;
 		shootingRangeRank = (FLOAT *)0x974B08;
+		gameTimer = (DWORD *)0x974B2C;
 		garbagePickups = (FLOAT *)0x974C00;
 		loanSharkVisits = (FLOAT*)0x974C28;
 		pedPool = (void **)0x97F2AC;
+		militaryCraneCollected = (DWORD *)0x9B6CE4;
 		topShootingRangeScore = (FLOAT *)0xA0D8A4;
 		levelName = (DWORD *)0xA0D9AC;
+		cpedtype = (uintptr_t)0xA0DA64;
 		movieStunts = (FLOAT *)0xA0FC8C;
 		carPool = (void **)0xA0FDE4;
 		allTaxiLights = (BYTE *)0xA10ABB;
+		currentPlayer = (BYTE *)0xA10AFB;
 		freeBombs = (BYTE *)0xA10B32;
+		forceRain = (BYTE *)0xA10B38;
 		break;
 	case 0x00408DC0:
 		version = V1_1;
 		StartFrenzy = (void(__cdecl *)(DWORD, INT, WORD, DWORD, wchar_t *, INT, INT, INT, BYTE, BYTE))0x429B60;
+		ResetOnPlayerDeath = (void(__cdecl *)(void))0x429F90;
+		IsEntityEntirelyInside3D = (BYTE(__thiscall *)(uintptr_t, uintptr_t, FLOAT))0x430630;
 		SetPhoneMessage_JustOnce = (void(__thiscall *)(uintptr_t, DWORD, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *))0x43C430;
 		CreatePickup = (void(__cdecl *)(FLOAT, FLOAT, FLOAT, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
+		OverrideNextRestart = (void(__cdecl *)(CVector *, FLOAT))0x4429E0;
 		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C30;
 		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C70;
 		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451CB0;
@@ -125,6 +152,8 @@ GtaGame::GtaGame()
 		barrel1 = (DWORD *)0x68E8B0;
 		barrel2 = (DWORD *)0x68E910;
 		maxWantedLevel = (DWORD *)0x6910D8;
+		phoneDisplayMessage = (BYTE *)0x7030E4;
+		currentPhone = (DWORD *)0x7030E8;
 		ccamera = 0x7E4688 + 8;
 		garage = 0x812668 + 8;
 		cphoneinfo = 0x817CF0 + 8;
@@ -133,15 +162,20 @@ GtaGame::GtaGame()
 		ctext = 0x94B220 + 8;
 		objectPool = (void **)(0x94DBE0 + 8);
 		shootingRangeRank = (FLOAT *)(0x974B08 + 8);
+		gameTimer = (DWORD *)(0x974B2C + 8);
 		garbagePickups = (FLOAT *)(0x974C00 + 8);
 		loanSharkVisits = (FLOAT*)(0x974C28 + 8);
 		pedPool = (void **)(0x97F2AC + 8);
+		militaryCraneCollected = (DWORD *)(0x9B6CE4 + 8);
 		topShootingRangeScore = (FLOAT *)(0xA0D8A4 + 8);
 		levelName = (DWORD *)(0xA0D9AC + 8);
+		cpedtype = (uintptr_t)(0xA0DA64 + 8);
 		movieStunts = (FLOAT *)(0xA0FC8C + 8);
 		carPool = (void **)(0xA0FDE4 + 8);
 		allTaxiLights = (BYTE *)(0xA10ABB + 8);
+		currentPlayer = (BYTE *)(0xA10AFB + 8);
 		freeBombs = (BYTE *)(0xA10B32 + 8);
+		forceRain = (BYTE *)(0xA10B38 + 8);
 		break;
 	case 0x00004824:
 		version = VSTEAM;
@@ -153,8 +187,10 @@ GtaGame::GtaGame()
 		garbagePickups = (FLOAT *)(0x974C00 - 0xFF8);
 		loanSharkVisits = (FLOAT*)(0x974C28 - 0xFF8);
 		pedPool = (void **)(0x97F2AC - 0xFF8);
+		militaryCraneCollected = (DWORD *)(0x9B6CE4 - 0xFF8);
 		topShootingRangeScore = (FLOAT *)(0xA0D8A4 - 0xFF8);
 		levelName = (DWORD *)(0xA0D9AC - 0xFF8);
+		cpedtype = (uintptr_t)(0xA0DA64 - 0xFF8);
 		movieStunts = (FLOAT *)(0xA0FC8C - 0xFF8);
 		carPool = (void **)(0xA0FDE4 - 0xFF8);
 		break;
@@ -163,14 +199,14 @@ GtaGame::GtaGame()
 
 void SetPhoneMessage_Repeatedly(uintptr_t cphoneinfo, DWORD phone, wchar_t *string1, wchar_t *string2, wchar_t *string3, wchar_t *string4, wchar_t *string5, wchar_t *string6)
 {
-	phone *= 0x34;
-	*(wchar_t **)(cphoneinfo + phone + 0x14) = string1;
-	*(wchar_t **)(cphoneinfo + phone + 0x18) = string2;
-	*(wchar_t **)(cphoneinfo + phone + 0x1C) = string3;
-	*(wchar_t **)(cphoneinfo + phone + 0x20) = string4;
-	*(wchar_t **)(cphoneinfo + phone + 0x24) = string5;
-	*(wchar_t **)(cphoneinfo + phone + 0x28) = string6;
-	*(DWORD *)(cphoneinfo + phone + 0x34) = 5;
+	phone = phone * 0x34 + cphoneinfo;
+	*(wchar_t **)(phone + 0x14) = string1;
+	*(wchar_t **)(phone + 0x18) = string2;
+	*(wchar_t **)(phone + 0x1C) = string3;
+	*(wchar_t **)(phone + 0x20) = string4;
+	*(wchar_t **)(phone + 0x24) = string5;
+	*(wchar_t **)(phone + 0x28) = string6;
+	*(DWORD *)(phone + 0x34) = 5;
 }
 
 /* 00A2 */
@@ -300,11 +336,7 @@ eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT(CScript *script)
 			source = car;
 		}
 	}
-	if (GetHasCollidedWith(source, target)) {
-		script->UpdateCompareFlag(true);
-		return OR_CONTINUE;
-	}
-	script->UpdateCompareFlag(false);
+	script->UpdateCompareFlag(GetHasCollidedWith(source, target) != 0);
 	return OR_CONTINUE;
 }
 
@@ -320,11 +352,7 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT(CScript *script)
 			source = car;
 		}
 	}
-	if (GetHasCollidedWith(source, target)) {
-		script->UpdateCompareFlag(true);
-		return OR_CONTINUE;
-	}
-	script->UpdateCompareFlag(false);
+	script->UpdateCompareFlag(GetHasCollidedWith(source, target) != 0);
 	return OR_CONTINUE;
 }
 
@@ -340,11 +368,7 @@ eOpcodeResult WINAPI SET_CHAR_AMMO(CScript *script)
 eOpcodeResult WINAPI SET_FREE_BOMBS(CScript *script)
 {
 	script->Collect(1);
-	DWORD param = Params[0].nVar;
-	if (param) {
-		param = 1;
-	}
-	*freeBombs = (BYTE)param;
+	*freeBombs = (BYTE)(Params[0].nVar ? 1 : 0);
 	return OR_CONTINUE;
 }
 
@@ -352,11 +376,7 @@ eOpcodeResult WINAPI SET_FREE_BOMBS(CScript *script)
 eOpcodeResult WINAPI SET_ALL_TAXI_LIGHTS(CScript *script)
 {
 	script->Collect(1);
-	DWORD param = Params[0].nVar;
-	if (param) {
-		param = 1;
-	}
-	*allTaxiLights = (BYTE)param;
+	*allTaxiLights = (BYTE)(Params[0].nVar ? 1 : 0);
 	return OR_CONTINUE;
 }
 
@@ -450,15 +470,56 @@ eOpcodeResult WINAPI SET_PHONE_MESSAGE(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 024D */
+eOpcodeResult WINAPI HAS_PHONE_DISPLAYED_MESSAGE(CScript *script)
+{
+	script->Collect(1);
+	if (*phoneDisplayMessage == 0) {
+		DWORD state = *(DWORD *)(Params[0].nVar * 0x34 + cphoneinfo + 0x34);
+		if (state == 6 || state == 7 || state == 8) {
+			script->UpdateCompareFlag(true);
+			return OR_CONTINUE;
+		}
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+/* 0255 */
+eOpcodeResult WINAPI RESTART_CRITICAL_MISSION(CScript *script)
+{
+	script->Collect(4);
+	if (Params[2].fVar <= -100.0) {
+		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
+	}
+	CVector pos;
+	pos.x = Params[0].fVar;
+	pos.y = Params[1].fVar;
+	pos.z = Params[2].fVar;
+	OverrideNextRestart(&pos, Params[3].fVar);
+	DWORD player = *currentPlayer * 0x170 + (DWORD)playerPedPool;
+	if (*(BYTE *)(player + 0xCC) == 0) {
+		*(BYTE *)(player + 0xCC) = 3;
+		*(DWORD *)(player + 0xD0) = *gameTimer;
+		ResetOnPlayerDeath();
+	}
+	return OR_CONTINUE;
+}
+
+/* 0295 */
+eOpcodeResult WINAPI IS_TAXI(CScript *script)
+{
+	script->Collect(1);
+	WORD model = *(WORD *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x5C);
+	script->UpdateCompareFlag(model == 0x96 || model == 0xA8 || model == 0xBC || model == 0xD8);
+	return OR_CONTINUE;
+}
+
 /* 029C */
 eOpcodeResult WINAPI IS_BOAT(CScript *script)
 {
 	script->Collect(1);
-	if (*(DWORD *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x29C) == 1) {
-		script->UpdateCompareFlag(true);
-		return OR_CONTINUE;
-	}
-	script->UpdateCompareFlag(false);
+	script->UpdateCompareFlag(*(DWORD *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x29C) == 1);
 	return OR_CONTINUE;
 }
 
@@ -790,15 +851,19 @@ eOpcodeResult WINAPI SET_6_PHONE_MESSAGES(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 03C2 */
+eOpcodeResult WINAPI IS_PHONE_DISPLAYING_MESSAGE(CScript *script)
+{
+	script->Collect(1);
+	script->UpdateCompareFlag((Params[0].nVar * 0x34 + cphoneinfo + 8) == *currentPhone);
+	return OR_CONTINUE;
+}
+
 /* 03C6 */
 eOpcodeResult WINAPI IS_COLLISION_IN_MEMORY(CScript *script)
 {
 	script->Collect(1);
-	if (Params[0].nVar == *levelName) {
-		script->UpdateCompareFlag(true);
-		return OR_CONTINUE;
-	}
-	script->UpdateCompareFlag(false);
+	script->UpdateCompareFlag(Params[0].nVar == *levelName);
 	return OR_CONTINUE;
 }
 
@@ -809,11 +874,14 @@ eOpcodeResult WINAPI IS_CAR_VISIBLY_DAMAGED(CScript *script)
 	BYTE flag = *(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x1FB);
 	flag >>= 1;
 	flag &= 1;
-	if (flag == 1) {
-		script->UpdateCompareFlag(true);
-		return OR_CONTINUE;
-	}
-	script->UpdateCompareFlag(false);
+	script->UpdateCompareFlag(flag == 1);
+	return OR_CONTINUE;
+}
+
+/* 03EC */
+eOpcodeResult WINAPI HAS_MILITARY_CRANE_COLLECTED_ALL_CARS(CScript *script)
+{
+	script->UpdateCompareFlag((*militaryCraneCollected & 0x7F) == 0x7F);
 	return OR_CONTINUE;
 }
 
@@ -828,12 +896,35 @@ eOpcodeResult WINAPI SET_GET_OUT_OF_JAIL_FREE(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 0421 */
+eOpcodeResult WINAPI FORCE_RAIN(CScript *script)
+{
+	script->Collect(1);
+	*forceRain = (BYTE)(Params[0].nVar ? 1 : 0);
+	return OR_CONTINUE;
+}
+
+/* 0422 */
+eOpcodeResult WINAPI DOES_GARAGE_CONTAIN_CAR(CScript *script)
+{
+	script->Collect(2);
+	script->UpdateCompareFlag(IsEntityEntirelyInside3D(Params[0].nVar * 0xA8 + garage, VehiclePoolGetStruct(*carPool, Params[1].nVar), 0.0) != 0);
+	return OR_CONTINUE;
+}
+
+/* 042A */
+eOpcodeResult WINAPI IS_THREAT_FOR_PED_TYPE(CScript *script)
+{
+	script->Collect(2);
+	script->UpdateCompareFlag(Params[1].nVar == (*(DWORD *)(*(DWORD *)(cpedtype + Params[0].nVar * 4) + 0x18) & Params[1].nVar));
+	return OR_CONTINUE;
+}
+
 /* 0447 */
 eOpcodeResult WINAPI IS_PLAYER_LIFTING_A_PHONE(CScript *script)
 {
 	script->Collect(1);
-	DWORD player = playerPedPool[0x2E * Params[0].nVar];
-	script->UpdateCompareFlag(*(DWORD *)(player + 0x244) == 0x13);
+	script->UpdateCompareFlag(*(DWORD *)(playerPedPool[0x2E * Params[0].nVar] + 0x244) == 0x13);
 	return OR_CONTINUE;
 }
 
@@ -1010,11 +1101,7 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_VEHICLE(CScript *script)
 			source = car;
 		}
 	}
-	if (GetHasCollidedWith(source, target)) {
-		script->UpdateCompareFlag(true);
-		return OR_CONTINUE;
-	}
-	script->UpdateCompareFlag(false);
+	script->UpdateCompareFlag(GetHasCollidedWith(source, target) != 0);
 	return OR_CONTINUE;
 }
 
@@ -1052,6 +1139,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x0242, ARM_CAR_WITH_BOMB);
 		Opcodes::RegisterOpcode(0x024B, SET_REPEATED_PHONE_MESSAGE);
 		Opcodes::RegisterOpcode(0x024C, SET_PHONE_MESSAGE);
+		Opcodes::RegisterOpcode(0x024D, HAS_PHONE_DISPLAYED_MESSAGE);
+		Opcodes::RegisterOpcode(0x0255, RESTART_CRITICAL_MISSION);
+		Opcodes::RegisterOpcode(0x0295, IS_TAXI);
 		Opcodes::RegisterOpcode(0x029C, IS_BOAT);
 		Opcodes::RegisterOpcode(0x0299, ACTIVATE_GARAGE);
 		Opcodes::RegisterOpcode(0x02B9, DEACTIVATE_GARAGE);
@@ -1074,9 +1164,14 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x0387, SET_5_PHONE_MESSAGES);
 		Opcodes::RegisterOpcode(0x0388, SET_6_REPEATED_PHONE_MESSAGES);
 		Opcodes::RegisterOpcode(0x0389, SET_6_PHONE_MESSAGES);
+		Opcodes::RegisterOpcode(0x03C2, IS_PHONE_DISPLAYING_MESSAGE);
 		Opcodes::RegisterOpcode(0x03C6, IS_COLLISION_IN_MEMORY);
 		Opcodes::RegisterOpcode(0x03C9, IS_CAR_VISIBLY_DAMAGED);
+		Opcodes::RegisterOpcode(0x03EC, HAS_MILITARY_CRANE_COLLECTED_ALL_CARS);
 		Opcodes::RegisterOpcode(0x0413, SET_GET_OUT_OF_JAIL_FREE);
+		Opcodes::RegisterOpcode(0x0421, FORCE_RAIN);
+		Opcodes::RegisterOpcode(0x0422, DOES_GARAGE_CONTAIN_CAR);
+		Opcodes::RegisterOpcode(0x042A, IS_THREAT_FOR_PED_TYPE);
 		Opcodes::RegisterOpcode(0x0447, IS_PLAYER_LIFTING_A_PHONE);
 		Opcodes::RegisterOpcode(0x047D, GET_NUMBER_OF_SEATS_IN_MODEL);
 		Opcodes::RegisterOpcode(0x04A7, IS_CHAR_IN_ANY_BOAT);
