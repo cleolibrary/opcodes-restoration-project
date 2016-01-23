@@ -33,11 +33,22 @@
 02BD: set_fbi_required 1
 02BE: set_army_required 1
 02A0:   actor 0@ stopped
+02D6:   actor 0@ shooting_in_area 0.0 0.0 0.0 0.0 0
+02EE:   projectile_in_cube 0.0 0.0 0.0 0.0 0.0 0.0
 02F0: create_explosive_barrel_at 0.0 0.0 0.0
 02F1: create_explosive_barrel_at 0.0 0.0 0.0
+02FC: text_2numbers 'ADMIRAL' 0 0 1000 ms 1
+0300: text_3numbers_highpriority 'ADMIRAL' 0 0 0 1000 ms 1
+0303: text_4numbers_highpriority 'ADMIRAL' 0 0 0 0 1000 ms 1
+0305: text_5numbers 'ADMIRAL' 0 0 0 0 0 1000 ms 1
+0306: text_5numbers_highpriority 'ADMIRAL' 0 0 0 0 0 1000 ms 1
+0309: text_6numbers_highpriority 'ADMIRAL' 0 0 0 0 0 0 1000 ms 1
 031B:   car 0@ primary_color 0
 031C:   car 0@ secondary_color 0
+032D: car 0@ block 1@
 0349: text_draw_style = 3
+0351:   gore_enabled
+0356:   explosion_type 0 in_cube 0.0 0.0 0.0 0.0 0.0 0.0
 0367: init_headshot_rampage 'RAMPAGE' weapon 26 time 120000 targets 10 -1 -1 -1 -1 0
 0378: set_phone 0@ 2messages_repeated 'ADMIRAL' 'AMBULAN'
 0379: set_phone 0@ 2messages 'ADMIRAL' 'AMBULAN'
@@ -49,6 +60,8 @@
 0387: set_phone 0@ 5messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
 0388: set_phone 0@ 6messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
 0389: set_phone 0@ 6messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
+03A0:   crane 0.0 0.0 is_lifting_car 0@
+03A5: set_garage $655 type_to 7 #ADMIRAL
 03C2:   phone 0@ displaying_message
 03C6:   current_island == 1
 03C9:   car 0@ visibly_damaged
