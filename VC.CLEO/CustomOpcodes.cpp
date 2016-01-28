@@ -1618,12 +1618,14 @@ eOpcodeResult CustomOpcodes::OPCODE_0ADC(CScript *script)
 	char buf[30];
 	strcpy(buf, game.Scripts.Params[0].cVar);
 	char *s = _strrev(buf);
-    while (*s) {
-        if (toupper(*s++) != *c++) {
-            script->UpdateCompareFlag(false);
-            return OR_CONTINUE;
-        }
-    }
+	while (*s)
+	{
+		if (toupper(*s++) != *c++)
+		{
+			script->UpdateCompareFlag(false);
+			return OR_CONTINUE;
+		}
+	}
 	game.Text.cheatString[0] = 0;
 	script->UpdateCompareFlag(true);
 
