@@ -7,6 +7,7 @@ POSX       = 0@
 PLAYER_CAR = 0@
 RAMP_STATE = 0@
 POSY       = 1@
+TEMP_VAR2  = 1@
 GAME_VERS  = 1@
 POSZ       = 2@
 SPAWN_CHAR = 3@
@@ -15,19 +16,22 @@ LINE       = 5@
 AIM_KEY    = 6@
 SPAWN_OBJ  = 7@
 DRUNK      = 8@
-SEATS      = 9@
-FREEBOMB   = 10@
-SETTAXI    = 10@
-SWAT_REQ   = 10@
-FBI_REQ    = 10@
-ARMY_REQ   = 10@
-FORCERAIN  = 10@
-GANGTHREAT = 10@
-MAXWANTED  = 11@
+PAGE       = 9@
+FREEBOMB   = 10@ // bit 0
+SETTAXI    = 10@ // bit 1
+SWAT_REQ   = 10@ // bit 2
+FBI_REQ    = 10@ // bit 3
+ARMY_REQ   = 10@ // bit 4
+FORCERAIN  = 10@ // bit 5
+GANGTHREAT = 10@ // bit 6
+SEATS      = 10@ // bits 8 to 11
+MAXWANTED  = 10@ // bits 12 to 15
+BLIP       = 11@
 PHONE_A    = 12@
 PHONE_B    = 13@
 GARAGE     = 14@
 SPAWN_BIKE = 15@
+PAGE_MAX   = 1
 end
 
 while true
@@ -75,7 +79,7 @@ POSX += 4.0
 024C: set_phone PHONE_A message 'ADMIRAL'
 024A: PHONE_B = get_phone_at 37.62793 -1023.3
 0219: GARAGE = create_garage_type 32 door -836.79 1307.78 10.04 to -838.88 1313.67 15.04 depth -833.59 1308.72
-10@ = 0 // FREEBOMB, SETTAXI, SWAT_REQ, FBI_REQ, ARMY_REQ, FORCERAIN, GANGTHREAT
+10@ = 0
 021D: set_free_bomb_shop_to 0
 021F: set_all_taxi_lights 0
 02BC: set_swat_required 0
@@ -83,6 +87,7 @@ POSX += 4.0
 02BE: set_army_required 0
 0421: force_rain 0
 03F2: pedgroup 8 remove_threat 1
+PAGE = 0
 
 while true
     wait 10
@@ -99,6 +104,7 @@ while true
     gosub @CHANGE_CAR_LOCK
     gosub @SHAKE_CAM_WITH_POINT
     gosub @IS_CAR_IN_AIR
+    gosub @ADD_BLIP_FOR_OBJECT_OLD
     gosub @IS_PLAYER_TOUCHING_OBJECT
     gosub @IS_CHAR_TOUCHING_OBJECT
     gosub @SET_CHAR_AMMO
@@ -116,11 +122,14 @@ while true
     gosub @IS_TAXI
     gosub @IS_BOAT
     gosub @ACTIVATE_GARAGE
+    gosub @IS_CHAR_STOPPED
+    gosub @ADD_SPRITE_BLIP_FOR_CAR
+    gosub @ADD_SPRITE_BLIP_FOR_CHAR
+    gosub @ADD_SPRITE_BLIP_FOR_OBJECT
     gosub @DEACTIVATE_GARAGE
     gosub @SET_SWAT_REQUIRED
     gosub @SET_FBI_REQUIRED
     gosub @SET_ARMY_REQUIRED
-    gosub @IS_CHAR_STOPPED
     gosub @IS_CHAR_SHOOTING_IN_AREA
     gosub @IS_PROJECTILE_IN_AREA
     gosub @DROP_MINE
@@ -130,7 +139,9 @@ while true
     gosub @IS_SECOND_CAR_COLOUR
     gosub @IS_NASTY_GAME
     gosub @IS_EXPLOSION_IN_AREA
+    gosub @IS_EXPLOSION_IN_ZONE
     gosub @START_KILL_FRENZY_HEADSHOT
+    gosub @PRINT_WITH_NUMBERS_BIG
     gosub @SET_2_REPEATED_PHONE_MESSAGES
     gosub @SET_2_PHONE_MESSAGES
     gosub @SET_3_REPEATED_PHONE_MESSAGES
@@ -156,6 +167,7 @@ while true
     gosub @IS_CHAR_IN_ANY_PLANE
     gosub @IS_CHAR_IN_FLYING_VEHICLE
     gosub @GET_MAX_WANTED_LEVEL
+    gosub @PRINT_HELP
     gosub @GET_PLAYER_DRUNKENNESS
     gosub @ADD_LOAN_SHARK_VISITS
     gosub @ADD_MOVIE_STUNTS
@@ -172,6 +184,7 @@ while true
         01C3: mark_car_as_no_longer_needed SPAWN_CAR
         01C4: mark_object_as_no_longer_needed SPAWN_OBJ
         01C3: mark_car_as_no_longer_needed SPAWN_BIKE
+        0164: disable_marker BLIP
         // remove created garage
         05E5: GAME_VERS = game_version
         if
@@ -197,60 +210,119 @@ while true
         $ONMISSION = 0
         05DC: end_custom_thread
     end
+    // next page
+    if
+        05EE:   key_pressed 0xBE // .
+    then
+        while true
+            wait 0
+            if
+                85EE:   not key_pressed 0xBE
+            then
+                break
+            end
+        end
+        PAGE += 1
+        if
+            PAGE > PAGE_MAX
+        then
+            PAGE = 0
+        end
+    end
+    // previous page
+    if
+        05EE:   key_pressed 0xBC // ,
+    then
+        while true
+            wait 0
+            if
+                85EE:   not key_pressed 0xBC
+            then
+                break
+            end
+        end
+        PAGE -= 1
+        if
+            0 > PAGE
+        then
+            PAGE = 1
+        end
+    end
     if
         8447:   not player $PLAYER_CHAR lifting_a_phone
     then
-        0308: text_6numbers 'HJSTATW' AIM_KEY MAXWANTED DRUNK SEATS 10@ 0 time 10 flag 5
+        05F9: TEMP_VAR = SEATS AND 0x00000F00
+        05FE: TEMP_VAR = TEMP_VAR SHR 8
+        05F9: TEMP_VAR2 = MAXWANTED AND 0x0000F000
+        05FE: TEMP_VAR2 = TEMP_VAR2 SHR 12
+        // aim_key, maxwanted, drunk, seats, var, page
+        0308: text_6numbers 'HJSTATW' AIM_KEY TEMP_VAR2 DRUNK TEMP_VAR 10@ PAGE time 10 flag 5
     end
 end
 
 :TEXT_STYLE
 0343: set_text_linewidth 500.0
-033F: set_text_draw_letter_width_height 0.25 1.0
-LINE += 10.0
+033F: set_text_draw_letter_width_height 0.3 1.2
+LINE += 11.0
 return
 
 :IS_CHAR_STILL_ALIVE
-gosub @TEXT_STYLE
 if
-    00A2:   actor SPAWN_CHAR alive
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "00A2: Spawned character is still alive"
-else
-    0608: show_text_position 10.0 LINE text "00A2: Spawned character is dead"
+    gosub @TEXT_STYLE
+    if
+        00A2:   actor SPAWN_CHAR alive
+    then
+        0608: show_text_position 10.0 LINE text "00A2: Spawned character is still alive"
+    else
+        0608: show_text_position 10.0 LINE text "00A2: Spawned character is dead"
+    end
 end
 return
 
 :IS_CAR_STILL_ALIVE
-gosub @TEXT_STYLE
 if
-    00AC:   car SPAWN_CAR alive
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "00AC: Spawned boat is still alive"
-else
-    0608: show_text_position 10.0 LINE text "00AC: Spawned boat is dead"
+    gosub @TEXT_STYLE
+    if
+        00AC:   car SPAWN_CAR alive
+    then
+        0608: show_text_position 10.0 LINE text "00AC: Spawned boat is still alive"
+    else
+        0608: show_text_position 10.0 LINE text "00AC: Spawned boat is dead"
+    end
 end
 return
 
 :RETURN_TRUE
-gosub @TEXT_STYLE
 if
-    00C5:   true
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "00C5: Returned true"
-else
-    0608: show_text_position 10.0 LINE text "00C5: Returned false"
+    gosub @TEXT_STYLE
+    if
+        00C5:   true
+    then
+        0608: show_text_position 10.0 LINE text "00C5: Returned true"
+    else
+        0608: show_text_position 10.0 LINE text "00C5: Returned false"
+    end
 end
 return
 
 :RETURN_FALSE
-gosub @TEXT_STYLE
 if
-    00C6:   false
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "00C6: Returned true"
-else
-    0608: show_text_position 10.0 LINE text "00C6: Returned false"
+    gosub @TEXT_STYLE
+    if
+        00C6:   false
+    then
+        0608: show_text_position 10.0 LINE text "00C6: Returned true"
+    else
+        0608: show_text_position 10.0 LINE text "00C6: Returned false"
+    end
 end
 return
 
@@ -268,24 +340,32 @@ end
 return
 
 :IS_PLAYER_STILL_ALIVE
-gosub @TEXT_STYLE
 if
-    0116:   player $PLAYER_CHAR alive
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "0116: Player is alive"
-else
-    0608: show_text_position 10.0 LINE text "0116: Player is dead"
+    gosub @TEXT_STYLE
+    if
+        0116:   player $PLAYER_CHAR alive
+    then
+        0608: show_text_position 10.0 LINE text "0116: Player is alive"
+    else
+        0608: show_text_position 10.0 LINE text "0116: Player is dead"
+    end
 end
 return
 
 :HAS_PLAYER_BEEN_ARRESTED
-gosub @TEXT_STYLE
 if
-    0130:   player $PLAYER_CHAR busted
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "0130: Player has been arrested"
-else
-    0608: show_text_position 10.0 LINE text "0130: Player has not been arrested"
+    gosub @TEXT_STYLE
+    if
+        0130:   player $PLAYER_CHAR busted
+    then
+        0608: show_text_position 10.0 LINE text "0130: Player has been arrested"
+    else
+        0608: show_text_position 10.0 LINE text "0130: Player has not been arrested"
+    end
 end
 return
 
@@ -315,40 +395,62 @@ end
 return
 
 :IS_CAR_IN_AIR
-gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR in_any_car
+    PAGE == 0
 then
-    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    gosub @TEXT_STYLE
     if
-        015E:   car PLAYER_CAR in_air
+        00E0:   player $PLAYER_CHAR in_any_car
     then
-        0608: show_text_position 10.0 LINE text "015E: Car is in air"
-        return
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        if
+            015E:   car PLAYER_CAR in_air
+        then
+            0608: show_text_position 10.0 LINE text "015E: Car is in air"
+            return
+        end
     end
+    0608: show_text_position 10.0 LINE text "015E: Car is not in air"
 end
-0608: show_text_position 10.0 LINE text "015E: Car is not in air"
+return
+
+:ADD_BLIP_FOR_OBJECT_OLD
+if
+    0ADC: test_cheat "OBJBLIP"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0164: disable_marker BLIP
+    0163: create_marker_above_object SPAWN_OBJ color 0 visibility 3 handle BLIP
+end
 return
 
 :IS_PLAYER_TOUCHING_OBJECT
-gosub @TEXT_STYLE
 if
-    0178:   player $PLAYER_CHAR touching_object SPAWN_OBJ
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "0178: Player is touching spawned object"
-else
-    0608: show_text_position 10.0 LINE text "0178: Player is not touching spawned object"
+    gosub @TEXT_STYLE
+    if
+        0178:   player $PLAYER_CHAR touching_object SPAWN_OBJ
+    then
+        0608: show_text_position 10.0 LINE text "0178: Player is touching spawned object"
+    else
+        0608: show_text_position 10.0 LINE text "0178: Player is not touching spawned object"
+    end
 end
 return
 
 :IS_CHAR_TOUCHING_OBJECT
-gosub @TEXT_STYLE
 if
-    0179:   actor $PLAYER_ACTOR touching_object SPAWN_OBJ
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "0179: Player character is touching spawned object"
-else
-    0608: show_text_position 10.0 LINE text "0179: Player character is not touching spawned object"
+    gosub @TEXT_STYLE
+    if
+        0179:   actor $PLAYER_ACTOR touching_object SPAWN_OBJ
+    then
+        0608: show_text_position 10.0 LINE text "0179: Player character is touching spawned object"
+    else
+        0608: show_text_position 10.0 LINE text "0179: Player character is not touching spawned object"
+    end
 end
 return
 
@@ -398,56 +500,72 @@ end
 return
 
 :IS_CAR_ARMED_WITH_ANY_BOMB
-gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR in_any_car
+    PAGE == 0
 then
-    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    gosub @TEXT_STYLE
     if
-        0220:   car PLAYER_CAR has_car_bomb
+        00E0:   player $PLAYER_CHAR in_any_car
     then
-        0608: show_text_position 10.0 LINE text "0220: Car is armed with any bomb"
-        return
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        if
+            0220:   car PLAYER_CAR has_car_bomb
+        then
+            0608: show_text_position 10.0 LINE text "0220: Car is armed with any bomb"
+            return
+        end
     end
+    0608: show_text_position 10.0 LINE text "0220: Car is not armed with any bomb"
 end
-0608: show_text_position 10.0 LINE text "0220: Car is not armed with any bomb"
 return
 
 :IS_CAR_ARMED_WITH_BOMB
-gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR in_any_car
+    PAGE == 0
 then
-    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    gosub @TEXT_STYLE
     if
-        0228:   car PLAYER_CAR bomb_status == 4
+        00E0:   player $PLAYER_CHAR in_any_car
     then
-        0608: show_text_position 10.0 LINE text "0228: Car is armed with bomb 4"
-        return
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        if
+            0228:   car PLAYER_CAR bomb_status == 4
+        then
+            0608: show_text_position 10.0 LINE text "0228: Car is armed with bomb 4"
+            return
+        end
     end
+    0608: show_text_position 10.0 LINE text "0228: Car is not armed with bomb 4"
 end
-0608: show_text_position 10.0 LINE text "0228: Car is not armed with bomb 4"
 return
 
 :IS_PLAYER_TOUCHING_OBJECT_ON_FOOT
-gosub @TEXT_STYLE
 if
-    023A:   player $PLAYER_CHAR touching_object SPAWN_OBJ on_foot
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "023A: Player is touching spawned object on foot"
-else
-    0608: show_text_position 10.0 LINE text "023A: Player is not touching spawned object on foot"
+    gosub @TEXT_STYLE
+    if
+        023A:   player $PLAYER_CHAR touching_object SPAWN_OBJ on_foot
+    then
+        0608: show_text_position 10.0 LINE text "023A: Player is touching spawned object on foot"
+    else
+        0608: show_text_position 10.0 LINE text "023A: Player is not touching spawned object on foot"
+    end
 end
 return
 
 :IS_CHAR_TOUCHING_OBJECT_ON_FOOT
-gosub @TEXT_STYLE
 if
-    023B:   actor $PLAYER_ACTOR touching_object SPAWN_OBJ on_foot
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "023B: Player character is touching spawned object on foot"
-else
-    0608: show_text_position 10.0 LINE text "023B: Player character is not touching spawned object on foot"
+    gosub @TEXT_STYLE
+    if
+        023B:   actor $PLAYER_ACTOR touching_object SPAWN_OBJ on_foot
+    then
+        0608: show_text_position 10.0 LINE text "023B: Player character is touching spawned object on foot"
+    else
+        0608: show_text_position 10.0 LINE text "023B: Player character is not touching spawned object on foot"
+    end
 end
 return
 
@@ -496,13 +614,17 @@ end
 return
 
 :HAS_PHONE_DISPLAYED_MESSAGE
-gosub @TEXT_STYLE
 if
-    024D:   phone PHONE_A has_displayed_message
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "024D: Phone-A has displayed message"
-else
-    0608: show_text_position 10.0 LINE text "024D: Phone-A has not displayed message"
+    gosub @TEXT_STYLE
+    if
+        024D:   phone PHONE_A has_displayed_message
+    then
+        0608: show_text_position 10.0 LINE text "024D: Phone-A has displayed message"
+    else
+        0608: show_text_position 10.0 LINE text "024D: Phone-A has not displayed message"
+    end
 end
 return
 
@@ -516,35 +638,43 @@ end
 return
 
 :IS_TAXI
-gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR in_any_car
+    PAGE == 0
 then
-    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    gosub @TEXT_STYLE
     if
-        0295:   is PLAYER_CAR taxi
+        00E0:   player $PLAYER_CHAR in_any_car
     then
-        0608: show_text_position 10.0 LINE text "0295: Is a taxi"
-        return
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        if
+            0295:   is PLAYER_CAR taxi
+        then
+            0608: show_text_position 10.0 LINE text "0295: Is a taxi"
+            return
+        end
     end
+    0608: show_text_position 10.0 LINE text "0295: Is not a taxi"
 end
-0608: show_text_position 10.0 LINE text "0295: Is not a taxi"
 return
 
 :IS_BOAT
-gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR in_any_car
+    PAGE == 0
 then
-    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    gosub @TEXT_STYLE
     if
-        029C:   is PLAYER_CAR boat
+        00E0:   player $PLAYER_CHAR in_any_car
     then
-        0608: show_text_position 10.0 LINE text "029C: Is a boat"
-        return
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        if
+            029C:   is PLAYER_CAR boat
+        then
+            0608: show_text_position 10.0 LINE text "029C: Is a boat"
+            return
+        end
     end
+    0608: show_text_position 10.0 LINE text "029C: Is not a boat"
 end
-0608: show_text_position 10.0 LINE text "029C: Is not a boat"
 return
 
 :ACTIVATE_GARAGE
@@ -553,6 +683,51 @@ if
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0299: activate_garage GARAGE
+end
+return
+
+:IS_CHAR_STOPPED
+if
+    PAGE == 0
+then
+    gosub @TEXT_STYLE
+    if
+        02A0:   actor $PLAYER_ACTOR stopped
+    then
+        0608: show_text_position 10.0 LINE text "02A0: Player character is 'stopped'"
+    else
+        0608: show_text_position 10.0 LINE text "02A0: Player character is not 'stopped'"
+    end
+end
+return
+
+:ADD_SPRITE_BLIP_FOR_CAR
+if
+    0ADC: test_cheat "CARSPRITE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0164: disable_marker BLIP
+    02A4: create_marker_above_car SPAWN_BIKE icon 36 handle BLIP
+end
+return
+
+:ADD_SPRITE_BLIP_FOR_CHAR
+if
+    0ADC: test_cheat "PEDSPRITE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0164: disable_marker BLIP
+    02A5: create_marker_above_actor SPAWN_CHAR icon 34 handle BLIP
+end
+return
+
+:ADD_SPRITE_BLIP_FOR_OBJECT
+if
+    0ADC: test_cheat "OBJSPRITE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0164: disable_marker BLIP
+    02A6: create_marker_above_object SPAWN_OBJ icon 38 handle BLIP
 end
 return
 
@@ -619,36 +794,33 @@ then
 end
 return
 
-:IS_CHAR_STOPPED
-gosub @TEXT_STYLE
-if
-    02A0:   actor $PLAYER_ACTOR stopped
-then
-    0608: show_text_position 10.0 LINE text "02A0: Player character is 'stopped'"
-else
-    0608: show_text_position 10.0 LINE text "02A0: Player character is not 'stopped'"
-end
-return
-
 :IS_CHAR_SHOOTING_IN_AREA
-gosub @TEXT_STYLE
 if
-    02D6:   actor $PLAYER_ACTOR shooting_in_area -838.88 1307.78 -833.59 1313.67 0
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "02D6: Player character is shooting in garage area"
-else
-    0608: show_text_position 10.0 LINE text "02D6: Player character is not shooting in garage area"
+    gosub @TEXT_STYLE
+    if
+        02D6:   actor $PLAYER_ACTOR shooting_in_area -838.88 1307.78 -833.59 1313.67 0
+    then
+        0608: show_text_position 10.0 LINE text "02D6: Player character is shooting in garage area"
+    else
+        0608: show_text_position 10.0 LINE text "02D6: Player character is not shooting in garage area"
+    end
 end
 return
 
 :IS_PROJECTILE_IN_AREA
-gosub @TEXT_STYLE
 if
-    02EE:   projectile_in_cube -838.88 1307.78 10.04 -833.59 1313.67 15.04
+    PAGE == 0
 then
-    0608: show_text_position 10.0 LINE text "02EE: Projectile is in garage area"
-else
-    0608: show_text_position 10.0 LINE text "02EE: Projectile is not in garage area"
+    gosub @TEXT_STYLE
+    if
+        02EE:   projectile_in_cube -838.88 1307.78 10.04 -833.59 1313.67 15.04
+    then
+        0608: show_text_position 10.0 LINE text "02EE: Projectile is in garage area"
+    else
+        0608: show_text_position 10.0 LINE text "02EE: Projectile is not in garage area"
+    end
 end
 return
 
@@ -674,7 +846,7 @@ return
 
 :PRINT_WITH_NUMBERS
 if
-    0ADC: test_cheat "PRINT"
+    0ADC: test_cheat "PRINTNUM"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     02FC: text_2numbers 'HJSTATW' 1 2 500 ms 1
@@ -698,56 +870,87 @@ end
 return
 
 :IS_FIRST_CAR_COLOUR
-gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR in_any_car
+    PAGE == 1
 then
-    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    gosub @TEXT_STYLE
     if
-        031B:   car PLAYER_CAR primary_color 6
+        00E0:   player $PLAYER_CHAR in_any_car
     then
-        0608: show_text_position 10.0 LINE text "031B: Car primary colour is 6"
-        return
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        if
+            031B:   car PLAYER_CAR primary_color 6
+        then
+            0608: show_text_position 10.0 LINE text "031B: Car primary colour is 6"
+            return
+        end
     end
+    0608: show_text_position 10.0 LINE text "031B: Car primary colour is not 6"
 end
-0608: show_text_position 10.0 LINE text "031B: Car primary colour is not 6"
 return
 
 :IS_SECOND_CAR_COLOUR
-gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR in_any_car
+    PAGE == 1
 then
-    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    gosub @TEXT_STYLE
     if
-        031C:   car PLAYER_CAR secondary_color 75
+        00E0:   player $PLAYER_CHAR in_any_car
     then
-        0608: show_text_position 10.0 LINE text "031C: Car secondary colour is 75"
-        return
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        if
+            031C:   car PLAYER_CAR secondary_color 75
+        then
+            0608: show_text_position 10.0 LINE text "031C: Car secondary colour is 75"
+            return
+        end
     end
+    0608: show_text_position 10.0 LINE text "031C: Car secondary colour is not 75"
 end
-0608: show_text_position 10.0 LINE text "031C: Car secondary colour is not 75"
 return
 
 :IS_NASTY_GAME
-gosub @TEXT_STYLE
 if
-    0351:   gore_enabled
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "0351: Gore is enabled"
-else
-    0608: show_text_position 10.0 LINE text "0351: Gore is disabled"
+    gosub @TEXT_STYLE
+    if
+        0351:   gore_enabled
+    then
+        0608: show_text_position 10.0 LINE text "0351: Gore is enabled"
+    else
+        0608: show_text_position 10.0 LINE text "0351: Gore is disabled"
+    end
 end
 return
 
 :IS_EXPLOSION_IN_AREA
-gosub @TEXT_STYLE
 if
-    0356:   explosion_type 1 in_cube -838.88 1307.78 10.04 -833.59 1313.67 15.04
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "0356: Molotov explosion in garage area"
-else
-    0608: show_text_position 10.0 LINE text "0356: No Molotov explosion in garage area"
+    gosub @TEXT_STYLE
+    if
+        0356:   explosion_type 1 in_cube -838.88 1307.78 10.04 -833.59 1313.67 15.04
+    then
+        0608: show_text_position 10.0 LINE text "0356: Molotov explosion in garage area"
+    else
+        0608: show_text_position 10.0 LINE text "0356: No Molotov explosion in garage area"
+    end
+end
+return
+
+:IS_EXPLOSION_IN_ZONE
+if
+    PAGE == 1
+then
+    gosub @TEXT_STYLE
+    if
+        0357:   explosion_type 1 in_zone 'DTOWN'
+    then
+        0608: show_text_position 10.0 LINE text "0357: Molotov explosion in Downtown area"
+    else
+        0608: show_text_position 10.0 LINE text "0357: No Molotov explosion in Downtown area"
+    end
 end
 return
 
@@ -762,6 +965,28 @@ then
     038B: load_requested_models
     0367: init_headshot_rampage 'RAMPAGE' weapon 26 time 120000 targets 10 -1 -1 -1 -1 0
     0249: release_model #M4
+end
+return
+
+:PRINT_WITH_NUMBERS_BIG
+if
+    0ADC: test_cheat "PRINTBIGNUM"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0218: text_1number_styled 'HJSTATW' 1 time 500 style 6
+    wait 500
+    018C: play_sound 1 at 0.0 0.0 0.0
+    036E: text_3numbers_styled 'HJSTATW' numbers 1 2 3 time 500 style 6
+    wait 500
+    018C: play_sound 1 at 0.0 0.0 0.0
+    036F: text_4numbers_styled 'HJSTATW' numbers 1 2 3 4 time 500 style 6
+    wait 500
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0370: text_5numbers_styled 'HJSTATW' numbers 1 2 3 4 5 time 500 style 6
+    wait 500
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0371: text_6numbers_styled 'HJSTATW' numbers 1 2 3 4 5 6 time 500 style 6
+    wait 500
 end
 return
 
@@ -916,51 +1141,67 @@ end
 return
 
 :IS_PHONE_DISPLAYING_MESSAGE
-gosub @TEXT_STYLE
 if
-    03C2:   phone PHONE_A displaying_message
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "03C2: Phone-A is displaying message"
-else
-    0608: show_text_position 10.0 LINE text "03C2: Phone-A is not displaying message"
+    gosub @TEXT_STYLE
+    if
+        03C2:   phone PHONE_A displaying_message
+    then
+        0608: show_text_position 10.0 LINE text "03C2: Phone-A is displaying message"
+    else
+        0608: show_text_position 10.0 LINE text "03C2: Phone-A is not displaying message"
+    end
 end
 return
 
 :IS_COLLISION_IN_MEMORY
-gosub @TEXT_STYLE
 if
-    03C6:   current_island == 1
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "03C6: Level 1 is in memory"
-else
-    0608: show_text_position 10.0 LINE text "03C6: Level 1 is not in memory"
+    gosub @TEXT_STYLE
+    if
+        03C6:   current_island == 1
+    then
+        0608: show_text_position 10.0 LINE text "03C6: Level 1 is in memory"
+    else
+        0608: show_text_position 10.0 LINE text "03C6: Level 1 is not in memory"
+    end
 end
 return
 
 :IS_CAR_VISIBLY_DAMAGED
-gosub @TEXT_STYLE
 if
-    00E0:   player $PLAYER_CHAR in_any_car
+    PAGE == 1
 then
-    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    gosub @TEXT_STYLE
     if
-        03C9:   car PLAYER_CAR visibly_damaged
+        00E0:   player $PLAYER_CHAR in_any_car
     then
-        0608: show_text_position 10.0 LINE text "03C9: Car is visibly damaged"
-        return
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        if
+            03C9:   car PLAYER_CAR visibly_damaged
+        then
+            0608: show_text_position 10.0 LINE text "03C9: Car is visibly damaged"
+            return
+        end
     end
+    0608: show_text_position 10.0 LINE text "03C9: Car is not visibly damaged"
 end
-0608: show_text_position 10.0 LINE text "03C9: Car is not visibly damaged"
 return
 
 :HAS_MILITARY_CRANE_COLLECTED_ALL_CARS
-gosub @TEXT_STYLE
 if
-    03EC:   ev_crane_collected_all_cars
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "03EC: Military crane has collected all cars"
-else
-    0608: show_text_position 10.0 LINE text "03EC: Military crane has not collected all cars"
+    gosub @TEXT_STYLE
+    if
+        03EC:   ev_crane_collected_all_cars
+    then
+        0608: show_text_position 10.0 LINE text "03EC: Military crane has collected all cars"
+    else
+        0608: show_text_position 10.0 LINE text "03EC: Military crane has not collected all cars"
+    end
 end
 return
 
@@ -992,24 +1233,32 @@ end
 return
 
 :DOES_GARAGE_CONTAIN_CAR
-gosub @TEXT_STYLE
 if
-    0422:   garage_contain_car GARAGE SPAWN_BIKE
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "0422: Garage contains spawned bike"
-else
-    0608: show_text_position 10.0 LINE text "0422: Garage does not contain spawned bike"
+    gosub @TEXT_STYLE
+    if
+        0422:   garage_contain_car GARAGE SPAWN_BIKE
+    then
+        0608: show_text_position 10.0 LINE text "0422: Garage contains spawned bike"
+    else
+        0608: show_text_position 10.0 LINE text "0422: Garage does not contain spawned bike"
+    end
 end
 return
 
 :IS_THREAT_FOR_PED_TYPE
-gosub @TEXT_STYLE
 if
-    042A:   ped_threat_exists 8 1
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "042A: Ped type 8 is threat to player"
-else
-    0608: show_text_position 10.0 LINE text "042A: Ped type 8 is not threat to player"
+    gosub @TEXT_STYLE
+    if
+        042A:   ped_threat_exists 8 1
+    then
+        0608: show_text_position 10.0 LINE text "042A: Ped type 8 is threat to player"
+    else
+        0608: show_text_position 10.0 LINE text "042A: Ped type 8 is not threat to player"
+    end
 end
 if
     0ADC: test_cheat "GANGTHREAT"
@@ -1029,74 +1278,113 @@ end
 return
 
 :IS_PLAYER_LIFTING_A_PHONE
-gosub @TEXT_STYLE
 if
-    0447:   player $PLAYER_CHAR lifting_a_phone
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "0447: Player is lifting phone"
-else
-    0608: show_text_position 10.0 LINE text "0447: Player is not lifting phone"
+    gosub @TEXT_STYLE
+    if
+        0447:   player $PLAYER_CHAR lifting_a_phone
+    then
+        0608: show_text_position 10.0 LINE text "0447: Player is lifting phone"
+    else
+        0608: show_text_position 10.0 LINE text "0447: Player is not lifting phone"
+    end
 end
 return
 
 :GET_NUMBER_OF_SEATS_IN_MODEL
+05F9: SEATS = SEATS AND 0xFFFFF0FF
 if
     00E0:   player $PLAYER_CHAR in_any_car
 then
     03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
     0441: PLAYER_CAR = car PLAYER_CAR model
-    047D: get_number_of_seats_in_model PLAYER_CAR store_to SEATS
-else
-    SEATS = 0
+    047D: get_number_of_seats_in_model PLAYER_CAR store_to TEMP_VAR
+    05FF: TEMP_VAR = TEMP_VAR SHL 8
+    05FA: SEATS = SEATS OR TEMP_VAR
 end
 return
 
 :IS_CHAR_IN_ANY_BOAT
-gosub @TEXT_STYLE
 if
-    04A7:   actor $PLAYER_ACTOR in_any_boat
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "04A7: Player character is in any boat"
-else
-    0608: show_text_position 10.0 LINE text "04A7: Player character is not in any boat"
+    gosub @TEXT_STYLE
+    if
+        04A7:   actor $PLAYER_ACTOR in_any_boat
+    then
+        0608: show_text_position 10.0 LINE text "04A7: Player character is in any boat"
+    else
+        0608: show_text_position 10.0 LINE text "04A7: Player character is not in any boat"
+    end
 end
 return
 
 :IS_CHAR_IN_ANY_HELI
-gosub @TEXT_STYLE
 if
-    04A9:   actor $PLAYER_ACTOR in_any_heli
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "04A9: Player character is in any heli"
-else
-    0608: show_text_position 10.0 LINE text "04A9: Player character is not in any heli"
+    gosub @TEXT_STYLE
+    if
+        04A9:   actor $PLAYER_ACTOR in_any_heli
+    then
+        0608: show_text_position 10.0 LINE text "04A9: Player character is in any heli"
+    else
+        0608: show_text_position 10.0 LINE text "04A9: Player character is not in any heli"
+    end
 end
 return
 
 :IS_CHAR_IN_ANY_PLANE
-gosub @TEXT_STYLE
 if
-    04AB:   actor $PLAYER_ACTOR in_any_plane
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "04AB: Player character is in any plane"
-else
-    0608: show_text_position 10.0 LINE text "04AB: Player character is not in any plane"
+    gosub @TEXT_STYLE
+    if
+        04AB:   actor $PLAYER_ACTOR in_any_plane
+    then
+        0608: show_text_position 10.0 LINE text "04AB: Player character is in any plane"
+    else
+        0608: show_text_position 10.0 LINE text "04AB: Player character is not in any plane"
+    end
 end
 return
 
 :IS_CHAR_IN_FLYING_VEHICLE
-gosub @TEXT_STYLE
 if
-    04C8:   actor $PLAYER_ACTOR in_flying_vehicle
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "04C8: Player character is in flying vehicle"
-else
-    0608: show_text_position 10.0 LINE text "04C8: Player character is not in flying vehicle"
+    gosub @TEXT_STYLE
+    if
+        04C8:   actor $PLAYER_ACTOR in_flying_vehicle
+    then
+        0608: show_text_position 10.0 LINE text "04C8: Player character is in flying vehicle"
+    else
+        0608: show_text_position 10.0 LINE text "04C8: Player character is not in flying vehicle"
+    end
 end
 return
 
 :GET_MAX_WANTED_LEVEL
-050F: get_max_wanted_level_to MAXWANTED
+05F9: MAXWANTED = MAXWANTED AND 0xFFFF0FFF
+050F: get_max_wanted_level_to TEMP_VAR
+05FF: TEMP_VAR = TEMP_VAR SHL 12
+05FA: MAXWANTED = MAXWANTED OR TEMP_VAR
+return
+
+:PRINT_HELP
+if
+    0ADC: test_cheat "PRINTHELP"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0511: show_text_box_1number 'NUMBER' number 1
+    wait 5000
+    03E6: remove_text_box
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0513: show_permanent_text_box_1number 'NUMBER' number 2
+    wait 5000
+    03E6: remove_text_box
+end
 return
 
 :GET_PLAYER_DRUNKENNESS
@@ -1161,12 +1449,16 @@ end
 return
 
 :IS_CHAR_TOUCHING_VEHICLE
-gosub @TEXT_STYLE
 if
-    0547:   actor $PLAYER_ACTOR touching_car SPAWN_CAR
+    PAGE == 1
 then
-    0608: show_text_position 10.0 LINE text "0547: Player character is touching spawned boat"
-else
-    0608: show_text_position 10.0 LINE text "0547: Player character is not touching spawned boat"
+    gosub @TEXT_STYLE
+    if
+        0547:   actor $PLAYER_ACTOR touching_car SPAWN_CAR
+    then
+        0608: show_text_position 10.0 LINE text "0547: Player character is touching spawned boat"
+    else
+        0608: show_text_position 10.0 LINE text "0547: Player character is not touching spawned boat"
+    end
 end
 return
