@@ -9,11 +9,18 @@
 0130:   player $PLAYER_CHAR busted
 0135: change_car 0@ lock 2
 0136: shake_camera 100 with_point 0.0 0.0 0.0
+013B:   car 0@ dead_in_rectangle 0.0 0.0 0.0 0.0 0
+013C:   car 0@ dead_in_cube 0.0 0.0 0.0 0.0 0.0 0.0 0
+0155: set_zone_car_density 'DTOWN' 0 0
+0156: set_zone_ped_density 'DTOWN' 0 0
 015E:   car 0@ in_air
+0163: create_marker_above_object 0@ color 0 display 3 handle 1@
+016F: draw_shadow 3 at 13@ 14@ 15@ angle 0.0 size 1.0 intensity 150 colour 0 0 0
 0178:   player $PLAYER_CHAR touching_object 0@
 0179:   actor 0@ touching_object 1@
 017B: set_actor 0@ weapon 17 ammo_to 100
-016F: draw_shadow 3 at 13@ 14@ 15@ angle 0.0 size 1.0 intensity 150 colour 0 0 0
+01C6: remove_car_from_mission_cleanup_list 0@
+0218: text_1number_styled 'HJSTATW' 0 time 1000 style 6
 021D: set_free_bomb_shop_to 1
 021F: set_all_taxi_lights 1
 0220:   car 0@ has_car_bomb
@@ -28,11 +35,14 @@
 0295:   is 0@ taxi
 029C:   is 0@ boat
 0299: activate_garage $655
+02A0:   actor 0@ stopped
+02A4: create_marker_above_car 0@ icon 4 handle 1@
+02A5: create_marker_above_actor 0@ icon 4 handle 1@
+02A6: create_marker_above_object 0@ icon 4 handle 1@
 02B9: deactivate_garage $655
 02BC: set_swat_required 1
 02BD: set_fbi_required 1
 02BE: set_army_required 1
-02A0:   actor 0@ stopped
 02D6:   actor 0@ shooting_in_area 0.0 0.0 0.0 0.0 0
 02EE:   projectile_in_cube 0.0 0.0 0.0 0.0 0.0 0.0
 02F0: create_explosive_barrel_at 0.0 0.0 0.0
@@ -49,7 +59,12 @@
 0349: text_draw_style = 3
 0351:   gore_enabled
 0356:   explosion_type 0 in_cube 0.0 0.0 0.0 0.0 0.0 0.0
+0357:   explosion_type 0 in_zone 'DTOWN'
 0367: init_headshot_rampage 'RAMPAGE' weapon 26 time 120000 targets 10 -1 -1 -1 -1 0
+036E: text_3numbers_styled 'HJSTATW' 0 0 0 time 1000 style 6
+036F: text_4numbers_styled 'HJSTATW' 0 0 0 0 time 1000 style 6
+0370: text_5numbers_styled 'HJSTATW' 0 0 0 0 0 time 1000 style 6
+0371: text_6numbers_styled 'HJSTATW' 0 0 0 0 0 0 time 1000 style 6
 0378: set_phone 0@ 2messages_repeated 'ADMIRAL' 'AMBULAN'
 0379: set_phone 0@ 2messages 'ADMIRAL' 'AMBULAN'
 037A: set_phone 0@ 3messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL'
@@ -77,6 +92,8 @@
 04AB:   actor 0@ in_any_plane
 04C8:   actor 0@ in_flying_vehicle
 050F: get_max_wanted_level_to 0@
+0511: show_text_box_1number 'HJSTATW' number 0
+0513: show_permanent_text_box_1number 'HJSTATW' number 0
 052D: get_player $PLAYER_CHAR drunkenness_to 0@
 0530: add_loan_shark_visits 10
 0532: add_movie_stunts 10

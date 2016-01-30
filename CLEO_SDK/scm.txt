@@ -9,11 +9,18 @@
 0130=1,  player %1d% busted
 0135=2,change_car %1d% lock %2d%
 0136=4,shake_camera %1d% with_point %2d% %3d% %4d%
+013B=6,  car %1d% dead_in_rectangle %2d% %3d% %4d% %5d% %6d%
+013C=8,  car %1d% dead_in_cube %2d% %3d% %4d% %5d% %6d% %7d% %8d%
+0155=3,set_zone_car_density %1z% %2d% %3d%
+0156=3,set_zone_ped_density %1z% %2d% %3d%
 015E=1,  car %1d% in_air
+0163=4,create_marker_above_object %1d% color %2d% display %3d% handle %4d%
+016F=10,draw_shadow %1d% at %2d% %3d% %4d% angle %5d% size %6d% intensity %7d% colour %8d% %9d% %10d%
 0178=2,  player %1d% touching_object %2d%
 0179=2,  actor %1d% touching_object %2d%
 017B=3,set_actor %1d% weapon %2d% ammo_to %3d%
-016F=10,draw_shadow %1d% at %2d% %3d% %4d% angle %5d% size %6d% intensity %7d% colour %8d% %9d% %10d%
+01C6=1,remove_car_from_mission_cleanup_list %1d%
+0218=4,text_1number_styled %1g% %2d% time %3d% style %4d%
 021D=1,set_free_bomb_shop_to %1d%
 021F=1,set_all_taxi_lights %1d%
 0220=1,  car %1d% has_car_bomb
@@ -28,11 +35,14 @@
 0295=1,  is %1d% taxi
 029C=1,  is %1d% boat
 0299=1,activate_garage %1d%
+02A0=1,  actor %1d% stopped
+02A4=3,create_marker_above_car %1d% icon %2d% handle %3d%
+02A5=3,create_marker_above_actor %1d% icon %2d% handle %3d%
+02A6=3,create_marker_above_object %1d% icon %2d% handle %3d%
 02B9=1,deactivate_garage %1d%
 02BC=1,set_swat_required %1d%
 02BD=1,set_fbi_required %1d%
 02BE=1,set_army_required %1d%
-02A0=1,  actor %1d% stopped
 02D6=6,  actor %1d% shooting_in_area %2d% %3d% %4d% %5d% %6d%
 02EE=6,  projectile_in_cube %1d% %2d% %3d% %4d% %5d% %6d%
 02F0=3,create_explosive_barrel_at %1d% %2d% %3d%
@@ -49,7 +59,12 @@
 0349=1,text_draw_style = %1d%
 0351=0,  gore_enabled
 0356=7,  explosion_type %1d% in_cube %2d% %3d% %4d% %5d% %6d% %7d%
+0357=2,  explosion_type %1d% in_zone %2z%
 0367=9,init_headshot_rampage %1g% weapon %2d% time %3d% targets %4d% %5d% %6d% %7d% %8d% %9d%
+036E=6,text_3numbers_styled %1g% %2d% %3d% %4d% time %5d% style %6d%
+036F=7,text_4numbers_styled %1g% %2d% %3d% %4d% %5d% time %6d% style %7d%
+0370=8,text_5numbers_styled %1g% %2d% %3d% %4d% %5d% %6d% time %7d% style %8d%
+0371=9,text_6numbers_styled %1g% %2d% %3d% %4d% %5d% %6d% %7d% time %8d% style %9d%
 0378=3,set_phone %1d% 2messages_repeated %2g% %3g%
 0379=3,set_phone %1d% 2messages %2g% %3g%
 037A=4,set_phone %1d% 3messages_repeated %2g% %3g% %4g%
@@ -77,6 +92,8 @@
 04AB=1,  actor %1d% in_any_plane
 04C8=1,  actor %1d% in_flying_vehicle
 050F=1,get_max_wanted_level_to %1d%
+0511=2,show_text_box_1number %1s% number %2d%
+0513=2,show_permanent_text_box_1number %1s% number %2d%
 052D=2,get_player %1d% drunkenness_to %2d%
 0530=1,add_loan_shark_visits %1d%
 0532=1,add_movie_stunts %1d%
