@@ -10,12 +10,13 @@ POSY       = 1@
 TEMP_VAR2  = 1@
 GAME_VERS  = 1@
 POSZ       = 2@
+TEMP_VAR3  = 2@
 SPAWN_CHAR = 3@
 SPAWN_CAR  = 4@
 LINE       = 5@
 AIM_KEY    = 6@
 SPAWN_OBJ  = 7@
-DRUNK      = 8@
+SPAWN_PICK = 8@
 PAGE       = 9@
 FREEBOMB   = 10@ // bit 0
 SETTAXI    = 10@ // bit 1
@@ -26,6 +27,7 @@ FORCERAIN  = 10@ // bit 5
 GANGTHREAT = 10@ // bit 6
 SEATS      = 10@ // bits 8 to 11
 MAXWANTED  = 10@ // bits 12 to 15
+DRUNK      = 10@ // bits 16 to 23
 BLIP       = 11@
 PHONE_A    = 12@
 PHONE_B    = 13@
@@ -69,6 +71,8 @@ POSX += 4.0
 0229: set_car SPAWN_CAR color_to 6 75
 POSX += 4.0
 00A5: SPAWN_BIKE = create_car #PCJ600 at POSX POSY POSZ
+POSX += 4.0
+0213: SPAWN_PICK = create_pickup #COLT45 type 2 at POSX POSY POSZ
 POSX += 4.0
 029B: SPAWN_OBJ = init_object #ELECTRICGATE at POSX POSY POSZ
 0249: release_model #COLT45
@@ -155,6 +159,9 @@ while true
     gosub @IS_PHONE_DISPLAYING_MESSAGE
     gosub @IS_COLLISION_IN_MEMORY
     gosub @IS_CAR_VISIBLY_DAMAGED
+    gosub @ADD_BLIP_FOR_PICKUP_OLD
+    gosub @ADD_SPRITE_BLIP_FOR_PICKUP
+    gosub @IS_CHAR_IN_CONTROL
     gosub @HAS_MILITARY_CRANE_COLLECTED_ALL_CARS
     gosub @SET_GET_OUT_OF_JAIL_FREE
     gosub @FORCE_RAIN
@@ -182,6 +189,7 @@ while true
     then
         01C2: mark_actor_as_no_longer_needed SPAWN_CHAR
         01C3: mark_car_as_no_longer_needed SPAWN_CAR
+        0215: destroy_pickup SPAWN_PICK
         01C4: mark_object_as_no_longer_needed SPAWN_OBJ
         01C3: mark_car_as_no_longer_needed SPAWN_BIKE
         0164: disable_marker BLIP
@@ -255,8 +263,10 @@ while true
         05FE: TEMP_VAR = TEMP_VAR SHR 8
         05F9: TEMP_VAR2 = MAXWANTED AND 0x0000F000
         05FE: TEMP_VAR2 = TEMP_VAR2 SHR 12
+        05F9: TEMP_VAR3 = DRUNK AND 0x00FF0000
+        05FE: TEMP_VAR3 = TEMP_VAR3 SHR 16
         // aim_key, maxwanted, drunk, seats, var, page
-        0308: text_6numbers 'HJSTATW' AIM_KEY TEMP_VAR2 DRUNK TEMP_VAR 10@ PAGE time 10 flag 5
+        0308: text_6numbers 'HJSTATW' AIM_KEY TEMP_VAR2 TEMP_VAR3 TEMP_VAR 10@ PAGE time 10 flag 5
     end
 end
 
@@ -1190,6 +1200,41 @@ then
 end
 return
 
+:ADD_BLIP_FOR_PICKUP_OLD
+if
+    0ADC: test_cheat "PICKBLIP"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0164: disable_marker BLIP
+    03DB: create_marker_above_pickup SPAWN_PICK color 0 visibility 3 handle BLIP
+end
+return
+
+:ADD_SPRITE_BLIP_FOR_PICKUP
+if
+    0ADC: test_cheat "PICKSPRITE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0164: disable_marker BLIP
+    03DD: create_marker_above_pickup SPAWN_PICK icon 16 handle BLIP
+end
+return
+
+:IS_CHAR_IN_CONTROL
+if
+    PAGE == 1
+then
+    gosub @TEXT_STYLE
+    if
+        03E9:   actor SPAWN_CHAR is_in_control
+    then
+        0608: show_text_position 10.0 LINE text "03E9: Spawned character is in control"
+    else
+        0608: show_text_position 10.0 LINE text "03E9: Spawned character is not in control"
+    end
+end
+return
+
 :HAS_MILITARY_CRANE_COLLECTED_ALL_CARS
 if
     PAGE == 1
@@ -1388,13 +1433,16 @@ end
 return
 
 :GET_PLAYER_DRUNKENNESS
-052D: get_player $PLAYER_CHAR drunkenness_to DRUNK
+05F9: DRUNK = DRUNK AND 0xFF00FFFF
+052D: get_player $PLAYER_CHAR drunkenness_to TEMP_VAR
+05FF: TEMP_VAR = TEMP_VAR SHL 16
+05FA: DRUNK = DRUNK OR TEMP_VAR
 if
     0ADC: test_cheat "DRUNK"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     if
-        DRUNK == 0
+        TEMP_VAR == 0
     then
         052C: set_player $PLAYER_CHAR drunk_visuals 255
     else

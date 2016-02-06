@@ -33,8 +33,8 @@
 024D=1,  phone %1d% has_displayed_message
 0255=4,set_critical_mission_restart_at %1d% %2d% %3d% angle %4d%
 0295=1,  is %1d% taxi
-029C=1,  is %1d% boat
 0299=1,activate_garage %1d%
+029C=1,  is %1d% boat
 02A0=1,  actor %1d% stopped
 02A4=3,create_marker_above_car %1d% icon %2d% handle %3d%
 02A5=3,create_marker_above_actor %1d% icon %2d% handle %3d%
@@ -75,16 +75,23 @@
 0387=6,set_phone %1d% 5messages %2g% %3g% %4g% %5g% %6g%
 0388=7,set_phone %1d% 6messages_repeated %2g% %3g% %4g% %5g% %6g% %7g%
 0389=7,set_phone %1d% 6messages %2g% %3g% %4g% %5g% %6g% %7g%
+0393=2,set_actor %1d% anim_speed %2d%
 03A0=3,  crane %1d% %2d% is_lifting_car %3d%
 03A5=3,set_garage %1d% type_to %2d% %3d%
 03C2=1,  phone %1d% displaying_message
 03C6=1,  current_island == %1d%
 03C9=1,  car %1d% visibly_damaged
+03DB=4,create_marker_above_pickup %1d% color %2d% display %3d% handle %4d%
+03DD=3,create_marker_above_pickup %1d% icon %2d% handle %3d%
+03E9=1,  actor %1d% in_control
 03EC=0,  ev_crane_collected_all_cars
 0413=2,set_player %1d% get_out_of_jail_free %2d%
+041F=1,override_hospital %1d%
+0420=1,override_police_station %1d%
 0421=1,force_rain %1d%
 0422=2,  garage_contain_car %1d% %2d%
 042A=2,  ped_threat_exists %1u% %2u%
+0444=2,set_fire_audio %1d% %2d%
 0447=1,  player %1d% lifting_a_phone
 047D=2,get_number_of_seats_in_model %1d% store_to %2d%
 04A7=1,  actor %1d% in_any_boat
@@ -103,6 +110,9 @@
 0547=2,  actor %1d% touching_car %2d%
 }
 { GTA3 only
+0116=1,  player %1d% alive
+02BD=1,set_fbi_required %1d%
+02BE=1,set_army_required %1d%
 04C2=7,create_coordinate %5d% %6d% %7d% from_object %1d% offset %2d% %3d% %4d% ;0400 in VC
 04C3=7,create_coordinate %5d% %6d% %7d% from_car %1d% offset %2d% %3d% %4d% ;0407 in VC
 04C4=7,create_coordinate %5d% %6d% %7d% from_actor %1d% offset %2d% %3d% %4d%
@@ -113,6 +123,10 @@
 04AA=1,  player %1d% driving_heli
 047E=1,  player %1d% driving_a_motorbike
 0485=0,  pc_version  ;; never used in VC, always returns true
+050F=1,get_max_wanted_level_to %1d%
+0511=2,show_text_box_1number %1s% number %2d%
+0546=2,  player %1d% touching_car %2d%
+0547=2,  actor %1d% touching_car %2d%
 059A=0,  australian_game  ;; always returns false
 }
 0601=2, is_button_pressed_on_pad %1d% with_sensitivity %2d%

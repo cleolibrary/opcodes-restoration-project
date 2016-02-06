@@ -33,8 +33,8 @@
 024D:   phone 0@ has_displayed_message
 0255: set_critical_mission_restart_at 0.0 0.0 0.0 angle 0.0
 0295:   is 0@ taxi
-029C:   is 0@ boat
 0299: activate_garage $655
+029C:   is 0@ boat
 02A0:   actor 0@ stopped
 02A4: create_marker_above_car 0@ icon 4 handle 1@
 02A5: create_marker_above_actor 0@ icon 4 handle 1@
@@ -75,16 +75,23 @@
 0387: set_phone 0@ 5messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
 0388: set_phone 0@ 6messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
 0389: set_phone 0@ 6messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
+0393: set_actor 0@ anim_speed 1.0
 03A0:   crane 0.0 0.0 is_lifting_car 0@
 03A5: set_garage $655 type_to 7 #ADMIRAL
 03C2:   phone 0@ displaying_message
 03C6:   current_island == 1
 03C9:   car 0@ visibly_damaged
+03DB: create_marker_above_pickup 0@ color 0 display 3 handle 1@
+03DD: create_marker_above_pickup 0@ icon 4 handle 1@
+03E9:   actor 0@ in_control
 03EC:   ev_crane_collected_all_cars
 0413: set_player $PLAYER_CHAR get_out_of_jail_free 1
+041F: override_hospital 1
+0420: override_police_station 1
 0421: force_rain 1
 0422:   garage_contain_car $655 0@
 042A:   ped_threat_exists 8 1
+0444: set_fire_audio 0@ 0
 0447:   player $PLAYER_CHAR lifting_a_phone
 047D: get_number_of_seats_in_model #ADMIRAL store_to 0@
 04A7:   actor 0@ in_any_boat
@@ -103,17 +110,24 @@
 0547:   actor 0@ touching_car 1@
 }
 { GTA3 only
+0116:   player $PLAYER_CHAR alive
+02BD: set_fbi_required 1
+02BE: set_army_required 1
 04C2: create_coordinate 0@ 1@ 2@ from_object 11@ offset -0.277 -16.662 3.152 ;0400 in VC
 04C3: create_coordinate 0@ 1@ 2@ from_car 10@ offset 0.0 -20.0 0.0 ;0407 in VC
 04C4: create_coordinate 0@ 1@ 2@ from_actor $PLAYER_ACTOR offset 0.0 1.2 0.0
-046F: store_player $player_char currently_armed_weapon_to 13@
-04DD: $873 = actor $player_actor armour
-04C9: player $PLAYER_CHAR driving_plane 
-04A8: player $PLAYER_CHAR driving_boat
-04aa: player $PLAYER_CHAR driving_heli
-047E: player $PLAYER_CHAR driving_a_motorbike 
+046F: store_player $PLAYER_CHAR currently_armed_weapon_to 13@
+04DD: 0@ = actor $PLAYER_ACTOR armour
+04C9:   player $PLAYER_CHAR driving_plane 
+04A8:   player $PLAYER_CHAR driving_boat
+04AA:   player $PLAYER_CHAR driving_heli
+047E:   player $PLAYER_CHAR driving_a_motorbike 
 0485: return_true
-059a: return_false
+050F: get_max_wanted_level_to 0@
+0511: show_text_box_1number 'HJSTATW' number 0
+0546:   player $PLAYER_CHAR touching_car 1@
+0547:   actor 0@ touching_car 1@
+059A: return_false
 }
 0601: is_button_pressed_on_pad 3 with_sensitivity 0xFF
 0602: emulate_button_press_on_pad 2 with_sensitivity 0xFF
