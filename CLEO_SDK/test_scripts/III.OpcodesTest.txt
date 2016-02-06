@@ -1,0 +1,156 @@
+{$CLEO .cs}
+
+0000:
+const
+POSX = 0@
+POSY = 1@
+POSZ = 2@
+SPAWN_CAR = 4@
+LINE = 5@
+MAXWANTED = 6@
+FBI_REQ = 7@
+ARMY_REQ = 8@
+end
+
+while true
+    wait 0
+    if and
+        00E1:   player 0 pressed_button 6 // aim
+        80E0:   not player $PLAYER_CHAR in_any_car
+        $ONMISSION == 0
+    then
+        $ONMISSION = 1
+        break
+    end
+end
+
+while true
+    wait 0
+    if
+        80E1:   not player 0 pressed_button 4
+    then
+        break
+    end
+end
+
+0109: player $PLAYER_CHAR money += 10000
+0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+0247: request_model #KURUMA
+038B: load_requested_models
+POSX += 4.0
+00A5: SPAWN_CAR = create_car #KURUMA at POSX POSY POSZ
+0249: release_model #KURUMA
+FBI_REQ = 0
+02BD: set_fbi_required 0
+ARMY_REQ = 0
+02BE: set_army_required 0
+
+while true
+    wait 10
+    03F0: enable_text_draw 0
+    LINE = 0
+    gosub @IS_PLAYER_STILL_ALIVE
+    gosub @SET_FBI_REQUIRED
+    gosub @SET_ARMY_REQUIRED
+    gosub @GET_MAX_WANTED_LEVEL
+    gosub @PRINT_HELP_WITH_NUMBER
+    gosub @IS_PLAYER_TOUCHING_VEHICLE
+    gosub @IS_CHAR_TOUCHING_VEHICLE
+
+    if and
+        00E1:   player 0 pressed_button 6 // aim
+        80E0:   not player $PLAYER_CHAR in_any_car
+    then
+        01C3: mark_car_as_no_longer_needed SPAWN_CAR
+        $ONMISSION = 0
+        05DC: end_custom_thread
+    end
+    // maxwanted, fbi_req, army_req
+    0308: text_6numbers 'HJSTATW' MAXWANTED FBI_REQ ARMY_REQ 0 0 0 time 10 flag 5
+end
+
+:TEXT_STYLE
+0343: set_text_linewidth 500.0
+033F: set_text_draw_letter_width_height 0.3 1.2
+LINE += 11.0
+return
+
+:IS_PLAYER_STILL_ALIVE
+gosub @TEXT_STYLE
+if
+    0116:   player $PLAYER_CHAR alive
+then
+    0608: show_text_position 10.0 LINE text "0116: Player is alive"
+else
+    0608: show_text_position 10.0 LINE text "0116: Player is dead"
+end
+return
+
+:SET_FBI_REQUIRED
+if
+    0ADC: test_cheat "FBIREQ"
+then
+    018C: play_sound 94 at 0.0 0.0 0.0
+    if
+        FBI_REQ == 0
+    then
+        FBI_REQ = 1
+        02BD: set_fbi_required 1
+    else
+        FBI_REQ = 0
+        02BD: set_fbi_required 0
+    end
+end
+return
+
+:SET_ARMY_REQUIRED
+if
+    0ADC: test_cheat "ARMYREQ"
+then
+    018C: play_sound 94 at 0.0 0.0 0.0
+    if
+        ARMY_REQ == 0
+    then
+        ARMY_REQ = 1
+        02BE: set_army_required 1
+    else
+        ARMY_REQ = 0
+        02BE: set_army_required 0
+    end
+end
+return
+
+:GET_MAX_WANTED_LEVEL
+050F: get_max_wanted_level_to MAXWANTED
+return
+
+:PRINT_HELP_WITH_NUMBER
+if
+    0ADC: test_cheat "PRINTHELP"
+then
+    018C: play_sound 94 at 0.0 0.0 0.0
+    0511: show_text_box_1number 'NUMBER' number 1
+end
+return
+
+:IS_PLAYER_TOUCHING_VEHICLE
+gosub @TEXT_STYLE
+if
+    0546:   player $PLAYER_CHAR touching_car SPAWN_CAR
+then
+    0608: show_text_position 10.0 LINE text "0546: Player is touching spawned car"
+else
+    0608: show_text_position 10.0 LINE text "0546: Player is not touching spawned car"
+end
+return
+
+:IS_CHAR_TOUCHING_VEHICLE
+gosub @TEXT_STYLE
+if
+    0547:   actor $PLAYER_ACTOR touching_car SPAWN_CAR
+then
+    0608: show_text_position 10.0 LINE text "0547: Player character is touching spawned car"
+else
+    0608: show_text_position 10.0 LINE text "0547: Player character is not touching spawned car"
+end
+return
