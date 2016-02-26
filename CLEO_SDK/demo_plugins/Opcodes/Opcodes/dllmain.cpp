@@ -47,6 +47,7 @@ void(__thiscall *RemoveEntityFromList)(uintptr_t, INT, BYTE); // cmissioncleanup
 uintptr_t(__thiscall *ObjectPoolGetStruct)(void *, INT); // cpool_cobject_ccutscenehead::getat
 uintptr_t(__thiscall *VehiclePoolGetStruct)(void *, INT); // cpool_cvehicle_cautomobile::getat
 uintptr_t(__thiscall *PedPoolGetStruct)(void *, INT); // cpool_cped_cplayerped::getat
+int(__thiscall *PedPoolGetHandle)(void *, void *); // cpool_cped_cplayerped::getindex
 void(__cdecl *HighlightImportantArea)(CScript *, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT); // cthescripts::highlightimportantarea
 WORD(__thiscall *GetPadState)(CScript *, DWORD, DWORD); // crunningscript::getpadstate
 void(__thiscall *CamShake)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT); // ccamera::camshake
@@ -55,13 +56,17 @@ BYTE(__thiscall *IsWithinArea_3d)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, 
 BYTE(__thiscall *IsWithinArea_2d)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT); // cplaceable::iswithinarea
 DWORD(__cdecl *FindPlayerPed)(void); // findplayerped
 void(__cdecl *SetBlipSprite)(INT, INT); // cradar::setblipsprite
+void(__cdecl *ChangeBlipScale)(INT, INT); // cradar::changeblipscale
 DWORD(__cdecl *SetEntityBlip)(DWORD, INT, INT, DWORD); // cradar::setentityblip
+DWORD(__cdecl *SetShortRangeBlip)(DWORD, FLOAT, FLOAT, FLOAT, DWORD, DWORD);
 void(__cdecl *GetActualBlipArrayIndex)(unsigned int); // cradar::getactualbliparrayindex
 void(__thiscall *RegisterReference)(uintptr_t, uintptr_t); // centity::registerreference
+void(__cdecl *AnotherKillFrenzyPassed)(void); // cstats::anotherkillfrenzypassed
 FLOAT(__cdecl *FindGroundZForCoord)(FLOAT, FLOAT); // cworld::findgroundzforcoord
 void(__thiscall *SetAmmo)(uintptr_t, DWORD, DWORD); // cped::setammo
 void(__thiscall *GrantAmmo)(DWORD, DWORD, DWORD); // cped::grantammo
 BYTE(__thiscall *IsPedInControl)(uintptr_t); // cped::ispedincontrol
+void(__thiscall *Say)(uintptr_t, WORD); // cped::say
 void(__cdecl *SetHelpMessage)(wchar_t *, CHAR, INT); // chud::sethelpmessage
 DWORD(__cdecl *GetVehicleTypeId)(DWORD); // cvehiclemodelinfo::getvehicletypeid
 void(__cdecl *AddMessageJumpQWithNumber)(wchar_t *, DWORD, WORD, INT, INT, INT, INT, INT, INT); // cmessages::addmessagejumpqwithnumber
@@ -78,8 +83,10 @@ BYTE *phoneDisplayMessage = NULL;
 DWORD *currentPhone = NULL;
 uintptr_t cexplosion = NULL;
 uintptr_t cprojectileinfo = NULL;
+uintptr_t gangPedModelOverride = NULL;
 uintptr_t ccrane = NULL;
 uintptr_t ccamera = NULL;
+uintptr_t textDraw = NULL;
 uintptr_t infoZoneCarDensity = NULL;
 uintptr_t infoZonePedDensity = NULL;
 uintptr_t cgarage = NULL;
@@ -108,6 +115,7 @@ uintptr_t cpedtype = NULL;
 FLOAT *movieStunts = NULL;
 void **carPool = NULL;
 WORD *numInfoZone = NULL;
+WORD *currentTextDraw = NULL;
 WORD *numNavigZone = NULL;
 BYTE *allTaxiLights = NULL;
 BYTE *overrideHospital = NULL;
@@ -136,6 +144,7 @@ GtaGame::GtaGame()
 		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C30;
 		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C70;
 		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451CB0;
+		PedPoolGetHandle = (int(__thiscall *)(void *, void *))0x451CF0;
 		HighlightImportantArea = (void(__cdecl *)(CScript *, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT))0x45F080;
 		GetPadState = (WORD(__thiscall *)(CScript *, DWORD, DWORD))0x460C00;
 		CamShake = (void(__thiscall *)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT))0x46FF21;
@@ -144,13 +153,17 @@ GtaGame::GtaGame()
 		IsWithinArea_2d = (BYTE(__thiscall *)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT))0x4BB9E0;
 		FindPlayerPed = (DWORD(__cdecl *)(void))0x4BC120;
 		SetBlipSprite = (void(__cdecl *)(INT, INT))0x4C3780;
+		ChangeBlipScale = (void(__cdecl *)(INT, INT))0x4C3840;
 		SetEntityBlip = (DWORD(__cdecl *)(DWORD, INT, INT, DWORD))0x4C3B40;
+		SetShortRangeBlip = (DWORD(__cdecl *)(DWORD, FLOAT, FLOAT, FLOAT, DWORD, DWORD))0x4C3C00;
 		GetActualBlipArrayIndex = (void(__cdecl *)(unsigned int))0x4C5D70;
 		RegisterReference = (void(__thiscall *)(uintptr_t, uintptr_t))0x4C6AC0;
+		AnotherKillFrenzyPassed = (void(__cdecl *)(void))0x4CDBA7;
 		FindGroundZForCoord = (FLOAT(__cdecl *)(FLOAT, FLOAT))0x4D5540;
 		SetAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))0x4FF780;
 		GrantAmmo = (void(__thiscall *)(DWORD, DWORD, DWORD))0x4FF840;
 		IsPedInControl = (BYTE(__thiscall *)(uintptr_t))0x501950;
+		Say = (void(__thiscall *)(uintptr_t, WORD))0x5226B0;
 		SetHelpMessage = (void(__cdecl *)(wchar_t *, CHAR, INT))0x55BFC0;
 		GetVehicleTypeId = (DWORD(__cdecl *)(DWORD))0x578A70;
 		AddMessageJumpQWithNumber = (void(__cdecl *)(wchar_t *, DWORD, WORD, INT, INT, INT, INT, INT, INT))0x583440;
@@ -167,8 +180,10 @@ GtaGame::GtaGame()
 		currentPhone = (DWORD *)0x7030E8;
 		cexplosion = 0x780C88;
 		cprojectileinfo = 0x7DB888;
+		gangPedModelOverride = 0x7D925C;
 		ccrane = 0x7E4040;
 		ccamera = 0x7E4688;
+		textDraw = 0x7F0EA0;
 		infoZoneCarDensity = 0x7FA370;
 		infoZonePedDensity = 0x7FA39C;
 		cgarage = 0x812668;
@@ -197,6 +212,7 @@ GtaGame::GtaGame()
 		movieStunts = (FLOAT *)0xA0FC8C;
 		carPool = (void **)0xA0FDE4;
 		numInfoZone = (WORD *)0xA1096A;
+		currentTextDraw = (WORD *)0xA10A48;
 		numNavigZone = (WORD *)0xA10A58;
 		allTaxiLights = (BYTE *)0xA10ABB;
 		overrideHospital = (BYTE *)0xA10AE6;
@@ -221,6 +237,7 @@ GtaGame::GtaGame()
 		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C30;
 		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451C70;
 		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))0x451CB0;
+		PedPoolGetHandle = (int(__thiscall *)(void *, void *))0x451CF0;
 		HighlightImportantArea = (void(__cdecl *)(CScript *, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT))0x45F080;
 		GetPadState = (WORD(__thiscall *)(CScript *, DWORD, DWORD))0x460C00;
 		CamShake = (void(__thiscall *)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT))0x46FF21;
@@ -228,13 +245,18 @@ GtaGame::GtaGame()
 		IsWithinArea_3d = (BYTE(__thiscall *)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT))(0x4BB900 + 0x20);
 		IsWithinArea_2d = (BYTE(__thiscall *)(uintptr_t, FLOAT, FLOAT, FLOAT, FLOAT))(0x4BB9E0 + 0x20);
 		FindPlayerPed = (DWORD(__cdecl *)(void))(0x4BC120 + 0x20);
+		SetBlipSprite = (void(__cdecl *)(INT, INT))(0x4C3780 + 0x20);
+		ChangeBlipScale = (void(__cdecl *)(INT, INT))(0x4C3840 + 0x20);
 		SetEntityBlip = (DWORD(__cdecl *)(DWORD, INT, INT, DWORD))(0x4C3B40 + 0x20);
+		SetShortRangeBlip = (DWORD(__cdecl *)(DWORD, FLOAT, FLOAT, FLOAT, DWORD, DWORD))(0x4C3C00 + 0x20);
 		GetActualBlipArrayIndex = (void(__cdecl *)(unsigned int))(0x4C5D70 + 0x20);
 		RegisterReference = (void(__thiscall *)(uintptr_t, uintptr_t))(0x4C6AC0 + 0x20);
+		AnotherKillFrenzyPassed = (void(__cdecl *)(void))(0x4CDBA7 + 0x20);
 		FindGroundZForCoord = (FLOAT(__cdecl *)(FLOAT, FLOAT))(0x4D5540 + 0x20);
 		SetAmmo = (void(__thiscall *)(uintptr_t, DWORD, DWORD))(0x4FF780 + 0x20);
 		GrantAmmo = (void(__thiscall *)(DWORD, DWORD, DWORD))(0x4FF840 + 0x20);
 		IsPedInControl = (BYTE(__thiscall *)(uintptr_t))(0x501950 + 0x20);
+		Say = (void(__thiscall *)(uintptr_t, WORD))(0x5226B0 + 0x20);
 		SetHelpMessage = (void(__cdecl *)(wchar_t *, CHAR, INT))(0x55BFC0 + 0x20);
 		GetVehicleTypeId = (DWORD(__cdecl *)(DWORD))(0x578A70 + 0x20);
 		AddMessageJumpQWithNumber = (void(__cdecl *)(wchar_t *, DWORD, WORD, INT, INT, INT, INT, INT, INT))(0x583440 + 0x20);
@@ -251,8 +273,10 @@ GtaGame::GtaGame()
 		currentPhone = (DWORD *)0x7030E8;
 		cexplosion = 0x780C88;
 		cprojectileinfo = 0x7DB888 + 8;
+		gangPedModelOverride = 0x7D925C + 8;
 		ccrane = 0x7E4040 + 8;
 		ccamera = 0x7E4688 + 8;
+		textDraw = 0x7F0EA0 + 8;
 		infoZoneCarDensity = 0x7FA370 + 8;
 		infoZonePedDensity = 0x7FA39C + 8;
 		cgarage = 0x812668 + 8;
@@ -281,6 +305,7 @@ GtaGame::GtaGame()
 		movieStunts = (FLOAT *)(0xA0FC8C + 8);
 		carPool = (void **)(0xA0FDE4 + 8);
 		numInfoZone = (WORD *)(0xA1096A + 8);
+		currentTextDraw = (WORD *)(0xA10A48 + 8);
 		numNavigZone = (WORD *)(0xA10A58 + 8);
 		allTaxiLights = (BYTE *)(0xA10ABB + 8);
 		overrideHospital = (BYTE *)(0xA10AE6 + 8);
@@ -296,8 +321,10 @@ GtaGame::GtaGame()
 		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, INT))(0x451CB0 - 0x120);
 		GetText = (wchar_t *(__thiscall *)(uintptr_t, char *))(0x584F30 - 0x1D0);
 		cprojectileinfo = 0x7DB888 - 0xFF8;
+		gangPedModelOverride = 0x7D925C - 0xFF8;
 		ccrane = 0x7E4040 - 0xFF8;
 		ccamera = 0x7E4688 - 0xFF8;
+		textDraw = 0x7F0EA0 - 0xFF8;
 		infoZoneCarDensity = 0x7FA370 - 0xFF8;
 		infoZonePedDensity = 0x7FA39C - 0xFF8;
 		cgarage = 0x812668 - 0xFF8;
@@ -326,6 +353,7 @@ GtaGame::GtaGame()
 		movieStunts = (FLOAT *)(0xA0FC8C - 0xFF8);
 		carPool = (void **)(0xA0FDE4 - 0xFF8);
 		numInfoZone = (WORD *)(0xA1096A - 0xFF8);
+		currentTextDraw = (WORD *)(0xA10A48 - 0xFF8);
 		numNavigZone = (WORD *)(0xA10A58 - 0xFF8);
 		break;
 	}
@@ -1104,6 +1132,17 @@ eOpcodeResult WINAPI SET_CAR_BLOCK_CAR(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 0346 */
+eOpcodeResult WINAPI SET_TEXT_BACKGROUND_COLOUR(CScript *script)
+{
+	script->Collect(4);
+	*(BYTE *)(*currentTextDraw * 0xF4 + textDraw + 0x18) = (BYTE)Params[0].nVar;
+	*(BYTE *)(*currentTextDraw * 0xF4 + textDraw + 0x19) = (BYTE)Params[1].nVar;
+	*(BYTE *)(*currentTextDraw * 0xF4 + textDraw + 0x1A) = (BYTE)Params[2].nVar;
+	*(BYTE *)(*currentTextDraw * 0xF4 + textDraw + 0x1B) = (BYTE)Params[3].nVar;
+	return OR_CONTINUE;
+}
+
 /* 0351 */
 eOpcodeResult WINAPI IS_NASTY_GAME(CScript *script)
 {
@@ -1477,13 +1516,6 @@ eOpcodeResult WINAPI ADD_SPRITE_BLIP_FOR_PICKUP(CScript *script)
 	return OR_CONTINUE;
 }
 
-/* 03EC */
-eOpcodeResult WINAPI HAS_MILITARY_CRANE_COLLECTED_ALL_CARS(CScript *script)
-{
-	script->UpdateCompareFlag((*militaryCraneCollected & 0x7F) == 0x7F);
-	return OR_CONTINUE;
-}
-
 /* 03E9 */
 eOpcodeResult WINAPI IS_CHAR_IN_CONTROL(CScript *script)
 {
@@ -1492,11 +1524,41 @@ eOpcodeResult WINAPI IS_CHAR_IN_CONTROL(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 03EC */
+eOpcodeResult WINAPI HAS_MILITARY_CRANE_COLLECTED_ALL_CARS(CScript *script)
+{
+	script->UpdateCompareFlag((*militaryCraneCollected & 0x7F) == 0x7F);
+	return OR_CONTINUE;
+}
+
+/* 0410 */
+eOpcodeResult WINAPI SET_GANG_PED_MODEL_PREFERENCE(CScript *script)
+{
+	script->Collect(2);
+	*(BYTE *)(Params[0].nVar * 0x18 + gangPedModelOverride) = (BYTE)Params[1].nVar;
+	return OR_CONTINUE;
+}
+
 /* 0413 */
 eOpcodeResult WINAPI SET_GET_OUT_OF_JAIL_FREE(CScript *script)
 {
 	script->Collect(2);
 	*(BYTE *)(Params[0].nVar * 0x170 + (DWORD)playerPedPool + 0x145) = (BYTE)(Params[1].nVar ? 1 : 0);
+	return OR_CONTINUE;
+}
+
+/* 041B */
+eOpcodeResult WINAPI REGISTER_KILL_FRENZY_PASSED(CScript *script)
+{
+	AnotherKillFrenzyPassed();
+	return OR_CONTINUE;
+}
+
+/* 041C */
+eOpcodeResult WINAPI SET_CHAR_SAY(CScript *script)
+{
+	script->Collect(2);
+	Say(PedPoolGetStruct(*pedPool, Params[0].nVar), Params[1].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1537,6 +1599,15 @@ eOpcodeResult WINAPI IS_THREAT_FOR_PED_TYPE(CScript *script)
 {
 	script->Collect(2);
 	script->UpdateCompareFlag(Params[1].nVar == (*(DWORD *)(*(DWORD *)(cpedtype + Params[0].nVar * 4) + 0x18) & Params[1].nVar));
+	return OR_CONTINUE;
+}
+
+/* 0432 */
+eOpcodeResult WINAPI GET_CHAR_IN_CAR_PASSENGER_SEAT(CScript *script)
+{
+	script->Collect(2);
+	Params[0].nVar = PedPoolGetHandle(*pedPool, *(void **)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + Params[1].nVar * 4 + 0x1AC));
+	script->Store(1);
 	return OR_CONTINUE;
 }
 
@@ -1657,6 +1728,33 @@ eOpcodeResult WINAPI IS_CHAR_IN_FLYING_VEHICLE(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 04CC */
+eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_COORD_OLD(CScript *script)
+{
+	script->Collect(5);
+	if (Params[2].fVar <= -100.0) {
+		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
+	}
+	GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
+	Params[0].nVar = SetShortRangeBlip(4, Params[0].fVar, Params[1].fVar, Params[2].fVar, Params[3].nVar, Params[4].nVar);
+	script->Store(1);
+	return OR_CONTINUE;
+}
+
+/* 04CD */
+eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_COORD(CScript *script)
+{
+	script->Collect(3);
+	if (Params[2].fVar <= -100.0) {
+		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
+	}
+	GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
+	Params[0].nVar = SetShortRangeBlip(4, Params[0].fVar, Params[1].fVar, Params[2].fVar, 5, 3);
+	ChangeBlipScale(Params[0].nVar, 3);
+	script->Store(1);
+	return OR_CONTINUE;
+}
+
 /* 050F */
 eOpcodeResult WINAPI GET_MAX_WANTED_LEVEL(CScript *script)
 {
@@ -1755,6 +1853,20 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_VEHICLE(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 056F */
+eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT(CScript *script)
+{
+	script->Collect(3);
+	if (Params[2].fVar <= -100.0) {
+		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
+	}
+	GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
+	Params[0].nVar = SetShortRangeBlip(5, Params[0].fVar, Params[1].fVar, Params[2].fVar, 2, 3);
+	ChangeBlipScale(Params[0].nVar, 3);
+	script->Store(1);
+	return OR_CONTINUE;
+}
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 {
 	if (reason == DLL_PROCESS_ATTACH)
@@ -1822,6 +1934,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x031B, IS_FIRST_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x031C, IS_SECOND_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x032D, SET_CAR_BLOCK_CAR);
+		Opcodes::RegisterOpcode(0x0346, SET_TEXT_BACKGROUND_COLOUR);
 		Opcodes::RegisterOpcode(0x0351, IS_NASTY_GAME);
 		Opcodes::RegisterOpcode(0x0356, IS_EXPLOSION_IN_AREA);
 		Opcodes::RegisterOpcode(0x0357, IS_EXPLOSION_IN_ZONE);
@@ -1848,14 +1961,18 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x03C9, IS_CAR_VISIBLY_DAMAGED);
 		Opcodes::RegisterOpcode(0x03DB, ADD_BLIP_FOR_PICKUP_OLD);
 		Opcodes::RegisterOpcode(0x03DD, ADD_SPRITE_BLIP_FOR_PICKUP);
-		Opcodes::RegisterOpcode(0x03EC, HAS_MILITARY_CRANE_COLLECTED_ALL_CARS);
 		Opcodes::RegisterOpcode(0x03E9, IS_CHAR_IN_CONTROL);
+		Opcodes::RegisterOpcode(0x03EC, HAS_MILITARY_CRANE_COLLECTED_ALL_CARS);
+		Opcodes::RegisterOpcode(0x0410, SET_GANG_PED_MODEL_PREFERENCE);
 		Opcodes::RegisterOpcode(0x0413, SET_GET_OUT_OF_JAIL_FREE);
+		Opcodes::RegisterOpcode(0x041B, REGISTER_KILL_FRENZY_PASSED);
+		Opcodes::RegisterOpcode(0x041C, SET_CHAR_SAY);
 		Opcodes::RegisterOpcode(0x041F, OVERRIDE_HOSPITAL_LEVEL);
 		Opcodes::RegisterOpcode(0x0420, OVERRIDE_POLICE_STATION_LEVEL);
 		Opcodes::RegisterOpcode(0x0421, FORCE_RAIN);
 		Opcodes::RegisterOpcode(0x0422, DOES_GARAGE_CONTAIN_CAR);
 		Opcodes::RegisterOpcode(0x042A, IS_THREAT_FOR_PED_TYPE);
+		Opcodes::RegisterOpcode(0x0432, GET_CHAR_IN_CAR_PASSENGER_SEAT);
 		Opcodes::RegisterOpcode(0x0444, SET_SCRIPT_FIRE_AUDIO);
 		Opcodes::RegisterOpcode(0x0447, IS_PLAYER_LIFTING_A_PHONE);
 		Opcodes::RegisterOpcode(0x047D, GET_NUMBER_OF_SEATS_IN_MODEL);
@@ -1863,6 +1980,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x04A9, IS_CHAR_IN_ANY_HELI);
 		Opcodes::RegisterOpcode(0x04AB, IS_CHAR_IN_ANY_PLANE);
 		Opcodes::RegisterOpcode(0x04C8, IS_CHAR_IN_FLYING_VEHICLE);
+		Opcodes::RegisterOpcode(0x04CC, ADD_SHORT_RANGE_BLIP_FOR_COORD_OLD);
+		Opcodes::RegisterOpcode(0x04CD, ADD_SHORT_RANGE_BLIP_FOR_COORD);
 		Opcodes::RegisterOpcode(0x050F, GET_MAX_WANTED_LEVEL);
 		Opcodes::RegisterOpcode(0x0511, PRINT_HELP_WITH_NUMBER);
 		Opcodes::RegisterOpcode(0x0513, PRINT_HELP_FOREVER_WITH_NUMBER);
@@ -1873,6 +1992,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x0537, SET_TOP_SHOOTING_RANGE_SCORE);
 		Opcodes::RegisterOpcode(0x0538, ADD_SHOOTING_RANGE_RANK);
 		Opcodes::RegisterOpcode(0x0547, IS_CHAR_TOUCHING_VEHICLE);
+		Opcodes::RegisterOpcode(0x056F, ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT);
 	}
 	return TRUE;
 }
