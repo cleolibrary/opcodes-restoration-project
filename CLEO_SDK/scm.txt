@@ -56,6 +56,7 @@
 031B=2,  car %1d% primary_color %2d%
 031C=2,  car %1d% secondary_color %2d%
 032D=2,car %1d% block %2d%
+0346=4,set_text_draw_background_color %1d% %2d% %3d% %4d%
 0349=1,text_draw_style = %1d%
 0351=0,  gore_enabled
 0356=7,  explosion_type %1d% in_cube %2d% %3d% %4d% %5d% %6d% %7d%
@@ -85,19 +86,25 @@
 03DD=3,create_marker_above_pickup %1d% icon %2d% handle %3d%
 03E9=1,  actor %1d% in_control
 03EC=0,  ev_crane_collected_all_cars
+0410=2,override_gang_model %1d% %2d%
 0413=2,set_player %1d% get_out_of_jail_free %2d%
+041B=0,increment_rampages_passed
+041C=2,make_actor %1d% say %2d%
 041F=1,override_hospital %1d%
 0420=1,override_police_station %1d%
 0421=1,force_rain %1d%
 0422=2,  garage_contain_car %1d% %2d%
 042A=2,  ped_threat_exists %1u% %2u%
-0444=2,set_fire_audio %1d% %2d%
+0432=3,get_actor_in_car %1d% passenger_seat %2d% store_to %3d%
+0444=2,set_fire %1d% audio %2d%
 0447=1,  player %1d% lifting_a_phone
 047D=2,get_number_of_seats_in_model %1d% store_to %2d%
 04A7=1,  actor %1d% in_any_boat
 04A9=1,  actor %1d% in_any_heli
 04AB=1,  actor %1d% in_any_plane
 04C8=1,  actor %1d% in_flying_vehicle
+04CC=6,create_blip_without_sphere %1d% %2d% %3d% color %4d% display %5d% store_to %6d%
+04CD=4,create_blip_without_sphere %1d% %2d% %3d% store_to %4d%
 050F=1,get_max_wanted_level_to %1d%
 0511=2,show_text_box_1number %1s% number %2d%
 0513=2,show_permanent_text_box_1number %1s% number %2d%
@@ -108,6 +115,7 @@
 0537=1,set_top_shooting_range_score %1d%
 0538=1,add_shooting_range_rank %1d%
 0547=2,  actor %1d% touching_car %2d%
+056F=4,create_asset_blip %1d% %2d% %3d% store_to %4d%
 }
 { GTA3 only
 0116=1,  player %1d% alive

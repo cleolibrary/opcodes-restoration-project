@@ -25,6 +25,7 @@ FBI_REQ    = 10@ // bit 3
 ARMY_REQ   = 10@ // bit 4
 FORCERAIN  = 10@ // bit 5
 GANGTHREAT = 10@ // bit 6
+GANGPREF   = 10@ // bit 7
 SEATS      = 10@ // bits 8 to 11
 MAXWANTED  = 10@ // bits 12 to 15
 DRUNK      = 10@ // bits 16 to 23
@@ -163,7 +164,12 @@ while true
     gosub @ADD_SPRITE_BLIP_FOR_PICKUP
     gosub @IS_CHAR_IN_CONTROL
     gosub @HAS_MILITARY_CRANE_COLLECTED_ALL_CARS
+    gosub @SET_GANG_PED_MODEL_PREFERENCE
     gosub @SET_GET_OUT_OF_JAIL_FREE
+    gosub @REGISTER_KILL_FRENZY_PASSED
+    gosub @SET_CHAR_SAY
+    gosub @OVERRIDE_HOSPITAL_LEVEL
+    gosub @OVERRIDE_POLICE_STATION_LEVEL
     gosub @FORCE_RAIN
     gosub @DOES_GARAGE_CONTAIN_CAR
     gosub @IS_THREAT_FOR_PED_TYPE
@@ -1250,12 +1256,78 @@ then
 end
 return
 
+:SET_GANG_PED_MODEL_PREFERENCE
+if
+    0ADC: test_cheat "PREFERENCE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    05F9: TEMP_VAR = GANGPREF AND 0x80
+    if
+        TEMP_VAR == 0
+    then
+        05FA: GANGTHREAT = GANGPREF OR 0x80
+        0410: override_gang_model 1 0
+    else
+        05F9: GANGTHREAT = GANGPREF AND 0x7F
+        0410: override_gang_model 1 255
+    end
+end
+return
+
 :SET_GET_OUT_OF_JAIL_FREE
 if
     0ADC: test_cheat "JAILFREE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0413: set_player $PLAYER_CHAR get_out_of_jail_free 1
+end
+return
+
+:REGISTER_KILL_FRENZY_PASSED
+if
+    0ADC: test_cheat "FRENZY"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    041B: increment_rampages_passed
+end
+return
+
+:SET_CHAR_SAY
+if
+    0ADC: test_cheat "TALK"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    041C: make_actor $PLAYER_ACTOR say 0x7A // picked up money talk
+end
+return
+
+:OVERRIDE_HOSPITAL_LEVEL
+if
+    0ADC: test_cheat "HOSPITAL1"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    041F: override_hospital 1
+end
+if
+    0ADC: test_cheat "HOSPITAL2"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    041F: override_hospital 2
+end
+return
+
+:OVERRIDE_POLICE_STATION_LEVEL
+if
+    0ADC: test_cheat "POLICE1"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0420: override_police_station 1
+end
+if
+    0ADC: test_cheat "POLICE2"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0420: override_police_station 2
 end
 return
 
