@@ -45,6 +45,7 @@
 02BE: set_army_required 1
 02D6:   actor 0@ shooting_in_area 0.0 0.0 0.0 0.0 0
 02EE:   projectile_in_cube 0.0 0.0 0.0 0.0 0.0 0.0
+02EF: destroy_projectile_in_cube 0.0 0.0 0.0 0.0 0.0 0.0
 02F0: create_explosive_barrel_at 0.0 0.0 0.0
 02F1: create_explosive_barrel_at 0.0 0.0 0.0
 02FC: text_2numbers 'ADMIRAL' 0 0 1000 ms 1
@@ -72,6 +73,7 @@
 037B: set_phone 0@ 3messages 'ADMIRAL' 'AMBULAN' 'ANGEL'
 037C: set_phone 0@ 4messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE'
 037D: set_phone 0@ 4messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE'
+037F: give_player_detonator
 0386: set_phone 0@ 5messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
 0387: set_phone 0@ 5messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
 0388: set_phone 0@ 6messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
