@@ -153,6 +153,7 @@ while true
     gosub @SET_3_PHONE_MESSAGES
     gosub @SET_4_REPEATED_PHONE_MESSAGES
     gosub @SET_4_PHONE_MESSAGES
+    gosub @GIVE_PLAYER_DETONATOR
     gosub @SET_5_REPEATED_PHONE_MESSAGES
     gosub @SET_5_PHONE_MESSAGES
     gosub @SET_6_REPEATED_PHONE_MESSAGES
@@ -1093,6 +1094,17 @@ if
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     037D: set_phone PHONE_B 4messages 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA'
+end
+return
+
+:GIVE_PLAYER_DETONATOR
+if
+    0ADC: test_cheat "DETONATE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0247: request_model #BOMB
+    038B: load_requested_models
+    037F: give_player_detonator
 end
 return
 

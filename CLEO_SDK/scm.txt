@@ -45,6 +45,7 @@
 02BE=1,set_army_required %1d%
 02D6=6,  actor %1d% shooting_in_area %2d% %3d% %4d% %5d% %6d%
 02EE=6,  projectile_in_cube %1d% %2d% %3d% %4d% %5d% %6d%
+02EF=6,destroy_projectile_in_cube %1d% %2d% %3d% %4d% %5d% %6d%
 02F0=3,create_explosive_barrel_at %1d% %2d% %3d%
 02F1=3,create_explosive_barrel_at %1d% %2d% %3d%
 02FC=5,text_2numbers %1g% %2d% %3d% %4d% ms %5d%
@@ -72,6 +73,7 @@
 037B=4,set_phone %1d% 3messages %2g% %3g% %4g%
 037C=5,set_phone %1d% 4messages_repeated %2g% %3g% %4g% %5g%
 037D=5,set_phone %1d% 4messages %2g% %3g% %4g% %5g%
+037F=0,give_player_detonator
 0386=6,set_phone %1d% 5messages_repeated %2g% %3g% %4g% %5g% %6g%
 0387=6,set_phone %1d% 5messages %2g% %3g% %4g% %5g% %6g%
 0388=7,set_phone %1d% 6messages_repeated %2g% %3g% %4g% %5g% %6g% %7g%
