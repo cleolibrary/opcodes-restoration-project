@@ -20,6 +20,8 @@
 0179=2,  actor %1d% touching_object %2d%
 017B=3,set_actor %1d% weapon %2d% ammo_to %3d%
 01C6=1,remove_car_from_mission_cleanup_list %1d%
+01EE=10,activate_crane %1d% %2d% %3d% %4d% %5d% %6d% %7d% %8d% %9d% %10d%
+01EF=2,deactivate_crane %1d% %2d%
 0218=4,text_1number_styled %1g% %2d% time %3d% style %4d%
 021D=1,set_free_bomb_shop_to %1d%
 021F=1,set_all_taxi_lights %1d%
@@ -48,6 +50,7 @@
 02EF=6,destroy_projectile_in_cube %1d% %2d% %3d% %4d% %5d% %6d%
 02F0=3,create_explosive_barrel_at %1d% %2d% %3d%
 02F1=3,create_explosive_barrel_at %1d% %2d% %3d%
+02FB=10,create_crusher_crane %1d% %2d% %3d% %4d% %5d% %6d% %7d% %8d% %9d% %10d%
 02FC=5,text_2numbers %1g% %2d% %3d% %4d% ms %5d%
 0300=6,text_3numbers_highpriority %1g% %2d% %3d% %4d% %5d% ms %6h%
 0303=7,text_4numbers_highpriority %1g% %2d% %3d% %4d% %5d% %6d% ms %7d%
@@ -63,6 +66,7 @@
 0356=7,  explosion_type %1d% in_cube %2d% %3d% %4d% %5d% %6d% %7d%
 0357=2,  explosion_type %1d% in_zone %2z%
 0367=9,init_headshot_rampage %1g% weapon %2d% time %3d% targets %4d% %5d% %6d% %7d% %8d% %9d%
+0368=10,create_ev_crane %1d% %2d% %3d% %4d% %5d% %6d% %7d% %8d% %9d% %10d%
 036E=6,text_3numbers_styled %1g% %2d% %3d% %4d% time %5d% style %6d%
 036F=7,text_4numbers_styled %1g% %2d% %3d% %4d% %5d% time %6d% style %7d%
 0370=8,text_5numbers_styled %1g% %2d% %3d% %4d% %5d% %6d% time %7d% style %8d%
@@ -90,6 +94,7 @@
 03EC=0,  ev_crane_collected_all_cars
 0410=2,override_gang_model %1d% %2d%
 0413=2,set_player %1d% get_out_of_jail_free %2d%
+0415=2,  car %1d% door %2d% closed
 041B=0,increment_rampages_passed
 041C=2,make_actor %1d% say %2d%
 041F=1,override_hospital %1d%

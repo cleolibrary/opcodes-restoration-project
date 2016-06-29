@@ -93,10 +93,10 @@ POSX += 4.0
 0421: force_rain 0
 03F2: pedgroup 8 remove_threat 1
 PAGE = 0
+03F0: enable_text_draw 1
 
 while true
     wait 10
-    03F0: enable_text_draw 0
     LINE = 0
     gosub @IS_CHAR_STILL_ALIVE
     gosub @IS_CAR_STILL_ALIVE
@@ -113,6 +113,8 @@ while true
     gosub @IS_PLAYER_TOUCHING_OBJECT
     gosub @IS_CHAR_TOUCHING_OBJECT
     gosub @SET_CHAR_AMMO
+    gosub @ACTIVATE_CRANE
+    gosub @DEACTIVATE_CRANE
     gosub @SET_FREE_BOMBS
     gosub @SET_ALL_TAXI_LIGHTS
     gosub @IS_CAR_ARMED_WITH_ANY_BOMB
@@ -125,8 +127,8 @@ while true
     gosub @HAS_PHONE_DISPLAYED_MESSAGE
     gosub @RESTART_CRITICAL_MISSION
     gosub @IS_TAXI
-    gosub @IS_BOAT
     gosub @ACTIVATE_GARAGE
+    gosub @IS_BOAT
     gosub @IS_CHAR_STOPPED
     gosub @ADD_SPRITE_BLIP_FOR_CAR
     gosub @ADD_SPRITE_BLIP_FOR_CHAR
@@ -139,6 +141,7 @@ while true
     gosub @IS_PROJECTILE_IN_AREA
     gosub @DROP_MINE
     gosub @DROP_NAUTICAL_MINE
+    gosub @ACTIVATE_CRUSHER_CRANE
     gosub @PRINT_WITH_NUMBERS
     gosub @IS_FIRST_CAR_COLOUR
     gosub @IS_SECOND_CAR_COLOUR
@@ -146,6 +149,7 @@ while true
     gosub @IS_EXPLOSION_IN_AREA
     gosub @IS_EXPLOSION_IN_ZONE
     gosub @START_KILL_FRENZY_HEADSHOT
+    gosub @ACTIVATE_MILITARY_CRANE
     gosub @PRINT_WITH_NUMBERS_BIG
     gosub @SET_2_REPEATED_PHONE_MESSAGES
     gosub @SET_2_PHONE_MESSAGES
@@ -167,6 +171,7 @@ while true
     gosub @HAS_MILITARY_CRANE_COLLECTED_ALL_CARS
     gosub @SET_GANG_PED_MODEL_PREFERENCE
     gosub @SET_GET_OUT_OF_JAIL_FREE
+    gosub @IS_CAR_DOOR_CLOSED
     gosub @REGISTER_KILL_FRENZY_PASSED
     gosub @SET_CHAR_SAY
     gosub @OVERRIDE_HOSPITAL_LEVEL
@@ -223,6 +228,7 @@ while true
             05DF: write_memory GARAGE size 1 value 0 virtual_protect 0
         end
         $ONMISSION = 0
+        03F0: enable_text_draw 0
         05DC: end_custom_thread
     end
     // next page
@@ -278,7 +284,7 @@ while true
 end
 
 :TEXT_STYLE
-0343: set_text_linewidth 500.0
+0343: set_text_linewidth 600.0
 033F: set_text_draw_letter_width_height 0.3 1.2
 LINE += 11.0
 return
@@ -480,6 +486,25 @@ then
 end
 return
 
+:ACTIVATE_CRANE
+if
+    0ADC: test_cheat "CRANEA"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    01EF: deactivate_crane -964.0 -1490.0
+    01EE: activate_crane -964.0 -1490.0 -974.0 -1500.0 -954.0 -1480.0 -951.0 -1525.0 20.0 160.0
+end
+return
+
+:DEACTIVATE_CRANE
+if
+    0ADC: test_cheat "CRANED"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    01EF: deactivate_crane -964.0 -1490.0
+end
+return
+
 :SET_FREE_BOMBS
 if
     0ADC: test_cheat "FREEBOMBS"
@@ -674,6 +699,15 @@ then
 end
 return
 
+:ACTIVATE_GARAGE
+if
+    0ADC: test_cheat "GARAGEA"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0299: activate_garage GARAGE
+end
+return
+
 :IS_BOAT
 if
     PAGE == 0
@@ -691,15 +725,6 @@ then
         end
     end
     0608: show_text_position 10.0 LINE text "029C: Is not a boat"
-end
-return
-
-:ACTIVATE_GARAGE
-if
-    0ADC: test_cheat "GARAGEA"
-then
-    018C: play_sound 1 at 0.0 0.0 0.0
-    0299: activate_garage GARAGE
 end
 return
 
@@ -861,6 +886,16 @@ then
 end
 return
 
+:ACTIVATE_CRUSHER_CRANE
+if
+    0ADC: test_cheat "CRANEC"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    01EF: deactivate_crane -964.0 -1490.0
+    02FB: create_crusher_crane -964.0 -1490.0 -974.0 -1500.0 -954.0 -1480.0 -951.0 -1525.0 20.0 160.0
+end
+return
+
 :PRINT_WITH_NUMBERS
 if
     0ADC: test_cheat "PRINTNUM"
@@ -982,6 +1017,16 @@ then
     038B: load_requested_models
     0367: init_headshot_rampage 'RAMPAGE' weapon 26 time 120000 targets 10 -1 -1 -1 -1 0
     0249: release_model #M4
+end
+return
+
+:ACTIVATE_MILITARY_CRANE
+if
+    0ADC: test_cheat "CRANEM"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    01EF: deactivate_crane -964.0 -1490.0
+    0368: create_ev_crane -964.0 -1490.0 -974.0 -1500.0 -954.0 -1480.0 -951.0 -1525.0 20.0 160.0
 end
 return
 
@@ -1292,6 +1337,26 @@ if
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0413: set_player $PLAYER_CHAR get_out_of_jail_free 1
+end
+return
+
+:IS_CAR_DOOR_CLOSED
+if
+    PAGE == 1
+then
+    gosub @TEXT_STYLE
+    if
+        00E0:   player $PLAYER_CHAR in_any_car
+    then
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        if
+            0415:   car PLAYER_CAR door 0 closed
+        then
+            0608: show_text_position 10.0 LINE text "0415: Car bonnet is closed"
+            return
+        end
+    end
+    0608: show_text_position 10.0 LINE text "0415: Car bonnet is not closed"
 end
 return
 

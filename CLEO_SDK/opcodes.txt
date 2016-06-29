@@ -20,6 +20,8 @@
 0179:   actor 0@ touching_object 1@
 017B: set_actor 0@ weapon 17 ammo_to 100
 01C6: remove_car_from_mission_cleanup_list 0@
+01EE: activate_crane 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+01EF: deactivate_crane 0.0 0.0
 0218: text_1number_styled 'HJSTATW' 0 time 1000 style 6
 021D: set_free_bomb_shop_to 1
 021F: set_all_taxi_lights 1
@@ -48,6 +50,7 @@
 02EF: destroy_projectile_in_cube 0.0 0.0 0.0 0.0 0.0 0.0
 02F0: create_explosive_barrel_at 0.0 0.0 0.0
 02F1: create_explosive_barrel_at 0.0 0.0 0.0
+02FB: create_crusher_crane 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 02FC: text_2numbers 'ADMIRAL' 0 0 1000 ms 1
 0300: text_3numbers_highpriority 'ADMIRAL' 0 0 0 1000 ms 1
 0303: text_4numbers_highpriority 'ADMIRAL' 0 0 0 0 1000 ms 1
@@ -63,6 +66,7 @@
 0356:   explosion_type 0 in_cube 0.0 0.0 0.0 0.0 0.0 0.0
 0357:   explosion_type 0 in_zone 'DTOWN'
 0367: init_headshot_rampage 'RAMPAGE' weapon 26 time 120000 targets 10 -1 -1 -1 -1 0
+0368: create_ev_crane 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 036E: text_3numbers_styled 'HJSTATW' 0 0 0 time 1000 style 6
 036F: text_4numbers_styled 'HJSTATW' 0 0 0 0 time 1000 style 6
 0370: text_5numbers_styled 'HJSTATW' 0 0 0 0 0 time 1000 style 6
@@ -90,6 +94,7 @@
 03EC:   ev_crane_collected_all_cars
 0410: override_gang_model 0 0
 0413: set_player $PLAYER_CHAR get_out_of_jail_free 1
+0415:   car 0@ door 0 closed
 041B: increment_rampages_passed
 041C: make_actor $PLAYER_ACTOR say 0x7A
 041F: override_hospital 1
