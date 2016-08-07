@@ -60,6 +60,7 @@
 031B:   car 0@ primary_color 0
 031C:   car 0@ secondary_color 0
 032D: car 0@ block 1@
+0338: set_car 0@ visible 0
 0346: set_text_draw_background_color 0 0 0 255
 0349: text_draw_style = 3
 0351:   gore_enabled

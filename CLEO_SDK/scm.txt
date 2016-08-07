@@ -60,6 +60,7 @@
 031B=2,  car %1d% primary_color %2d%
 031C=2,  car %1d% secondary_color %2d%
 032D=2,car %1d% block %2d%
+0338=2,set_car %1d% visible %2h%
 0346=4,set_text_draw_background_color %1d% %2d% %3d% %4d%
 0349=1,text_draw_style = %1d%
 0351=0,  gore_enabled

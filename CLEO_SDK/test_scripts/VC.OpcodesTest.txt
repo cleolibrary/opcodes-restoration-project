@@ -63,7 +63,7 @@ end
 0247: request_model #COLT45
 0247: request_model #MALE01
 0247: request_model #DINGHY
-0247: request_model #PCJ600
+0247: request_model #CADDY
 038B: load_requested_models
 POSX += 4.0
 009A: SPAWN_CHAR = create_actor_pedtype 4 model #MALE01 at POSX POSY POSZ
@@ -71,14 +71,14 @@ POSX += 4.0
 00A5: SPAWN_CAR = create_car #DINGHY at POSX POSY POSZ
 0229: set_car SPAWN_CAR color_to 6 75
 POSX += 4.0
-00A5: SPAWN_BIKE = create_car #PCJ600 at POSX POSY POSZ
+00A5: SPAWN_BIKE = create_car #CADDY at POSX POSY POSZ
 POSX += 4.0
 0213: SPAWN_PICK = create_pickup #COLT45 type 2 at POSX POSY POSZ
 POSX += 4.0
 029B: SPAWN_OBJ = init_object #ELECTRICGATE at POSX POSY POSZ
 0249: release_model #COLT45
 0249: release_model #DINGHY
-0249: release_model #PCJ600
+0249: release_model #CADDY
 01B1: give_player $PLAYER_CHAR weapon 17 ammo 10
 024A: PHONE_A = get_phone_at 38.341 -1023.3
 024C: set_phone PHONE_A message 'ADMIRAL'
@@ -145,6 +145,7 @@ while true
     gosub @PRINT_WITH_NUMBERS
     gosub @IS_FIRST_CAR_COLOUR
     gosub @IS_SECOND_CAR_COLOUR
+    gosub @SET_CAR_VISIBLE
     gosub @IS_NASTY_GAME
     gosub @IS_EXPLOSION_IN_AREA
     gosub @IS_EXPLOSION_IN_ZONE
@@ -162,6 +163,7 @@ while true
     gosub @SET_5_PHONE_MESSAGES
     gosub @SET_6_REPEATED_PHONE_MESSAGES
     gosub @SET_6_PHONE_MESSAGES
+    gosub @IS_CRANE_LIFTING_CAR
     gosub @IS_PHONE_DISPLAYING_MESSAGE
     gosub @IS_COLLISION_IN_MEMORY
     gosub @IS_CAR_VISIBLY_DAMAGED
@@ -961,6 +963,20 @@ then
 end
 return
 
+:SET_CAR_VISIBLE
+if
+    00E0:   player $PLAYER_CHAR in_any_car
+then
+    if
+        0ADC: test_cheat "INVISIBLE"
+    then
+        018C: play_sound 1 at 0.0 0.0 0.0
+        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        0338: set_car PLAYER_CAR visible 0
+    end
+end
+return
+
 :IS_NASTY_GAME
 if
     PAGE == 1
@@ -1147,8 +1163,6 @@ if
     0ADC: test_cheat "DETONATE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
-    0247: request_model #BOMB
-    038B: load_requested_models
     037F: give_player_detonator
 end
 return
@@ -1210,6 +1224,21 @@ if
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0389: set_phone PHONE_B 6messages 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA' 'BOBCAT' 'BOXVILL'
+end
+return
+
+:IS_CRANE_LIFTING_CAR
+if
+    PAGE == 1
+then
+    gosub @TEXT_STYLE
+    if
+        03A0:   crane -964.0 -1490.0 is_lifting_car SPAWN_BIKE
+    then
+        0608: show_text_position 10.0 LINE text "03A0: Crane is lifting spawned golf cart"
+    else
+        0608: show_text_position 10.0 LINE text "03A0: Crane is not lifting spawned golf cart"
+    end
 end
 return
 
@@ -1434,9 +1463,9 @@ then
     if
         0422:   garage_contain_car GARAGE SPAWN_BIKE
     then
-        0608: show_text_position 10.0 LINE text "0422: Garage contains spawned bike"
+        0608: show_text_position 10.0 LINE text "0422: Garage contains spawned golf cart"
     else
-        0608: show_text_position 10.0 LINE text "0422: Garage does not contain spawned bike"
+        0608: show_text_position 10.0 LINE text "0422: Garage does not contain spawned golf cart"
     end
 end
 return

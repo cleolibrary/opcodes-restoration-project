@@ -1,3 +1,12 @@
+/*************************************************************************
+	Opcodes Restoration Project
+
+	Plugin for CLEO v2.0.0.4 and above for Grand Theft Auto III and Grand
+	Theft Auto: Vice City that aims to restore functionality to many
+	unsupported opcodes
+	http://www.gtamodding.com/wiki/Opcodes_Restoration_Project
+*************************************************************************/
+
 // configuration manager
 // active solution configuration: VC or III
 // active solution platform: x86
@@ -27,106 +36,52 @@ GtaGame game;
 #pragma comment (lib, "..\\..\\..\\VC.CLEO.lib")
 #include "..\\..\\..\\VC.CLEO.h"
 
+#pragma comment (lib, "vcclasses\\vcclasses.lib")
+#pragma comment (lib, "vcversion\\vcversion.lib")
+#include "vcclasses\\vcclasses.h"
+#include "vcclasses\\Globals.h"
+#include "vcversion\\vcversion.h"
+
 tScriptVar *Params;
 
-struct CVector {
-	float x, y, z;
-};
-
-class CCranes
+class CCranesHack : public CCranes
 {
 public:
-	struct Crane
-	{
-		uintptr_t     object;            // 0x00, pointer to crane object
-		uintptr_t     hook;              // 0x04, pointer to hook object
-		float         pickupX1;           // 0x08
-		float         pickupX2;           // 0x0C
-		float         pickupY1;           // 0x10
-		float         pickupY2;           // 0x14
-		float         dropoffX;           // 0x18
-		float         dropoffY;           // 0x1C
-		float         dropoffZ;           // 0x20
-		float         dropoffHeading;     // 0x24
-		float         armPickupRotation;  // 0x28
-		float         armDropoffRotation; // 0x2C
-		float         armPickupDistance;  // 0x30
-		float         armDropoffDistance; // 0x34
-		float         armPickupHeight;    // 0x38
-		float         armDropoffHeight;   // 0x3C
-		float         armCurrentRotation; // 0x40
-		float         armCurrentDistance; // 0x44
-		float         armCurrentHeight;   // 0x48
-		float         hookInitialX;       // 0x4C
-		float         hookInitialY;       // 0x50
-		float         hookInitialZ;       // 0x54
-		float         hookCurrentX;       // 0x58
-		float         hookCurrentY;       // 0x5C
-		float         hookCurrentZ;       // 0x60
-		float         unk1;               // 0x64
-		float         unk2;               // 0x68
-		uintptr_t     vehicle;           // 0x6C, pointer to vehicle to be picked up
-		unsigned int  timer;              // 0x70
-		unsigned char activity;           // 0x74
-		unsigned char status;             // 0x75
-		unsigned char countCollected;     // 0x76
-		unsigned char isCrusher;          // 0x77
-		unsigned char isMilitary;         // 0x78
-		unsigned char unk3;               // 0x79
-		unsigned char isNotCab;           // 0x7A
-		unsigned char padding;            // 0x7B
-	};
-	static Crane *cranes;
-	static bool IsThisCarPickedUp(float positionX, float positionY, uintptr_t vehicle);
+	static bool IsThisCarPickedUp(float positionX, float positionY, CVehicle *vehicle);
 	static void DeActivateCrane(float positionX, float positionY);
 	static void ActivateCrane(float pickupX1, float pickupX2, float pickupY1, float pickupY2, float dropoffX, float dropoffY, float dropoffZ, float dropoffHeading, bool isCrusher, bool isMilitary, float positionX, float positionY);
 };
 
+class CCraneHack : public CCrane
+{
+public:
+	bool DoesCranePickUpThisCarType(unsigned int model);
+};
+
+class CExplosionHack : public CExplosion
+{
+public:
+	static bool TestForExplosionInArea(int explosionType, float x1, float x2, float y1, float y2, float z1, float z2);
+};
+
 DWORD(__cdecl *RpAnimBlendClumpGetFirstAssociation)(uintptr_t); // rpanimblendclumpgetfirstassociation
-void(__cdecl *StartFrenzy)(DWORD, int, unsigned short, int, wchar_t *, int, int, int, bool, bool); // cdarkel::startfrenzy
-void(__cdecl *ResetOnPlayerDeath)(void); // cdarkel::resetonplayerdeath
-bool(__thiscall *IsEntityEntirelyInside3D)(uintptr_t, uintptr_t, float); // cgarage::isentityentirelyinside3d
-void(__cdecl *ChangeGarageType)(short, unsigned char, unsigned int); // cgarages::changegaragetype
-int(__thiscall *ObjectPoolGetHandle)(void *, void *); // cpool_cobject_ccutscenehead::getindex
 void(__thiscall *SetPhoneMessage_JustOnce)(uintptr_t, int, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *); // cphoneinfo::setphonemessage_justonce
-DWORD(__cdecl *GetActualPickupIndex)(int); // cpickups::getactualpickupindex
-void(__cdecl *CreatePickup)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD); // cpickups::generatenewone
 void(__cdecl *OverrideNextRestart)(CVector *, float); // crestart::overridenextrestart
 void(__thiscall *RemoveEntityFromList)(uintptr_t, int, unsigned char); // cmissioncleanup::removeentityfromlist
-uintptr_t(__thiscall *ObjectPoolGetStruct)(void *, int); // cpool_cobject_ccutscenehead::getat
 uintptr_t(__thiscall *VehiclePoolGetStruct)(void *, int); // cpool_cvehicle_cautomobile::getat
 uintptr_t(__thiscall *PedPoolGetStruct)(void *, int); // cpool_cped_cplayerped::getat
 int(__thiscall *PedPoolGetHandle)(void *, void *); // cpool_cped_cplayerped::getindex
 void(__cdecl *HighlightImportantArea)(CScript *, float, float, float, float, float); // cthescripts::highlightimportantarea
 WORD(__thiscall *GetPadState)(CScript *, unsigned short, unsigned short); // crunningscript::getpadstate
-void(__thiscall *CamShake)(uintptr_t, float, float, float, float); // ccamera::camshake
-float(__cdecl *GetATanOfXY)(float, float); // cgeneral::getatanofxy
-bool(__thiscall *GetHasCollidedWith)(DWORD, uintptr_t); // cphysical::gethascollidedwith
 bool(__thiscall *IsWithinArea_3d)(uintptr_t, float, float, float, float, float, float); // cplaceable::iswithinarea
 bool(__thiscall *IsWithinArea_2d)(uintptr_t, float, float, float, float); // cplaceable::iswithinarea
 DWORD(__cdecl *FindPlayerPed)(void); // findplayerped
-void(__cdecl *SetBlipSprite)(int, int); // cradar::setblipsprite
-void(__cdecl *ChangeBlipScale)(int, int); // cradar::changeblipscale
-DWORD(__cdecl *SetEntityBlip)(DWORD, int, int, DWORD); // cradar::setentityblip
-DWORD(__cdecl *SetShortRangeCoordBlip)(DWORD, float, float, float, DWORD, DWORD);
-void(__cdecl *GetActualBlipArrayIndex)(int); // cradar::getactualbliparrayindex
 void(__thiscall *RegisterReference)(uintptr_t, uintptr_t); // centity::registerreference
 void(__cdecl *AnotherKillFrenzyPassed)(void); // cstats::anotherkillfrenzypassed
-float(__cdecl *FindGroundZForCoord)(float, float); // cworld::findgroundzforcoord
 DWORD(__cdecl *Remove)(DWORD); // cworld::remove
-void(__thiscall *SetAmmo)(uintptr_t, DWORD, unsigned int); // cped::setammo
 void(__thiscall *GrantAmmo)(uintptr_t, DWORD, unsigned int); // cped::grantammo
 void(__thiscall *GiveWeapon)(uintptr_t, DWORD, DWORD, DWORD); // cped::giveweapon
-bool(__thiscall *IsPedInControl)(uintptr_t); // cped::ispedincontrol
-void(__thiscall *Say)(uintptr_t, unsigned short); // cped::say
-void(__cdecl *SetHelpMessage)(wchar_t *, char, int); // chud::sethelpmessage
-DWORD(__cdecl *GetMaximumNumberOfPassengersFromNumberOfDoors)(DWORD); // cvehiclemodelinfo::getmaximumnumberofpassengersfromnumberofdoors
-void(__cdecl *AddMessageJumpQWithNumber)(wchar_t *, unsigned int, unsigned short, int, int, int, int, int, int); // cmessages::addmessagejumpqwithnumber
-void(__cdecl *AddMessageWithNumber)(wchar_t *, unsigned int, unsigned short, int, int, int, int, int, int); // cmessages::addmessagewithnumber
-void(__cdecl *InsertNumberInString)(wchar_t *, int, int, int, int, int, int, wchar_t *); // cmessages::insertnumberinstring
-void(__cdecl *AddBigMessageQ)(wchar_t *, unsigned int, unsigned short); // cmessages::addbigmessageq
-void(__cdecl *AddBigMessage)(wchar_t *, unsigned int, unsigned short); // cmessages::addbigmessage
-wchar_t *(__thiscall *GetText)(uintptr_t, char *); // ctext::get
+DWORD(__cdecl *GetNumberOfPassengerSeats)(DWORD);
 DWORD(__cdecl *GetWeaponInfo)(DWORD); // cweaponinfo::getweaponinfo
 bool *isNastyGame = NULL;
 DWORD *barrel1 = NULL;
@@ -134,11 +89,8 @@ DWORD *barrel2 = NULL;
 DWORD *maxWantedLevel = NULL;
 BYTE *phoneDisplayMessage = NULL;
 DWORD *currentPhone = NULL;
-uintptr_t cexplosion = NULL;
 uintptr_t cprojectileinfo = NULL;
 uintptr_t gangPedModelOverride = NULL;
-CCranes::Crane *CCranes::cranes = NULL;
-uintptr_t ccamera = NULL;
 uintptr_t textDraw = NULL;
 uintptr_t infoZoneCarDensity = NULL;
 uintptr_t infoZonePedDensity = NULL;
@@ -149,21 +101,17 @@ uintptr_t infoZone = NULL;
 uintptr_t pickupEntity = NULL;
 uintptr_t *playerPedPool = NULL;
 uintptr_t *playerPedState = NULL;
-uintptr_t ctext = NULL;
 uintptr_t *projectileObject = NULL;
 uintptr_t navigZone = NULL;
 void **objectPool = NULL;
 float *shootingRangeRank = NULL;
-DWORD *gameTimer = NULL;
 float *garbagePickups = NULL;
 float *loanSharkVisits = NULL;
-int *numCranes = NULL;
 uintptr_t cmissioncleanup = NULL;
 void **pedPool = NULL;
 uintptr_t cfire = NULL;
-DWORD *militaryCraneCollected = NULL;
 float *topShootingRangeScore = NULL;
-DWORD *levelName = NULL;
+int *levelName = NULL;
 uintptr_t cpedtype = NULL;
 float *movieStunts = NULL;
 void **carPool = NULL;
@@ -174,8 +122,6 @@ BYTE *allTaxiLights = NULL;
 BYTE *overrideHospital = NULL;
 BYTE *overridePolice = NULL;
 BYTE *currentPlayer = NULL;
-BYTE *freeBombs = NULL;
-BYTE *forceRain = NULL;
 
 GtaGame::GtaGame()
 {
@@ -184,50 +130,23 @@ GtaGame::GtaGame()
 	case 0x74FF5064:
 		version = V1_0;
 		RpAnimBlendClumpGetFirstAssociation = (DWORD(__cdecl *)(uintptr_t))0x402E20;
-		StartFrenzy = (void(__cdecl *)(DWORD, int, unsigned short, int, wchar_t *, int, int, int, bool, bool))0x429B60;
-		ResetOnPlayerDeath = (void(__cdecl *)(void))0x429F90;
-		IsEntityEntirelyInside3D = (bool(__thiscall *)(uintptr_t, uintptr_t, float))0x430630;
-		ChangeGarageType = (void(__cdecl *)(short, unsigned char, unsigned int))0x4340F0;
-		ObjectPoolGetHandle = (int(__thiscall *)(void *, void *))0x434A10;
 		SetPhoneMessage_JustOnce = (void(__thiscall *)(uintptr_t, int, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *))0x43C430;
-		GetActualPickupIndex = (DWORD(__cdecl *)(int))0x43D360;
-		CreatePickup = (void(__cdecl *)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
 		OverrideNextRestart = (void(__cdecl *)(CVector *, float))0x4429E0;
 		RemoveEntityFromList = (void(__thiscall *)(uintptr_t, int, unsigned char))0x4518E0;
-		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x451C30;
 		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x451C70;
 		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x451CB0;
 		PedPoolGetHandle = (int(__thiscall *)(void *, void *))0x451CF0;
 		HighlightImportantArea = (void(__cdecl *)(CScript *, float, float, float, float, float))0x45F080;
 		GetPadState = (WORD(__thiscall *)(CScript *, unsigned short, unsigned short))0x460C00;
-		CamShake = (void(__thiscall *)(uintptr_t, float, float, float, float))0x46FF21;
-		GetATanOfXY = (float(__cdecl *)(float, float))0x4A55E0;
-		GetHasCollidedWith = (bool(__thiscall *)(DWORD, uintptr_t))0x4B9010;
 		IsWithinArea_3d = (bool(__thiscall *)(uintptr_t, float, float, float, float, float, float))0x4BB900;
 		IsWithinArea_2d = (bool(__thiscall *)(uintptr_t, float, float, float, float))0x4BB9E0;
 		FindPlayerPed = (DWORD(__cdecl *)(void))0x4BC120;
-		SetBlipSprite = (void(__cdecl *)(int, int))0x4C3780;
-		ChangeBlipScale = (void(__cdecl *)(int, int))0x4C3840;
-		SetEntityBlip = (DWORD(__cdecl *)(DWORD, int, int, DWORD))0x4C3B40;
-		SetShortRangeCoordBlip = (DWORD(__cdecl *)(DWORD, float, float, float, DWORD, DWORD))0x4C3C00;
-		GetActualBlipArrayIndex = (void(__cdecl *)(int))0x4C5D70;
 		RegisterReference = (void(__thiscall *)(uintptr_t, uintptr_t))0x4C6AC0;
 		AnotherKillFrenzyPassed = (void(__cdecl *)(void))0x4CDBA7;
-		FindGroundZForCoord = (float(__cdecl *)(float, float))0x4D5540;
 		Remove = (DWORD(__cdecl *)(DWORD))0x4DB310;
-		SetAmmo = (void(__thiscall *)(uintptr_t, DWORD, unsigned int))0x4FF780;
 		GrantAmmo = (void(__thiscall *)(uintptr_t, DWORD, unsigned int))0x4FF840;
 		GiveWeapon = (void(__thiscall *)(uintptr_t, DWORD, DWORD, DWORD))0x4FFA30;
-		IsPedInControl = (bool(__thiscall *)(uintptr_t))0x501950;
-		Say = (void(__thiscall *)(uintptr_t, unsigned short))0x5226B0;
-		SetHelpMessage = (void(__cdecl *)(wchar_t *, char, int))0x55BFC0;
-		GetMaximumNumberOfPassengersFromNumberOfDoors = (DWORD(__cdecl *)(DWORD))0x578A70;
-		AddMessageJumpQWithNumber = (void(__cdecl *)(wchar_t *, unsigned int, unsigned short, int, int, int, int, int, int))0x583440;
-		AddMessageWithNumber = (void(__cdecl *)(wchar_t *, unsigned int, unsigned short, int, int, int, int, int, int))0x583560;
-		InsertNumberInString = (void(__cdecl *)(wchar_t *, int, int, int, int, int, int, wchar_t *))0x583C80;
-		AddBigMessageQ = (void(__cdecl *)(wchar_t *, unsigned int, unsigned short))0x583F40;
-		AddBigMessage = (void(__cdecl *)(wchar_t *, unsigned int, unsigned short))0x584050;
-		GetText = (wchar_t *(__thiscall *)(uintptr_t, char *))0x584F30;
+		GetNumberOfPassengerSeats = (DWORD(__cdecl *)(DWORD))0x578A70;
 		GetWeaponInfo = (DWORD(__cdecl *)(DWORD))0x5D5710;
 		isNastyGame = (bool *)0x68DD68;
 		barrel1 = (DWORD *)0x68E8B0;
@@ -235,11 +154,8 @@ GtaGame::GtaGame()
 		maxWantedLevel = (DWORD *)0x6910D8;
 		phoneDisplayMessage = (BYTE *)0x7030E4;
 		currentPhone = (DWORD *)0x7030E8;
-		cexplosion = 0x780C88;
 		cprojectileinfo = 0x7DB888;
 		gangPedModelOverride = 0x7D925C;
-		CCranes::cranes = (CCranes::Crane *)0x7E4040;
-		ccamera = 0x7E4688;
 		textDraw = 0x7F0EA0;
 		infoZoneCarDensity = 0x7FA370;
 		infoZonePedDensity = 0x7FA39C;
@@ -250,21 +166,17 @@ GtaGame::GtaGame()
 		pickupEntity = 0x945D40;
 		playerPedPool = (uintptr_t *)0x94AD28;
 		playerPedState = (uintptr_t *)0x94ADF4;
-		ctext = 0x94B220;
 		projectileObject = (uintptr_t *)0x94B708;
 		navigZone = 0x94B990;
 		objectPool = (void **)0x94DBE0;
 		shootingRangeRank = (float *)0x974B08;
-		gameTimer = (DWORD *)0x974B2C;
 		garbagePickups = (float *)0x974C00;
 		loanSharkVisits = (float*)0x974C28;
-		numCranes = (int *)0x974C34;
 		cmissioncleanup = 0x97F060;
 		pedPool = (void **)0x97F2AC;
 		cfire = 0x97F8A0;
-		militaryCraneCollected = (DWORD *)0x9B6CE4;
 		topShootingRangeScore = (float *)0xA0D8A4;
-		levelName = (DWORD *)0xA0D9AC;
+		levelName = (int *)0xA0D9AC;
 		cpedtype = (uintptr_t)0xA0DA64;
 		movieStunts = (float *)0xA0FC8C;
 		carPool = (void **)0xA0FDE4;
@@ -275,56 +187,27 @@ GtaGame::GtaGame()
 		overrideHospital = (BYTE *)0xA10AE6;
 		overridePolice = (BYTE *)0xA10AEA;
 		currentPlayer = (BYTE *)0xA10AFB;
-		freeBombs = (BYTE *)0xA10B32;
-		forceRain = (BYTE *)0xA10B38;
 		break;
 	case 0x00408DC0:
 		version = V1_1;
 		RpAnimBlendClumpGetFirstAssociation = (DWORD(__cdecl *)(uintptr_t))0x402E20;
-		StartFrenzy = (void(__cdecl *)(DWORD, int, unsigned short, int, wchar_t *, int, int, int, bool, bool))0x429B60;
-		ResetOnPlayerDeath = (void(__cdecl *)(void))0x429F90;
-		IsEntityEntirelyInside3D = (bool(__thiscall *)(uintptr_t, uintptr_t, float))0x430630;
-		ChangeGarageType = (void(__cdecl *)(short, unsigned char, unsigned int))0x4340F0;
-		ObjectPoolGetHandle = (int(__thiscall *)(void *, void *))0x434A10;
 		SetPhoneMessage_JustOnce = (void(__thiscall *)(uintptr_t, int, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *))0x43C430;
-		GetActualPickupIndex = (DWORD(__cdecl *)(int))0x43D360;
-		CreatePickup = (void(__cdecl *)(float, float, float, DWORD, DWORD, DWORD, DWORD, BYTE, DWORD))0x4418C0;
 		OverrideNextRestart = (void(__cdecl *)(CVector *, float))0x4429E0;
 		RemoveEntityFromList = (void(__thiscall *)(uintptr_t, int, unsigned char))0x4518E0;
-		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x451C30;
 		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x451C70;
 		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x451CB0;
 		PedPoolGetHandle = (int(__thiscall *)(void *, void *))0x451CF0;
 		HighlightImportantArea = (void(__cdecl *)(CScript *, float, float, float, float, float))0x45F080;
 		GetPadState = (WORD(__thiscall *)(CScript *, unsigned short, unsigned short))0x460C00;
-		CamShake = (void(__thiscall *)(uintptr_t, float, float, float, float))0x46FF21;
-		GetATanOfXY = (float(__cdecl *)(float, float))(0x4A55E0 + 0x20);
-		GetHasCollidedWith = (bool(__thiscall *)(DWORD, uintptr_t))(0x4B9010 + 0x20);
 		IsWithinArea_3d = (bool(__thiscall *)(uintptr_t, float, float, float, float, float, float))(0x4BB900 + 0x20);
 		IsWithinArea_2d = (bool(__thiscall *)(uintptr_t, float, float, float, float))(0x4BB9E0 + 0x20);
 		FindPlayerPed = (DWORD(__cdecl *)(void))(0x4BC120 + 0x20);
-		SetBlipSprite = (void(__cdecl *)(int, int))(0x4C3780 + 0x20);
-		ChangeBlipScale = (void(__cdecl *)(int, int))(0x4C3840 + 0x20);
-		SetEntityBlip = (DWORD(__cdecl *)(DWORD, int, int, DWORD))(0x4C3B40 + 0x20);
-		SetShortRangeCoordBlip = (DWORD(__cdecl *)(DWORD, float, float, float, DWORD, DWORD))(0x4C3C00 + 0x20);
-		GetActualBlipArrayIndex = (void(__cdecl *)(int))(0x4C5D70 + 0x20);
 		RegisterReference = (void(__thiscall *)(uintptr_t, uintptr_t))(0x4C6AC0 + 0x20);
 		AnotherKillFrenzyPassed = (void(__cdecl *)(void))(0x4CDBA7 + 0x20);
-		FindGroundZForCoord = (float(__cdecl *)(float, float))(0x4D5540 + 0x20);
 		Remove = (DWORD(__cdecl *)(DWORD))(0x4DB310 + 0x20);
-		SetAmmo = (void(__thiscall *)(uintptr_t, DWORD, unsigned int))(0x4FF780 + 0x20);
 		GrantAmmo = (void(__thiscall *)(uintptr_t, DWORD, unsigned int))(0x4FF840 + 0x20);
 		GiveWeapon = (void(__thiscall *)(uintptr_t, DWORD, DWORD, DWORD))(0x4FFA30 + 0x20);
-		IsPedInControl = (bool(__thiscall *)(uintptr_t))(0x501950 + 0x20);
-		Say = (void(__thiscall *)(uintptr_t, unsigned short))(0x5226B0 + 0x20);
-		SetHelpMessage = (void(__cdecl *)(wchar_t *, char, int))(0x55BFC0 + 0x20);
-		GetMaximumNumberOfPassengersFromNumberOfDoors = (DWORD(__cdecl *)(DWORD))(0x578A70 + 0x20);
-		AddMessageJumpQWithNumber = (void(__cdecl *)(wchar_t *, unsigned int, unsigned short, int, int, int, int, int, int))(0x583440 + 0x20);
-		AddMessageWithNumber = (void(__cdecl *)(wchar_t *, unsigned int, unsigned short, int, int, int, int, int, int))(0x583560 + 0x20);
-		InsertNumberInString = (void(__cdecl *)(wchar_t *, int, int, int, int, int, int, wchar_t *))(0x583C80 + 0x20);
-		AddBigMessageQ = (void(__cdecl *)(wchar_t *, unsigned int, unsigned short))(0x583F40 + 0x20);
-		AddBigMessage = (void(__cdecl *)(wchar_t *, unsigned int, unsigned short))(0x584050 + 0x20);
-		GetText = (wchar_t *(__thiscall *)(uintptr_t, char *))(0x584F30 + 0x20);
+		GetNumberOfPassengerSeats = (DWORD(__cdecl *)(DWORD))(0x578A70 + 0x20);
 		GetWeaponInfo = (DWORD(__cdecl *)(DWORD))(0x5D5710 + 0x20);
 		isNastyGame = (bool *)0x68DD68;
 		barrel1 = (DWORD *)0x68E8B0;
@@ -332,11 +215,8 @@ GtaGame::GtaGame()
 		maxWantedLevel = (DWORD *)0x6910D8;
 		phoneDisplayMessage = (BYTE *)0x7030E4;
 		currentPhone = (DWORD *)0x7030E8;
-		cexplosion = 0x780C88;
 		cprojectileinfo = 0x7DB888 + 8;
 		gangPedModelOverride = 0x7D925C + 8;
-		CCranes::cranes = (CCranes::Crane *)(0x7E4040 + 8);
-		ccamera = 0x7E4688 + 8;
 		textDraw = 0x7F0EA0 + 8;
 		infoZoneCarDensity = 0x7FA370 + 8;
 		infoZonePedDensity = 0x7FA39C + 8;
@@ -347,21 +227,17 @@ GtaGame::GtaGame()
 		pickupEntity = 0x945D40 + 8;
 		playerPedPool = (uintptr_t *)(0x94AD28 + 8);
 		playerPedState = (uintptr_t *)(0x94ADF4 + 8);
-		ctext = 0x94B220 + 8;
 		projectileObject = (uintptr_t *)(0x94B708 + 8);
 		navigZone = 0x94B990 + 8;
 		objectPool = (void **)(0x94DBE0 + 8);
 		shootingRangeRank = (float *)(0x974B08 + 8);
-		gameTimer = (DWORD *)(0x974B2C + 8);
 		garbagePickups = (float *)(0x974C00 + 8);
 		loanSharkVisits = (float*)(0x974C28 + 8);
-		numCranes = (int *)(0x974C34 + 8);
 		cmissioncleanup = 0x97F060 + 8;
 		pedPool = (void **)(0x97F2AC + 8);
 		cfire = 0x97F8A0 + 8;
-		militaryCraneCollected = (DWORD *)(0x9B6CE4 + 8);
 		topShootingRangeScore = (float *)(0xA0D8A4 + 8);
-		levelName = (DWORD *)(0xA0D9AC + 8);
+		levelName = (int *)(0xA0D9AC + 8);
 		cpedtype = (uintptr_t)(0xA0DA64 + 8);
 		movieStunts = (float *)(0xA0FC8C + 8);
 		carPool = (void **)(0xA0FDE4 + 8);
@@ -372,19 +248,13 @@ GtaGame::GtaGame()
 		overrideHospital = (BYTE *)(0xA10AE6 + 8);
 		overridePolice = (BYTE *)(0xA10AEA + 8);
 		currentPlayer = (BYTE *)(0xA10AFB + 8);
-		freeBombs = (BYTE *)(0xA10B32 + 8);
-		forceRain = (BYTE *)(0xA10B38 + 8);
 		break;
 	case 0x00004824:
 		version = VSTEAM;
-		ObjectPoolGetStruct = (uintptr_t(__thiscall *)(void *, int))(0x451C30 - 0x120);
 		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, int))(0x451C70 - 0x120);
 		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, int))(0x451CB0 - 0x120);
-		GetText = (wchar_t *(__thiscall *)(uintptr_t, char *))(0x584F30 - 0x1D0);
 		cprojectileinfo = 0x7DB888 - 0xFF8;
 		gangPedModelOverride = 0x7D925C - 0xFF8;
-		CCranes::cranes = (CCranes::Crane *)(0x7E4040 - 0xFF8);
-		ccamera = 0x7E4688 - 0xFF8;
 		textDraw = 0x7F0EA0 - 0xFF8;
 		infoZoneCarDensity = 0x7FA370 - 0xFF8;
 		infoZonePedDensity = 0x7FA39C - 0xFF8;
@@ -395,21 +265,17 @@ GtaGame::GtaGame()
 		pickupEntity = 0x945D40 - 0xFF8;
 		playerPedPool = (uintptr_t *)(0x94AD28 - 0xFF8);
 		playerPedState = (uintptr_t *)(0x94ADF4 - 0xFF8);
-		ctext = 0x94B220 - 0xFF8;
 		projectileObject = (uintptr_t *)(0x94B708 - 0xFF8);
 		navigZone = 0x94B990 - 0xFF8;
 		objectPool = (void **)(0x94DBE0 - 0xFF8);
 		shootingRangeRank = (float *)(0x974B08 - 0xFF8);
-		gameTimer = (DWORD *)(0x974B2C - 0xFF8);
 		garbagePickups = (float *)(0x974C00 - 0xFF8);
 		loanSharkVisits = (float*)(0x974C28 - 0xFF8);
-		numCranes = (int *)(0x974C34 - 0xFF8);
 		cmissioncleanup = 0x97F060 - 0xFF8;
 		pedPool = (void **)(0x97F2AC - 0xFF8);
 		cfire = 0x97F8A0 - 0xFF8;
-		militaryCraneCollected = (DWORD *)(0x9B6CE4 - 0xFF8);
 		topShootingRangeScore = (float *)(0xA0D8A4 - 0xFF8);
-		levelName = (DWORD *)(0xA0D9AC - 0xFF8);
+		levelName = (int *)(0xA0D9AC - 0xFF8);
 		cpedtype = (uintptr_t)(0xA0DA64 - 0xFF8);
 		movieStunts = (float *)(0xA0FC8C - 0xFF8);
 		carPool = (void **)(0xA0FDE4 - 0xFF8);
@@ -420,11 +286,11 @@ GtaGame::GtaGame()
 	}
 }
 
-bool CCranes::IsThisCarPickedUp(float positionX, float positionY, uintptr_t vehicle)
+bool CCranesHack::IsThisCarPickedUp(float positionX, float positionY, CVehicle *vehicle)
 {
 	float craneObjectX, craneObjectY, distance;
-	if (*numCranes > 0) {
-		for (int i = 0; i < *numCranes; i++) {
+	if (numCranes > 0) {
+		for (int i = 0; i < numCranes; i++) {
 			craneObjectX = *(float *)(cranes[i].object + 0x34);
 			craneObjectY = *(float *)(cranes[i].object + 0x38);
 			distance = sqrt(pow(positionX - craneObjectX, 2) + pow(positionY - craneObjectY, 2));
@@ -436,13 +302,13 @@ bool CCranes::IsThisCarPickedUp(float positionX, float positionY, uintptr_t vehi
 	return false;
 }
 
-void CCranes::DeActivateCrane(float positionX, float positionY)
+void CCranesHack::DeActivateCrane(float positionX, float positionY)
 {
 	int index = -1;
 	float craneObjectX, craneObjectY, minDistance, distance;
 	minDistance = 100.0;
-	if (*numCranes > 0) {
-		for (int i = 0; i < *numCranes; i++) {
+	if (numCranes > 0) {
+		for (int i = 0; i < numCranes; i++) {
 			craneObjectX = *(float *)(cranes[i].object + 0x34);
 			craneObjectY = *(float *)(cranes[i].object + 0x38);
 			distance = sqrt(pow(positionX - craneObjectX, 2) + pow(positionY - craneObjectY, 2));
@@ -452,17 +318,18 @@ void CCranes::DeActivateCrane(float positionX, float positionY)
 			}
 		}
 	}
+	if (index == -1) return;
 	cranes[index].activity = 2;
 	cranes[index].status = 0;
 }
 
-void CCranes::ActivateCrane(float pickupX1, float pickupX2, float pickupY1, float pickupY2, float dropoffX, float dropoffY, float dropoffZ, float dropoffHeading, bool isCrusher, bool isMilitary, float positionX, float positionY)
+void CCranesHack::ActivateCrane(float pickupX1, float pickupX2, float pickupY1, float pickupY2, float dropoffX, float dropoffY, float dropoffZ, float dropoffHeading, bool isCrusher, bool isMilitary, float positionX, float positionY)
 {
 	int index = -1;
 	float craneObjectX, craneObjectY, minDistance, distance, pickupCenterX, pickupCenterY;
 	minDistance = 100.0;
-	if (*numCranes > 0) {
-		for (int i = 0; i < *numCranes; i++) {
+	if (numCranes > 0) {
+		for (int i = 0; i < numCranes; i++) {
 			craneObjectX = *(float *)(cranes[i].object + 0x34);
 			craneObjectY = *(float *)(cranes[i].object + 0x38);
 			distance = sqrt(pow(positionX - craneObjectX, 2) + pow(positionY - craneObjectY, 2));
@@ -472,6 +339,7 @@ void CCranes::ActivateCrane(float pickupX1, float pickupX2, float pickupY1, floa
 			}
 		}
 	}
+	if (index == -1) return;
 	cranes[index].pickupX1 = pickupX1;
 	cranes[index].pickupX2 = pickupX2;
 	cranes[index].pickupY1 = pickupY1;
@@ -496,12 +364,12 @@ void CCranes::ActivateCrane(float pickupX1, float pickupX2, float pickupY1, floa
 	} else if (isMilitary) {
 		cranes[index].armPickupHeight = 10.7862f;
 	} else {
-		cranes[index].armPickupHeight = FindGroundZForCoord(pickupCenterX, pickupCenterY);
+		cranes[index].armPickupHeight = CWorld::FindGroundZForCoord(pickupCenterX, pickupCenterY);
 	}*/
-	cranes[index].armPickupHeight = FindGroundZForCoord(pickupCenterX, pickupCenterY);
-	cranes[index].armPickupRotation = GetATanOfXY(pickupCenterX - craneObjectX, pickupCenterY - craneObjectY);
+	cranes[index].armPickupHeight = CWorld::FindGroundZForCoord(pickupCenterX, pickupCenterY);
+	cranes[index].armPickupRotation = CGeneral::GetATanOfXY(pickupCenterX - craneObjectX, pickupCenterY - craneObjectY);
 	cranes[index].armPickupDistance = sqrt(pow(pickupCenterX - craneObjectX, 2) + pow(pickupCenterY - craneObjectY, 2));
-	cranes[index].armDropoffRotation = GetATanOfXY(dropoffX - craneObjectX, dropoffY - craneObjectY);
+	cranes[index].armDropoffRotation = CGeneral::GetATanOfXY(dropoffX - craneObjectX, dropoffY - craneObjectY);
 	cranes[index].armDropoffDistance = sqrt(pow(dropoffX - craneObjectX, 2) + pow(dropoffY - craneObjectY, 2));
 	cranes[index].armDropoffHeight = dropoffZ;
 }
@@ -543,7 +411,7 @@ void SetPhoneMessage_Repeatedly(uintptr_t cphoneinfo, int phone, wchar_t *string
 	*(unsigned int *)(phone + 0x34) = 5;
 }
 
-bool TestForExplosionInArea(int explosionType, float x1, float x2, float y1, float y2, float z1, float z2)
+bool CExplosionHack::TestForExplosionInArea(int explosionType, float x1, float x2, float y1, float y2, float z1, float z2)
 {
 	float temp;
 	if (x1 > x2) {
@@ -561,12 +429,12 @@ bool TestForExplosionInArea(int explosionType, float x1, float x2, float y1, flo
 		z2 = z1;
 		z1 = temp;
 	}
-	for (uintptr_t address = cexplosion; address < cexplosion + 0x30 * 0x38; address += 0x38) {
-		if (*(BYTE *)(address + 0x24) != 0) {
-			if (*(int *)(address) == explosionType) {
-				if (*(float *)(address + 4) >= x1 && *(float *)(address + 4) <= x2) {
-					if (*(float *)(address + 8) >= y1 && *(float *)(address + 8) <= y2) {
-						if (*(float *)(address + 0xC) >= z1 && *(float *)(address + 0xC) <= z2) {
+	for (int i = 0; i < 0x30; i++) {
+		if (explosions[i].counter) {
+			if (explosions[i].type == explosionType) {
+				if (explosions[i].position.x >= x1 && explosions[i].position.x <= x2) {
+					if (explosions[i].position.y >= y1 && explosions[i].position.y <= y2) {
+						if (explosions[i].position.z >= z1 && explosions[i].position.z <= z2) {
 							return true;
 						}
 					}
@@ -581,10 +449,9 @@ bool TestForExplosionInArea(int explosionType, float x1, float x2, float y1, flo
 eOpcodeResult WINAPI IS_CHAR_STILL_ALIVE(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
-	if (ped != NULL) {
-		DWORD state = *(DWORD *)(ped + 0x244);
-		if (state != 0x37 && state != 0x36) {
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	if (ped) {
+		if (ped->state != 0x37 && ped->state != 0x36) {
 			script->UpdateCompareFlag(true);
 			return OR_CONTINUE;
 		}
@@ -597,8 +464,8 @@ eOpcodeResult WINAPI IS_CHAR_STILL_ALIVE(CScript *script)
 eOpcodeResult WINAPI IS_CAR_STILL_ALIVE(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
-	if (car != NULL) {
+	uintptr_t car = (uintptr_t)CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	if (car) {
 		BYTE flag = *(BYTE *)(car + 0x50);
 		flag >>= 3;
 		if (flag != 5) {
@@ -632,7 +499,7 @@ eOpcodeResult WINAPI RETURN_FALSE(CScript *script)
 eOpcodeResult WINAPI GET_PAD_STATE(CScript *script)
 {
 	script->Collect(2);
-	Params[0].nVar = (unsigned int)GetPadState(script, Params[0].nVar, Params[1].nVar);
+	Params[0].nVar = (unsigned int)GetPadState(script, (unsigned short)Params[0].nVar, (unsigned short)Params[1].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -665,9 +532,8 @@ eOpcodeResult WINAPI HAS_PLAYER_BEEN_ARRESTED(CScript *script)
 eOpcodeResult WINAPI CHANGE_CAR_LOCK(CScript *script)
 {
 	script->Collect(2);
-	uintptr_t car;
-	if ((car = VehiclePoolGetStruct(*carPool, Params[0].nVar)) != NULL) {
-		*(DWORD *)(car + 0x230) = Params[1].nVar;
+	if (CVehicle *car = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
+		car->lock = Params[1].nVar;
 	}
 	return OR_CONTINUE;
 }
@@ -676,7 +542,7 @@ eOpcodeResult WINAPI CHANGE_CAR_LOCK(CScript *script)
 eOpcodeResult WINAPI SHAKE_CAM_WITH_POINT(CScript *script)
 {
 	script->Collect(4);
-	CamShake(ccamera, ((float)Params[0].nVar) * 1e-3f, Params[1].fVar, Params[2].fVar, Params[3].fVar);
+	VCGlobals::TheCamera.CamShake(((float)Params[0].nVar) * 1e-3f, Params[1].fVar, Params[2].fVar, Params[3].fVar);
 	return OR_CONTINUE;
 }
 
@@ -684,11 +550,11 @@ eOpcodeResult WINAPI SHAKE_CAM_WITH_POINT(CScript *script)
 eOpcodeResult WINAPI IS_CAR_DEAD_IN_AREA_2D(CScript *script)
 {
 	script->Collect(6);
-	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
+	uintptr_t car = (uintptr_t)CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
 	if (Params[5].nVar) {
 		HighlightImportantArea(script, Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar, -100.0);
 	}
-	if (car != NULL) {
+	if (car) {
 		BYTE flag = *(BYTE *)(car + 0x50);
 		flag >>= 3;
 		if (flag == 5 && IsWithinArea_2d(car + 4, Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar)) {
@@ -704,7 +570,7 @@ eOpcodeResult WINAPI IS_CAR_DEAD_IN_AREA_2D(CScript *script)
 eOpcodeResult WINAPI IS_CAR_DEAD_IN_AREA_3D(CScript *script)
 {
 	script->Collect(8);
-	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
+	uintptr_t car = (uintptr_t)CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
 	if (Params[7].nVar) {
 		HighlightImportantArea(script, Params[1].fVar, Params[2].fVar, Params[4].fVar, Params[5].fVar, (Params[3].fVar + Params[6].fVar) * 0.5f);
 	}
@@ -760,7 +626,7 @@ eOpcodeResult WINAPI SET_PED_DENSITY(CScript *script)
 eOpcodeResult WINAPI IS_CAR_IN_AIR(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag(*(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x5C5) == 0);
+	script->UpdateCompareFlag(CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->numberOfWheelsOnGround == 0);
 	return OR_CONTINUE;
 }
 
@@ -768,9 +634,9 @@ eOpcodeResult WINAPI IS_CAR_IN_AIR(CScript *script)
 eOpcodeResult WINAPI ADD_BLIP_FOR_OBJECT_OLD(CScript *script)
 {
 	script->Collect(3);
-	ObjectPoolGetStruct(*objectPool, Params[0].nVar);
-	GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
-	Params[0].nVar = SetEntityBlip(3, Params[0].nVar, Params[1].nVar, Params[2].nVar);
+	CPools::ms_pObjectPool->GetAt(Params[0].nVar);
+	CRadar::GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
+	Params[0].nVar = CRadar::SetEntityBlip(3, Params[0].nVar, Params[1].nVar, Params[2].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -779,15 +645,14 @@ eOpcodeResult WINAPI ADD_BLIP_FOR_OBJECT_OLD(CScript *script)
 eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT(CScript *script)
 {
 	script->Collect(2);
-	DWORD source = playerPedPool[0x2E * Params[0].nVar];
-	uintptr_t target = ObjectPoolGetStruct(*objectPool, Params[1].nVar);
-	if (*(BYTE *)(source + 0x3AC)) {
-		uintptr_t car = *(uintptr_t *)(source + 0x3A8);
-		if (car != NULL) {
-			source = car;
+	CPlayerPed *player = CWorld::Players[Params[0].nVar].playerEntity;
+	CPhysical *source = player;
+	if (player->isInAnyVehicle) {
+		if (player->vehicle) {
+			source = player->vehicle;
 		}
 	}
-	script->UpdateCompareFlag(GetHasCollidedWith(source, target));
+	script->UpdateCompareFlag(source->GetHasCollidedWith(CPools::ms_pObjectPool->GetAt(Params[1].nVar)));
 	return OR_CONTINUE;
 }
 
@@ -795,15 +660,14 @@ eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT(CScript *script)
 {
 	script->Collect(2);
-	uintptr_t source = PedPoolGetStruct(*pedPool, Params[0].nVar);
-	uintptr_t target = ObjectPoolGetStruct(*objectPool, Params[1].nVar);
-	if (*(BYTE *)(source + 0x3AC)) {
-		uintptr_t car = *(uintptr_t *)(source + 0x3A8);
-		if (car != NULL) {
-			source = car;
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	CPhysical *source = ped;
+	if (ped->isInAnyVehicle) {
+		if (ped->vehicle) {
+			source = ped->vehicle;
 		}
 	}
-	script->UpdateCompareFlag(GetHasCollidedWith(source, target));
+	script->UpdateCompareFlag(source->GetHasCollidedWith(CPools::ms_pObjectPool->GetAt(Params[1].nVar)));
 	return OR_CONTINUE;
 }
 
@@ -811,7 +675,7 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT(CScript *script)
 eOpcodeResult WINAPI SET_CHAR_AMMO(CScript *script)
 {
 	script->Collect(3);
-	SetAmmo(PedPoolGetStruct(*pedPool, Params[0].nVar), Params[1].nVar, Params[2].nVar);
+	CPools::ms_pPedPool->GetAt(Params[0].nVar)->SetAmmo(Params[1].nVar, Params[2].nVar);
 	return OR_CONTINUE;
 }
 
@@ -819,7 +683,7 @@ eOpcodeResult WINAPI SET_CHAR_AMMO(CScript *script)
 eOpcodeResult WINAPI DONT_REMOVE_CAR(CScript *script)
 {
 	script->Collect(1);
-	VehiclePoolGetStruct(*carPool, Params[0].nVar);
+	CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
 	RemoveEntityFromList(cmissioncleanup, Params[0].nVar, 1);
 	return OR_CONTINUE;
 }
@@ -840,7 +704,7 @@ eOpcodeResult WINAPI ACTIVATE_CRANE(CScript *script)
 		Params[3].fVar = temp;
 	}
 	Params[9].fVar = Params[9].fVar * 3.1415927f * 5.5555557e-3f;
-	CCranes::ActivateCrane(Params[2].fVar, Params[4].fVar, Params[3].fVar, Params[5].fVar, Params[6].fVar, Params[7].fVar, Params[8].fVar, Params[9].fVar, false, false, Params[0].fVar, Params[1].fVar);
+	CCranesHack::ActivateCrane(Params[2].fVar, Params[4].fVar, Params[3].fVar, Params[5].fVar, Params[6].fVar, Params[7].fVar, Params[8].fVar, Params[9].fVar, false, false, Params[0].fVar, Params[1].fVar);
 	return OR_CONTINUE;
 }
 
@@ -848,7 +712,7 @@ eOpcodeResult WINAPI ACTIVATE_CRANE(CScript *script)
 eOpcodeResult WINAPI DEACTIVATE_CRANE(CScript *script)
 {
 	script->Collect(2);
-	CCranes::DeActivateCrane(Params[0].fVar, Params[1].fVar);
+	CCranesHack::DeActivateCrane(Params[0].fVar, Params[1].fVar);
 	return OR_CONTINUE;
 }
 
@@ -858,8 +722,8 @@ eOpcodeResult WINAPI PRINT_WITH_NUMBER_BIG_Q(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(3);
-	InsertNumberInString(GetText(ctext, gxt), Params[0].nVar, 0, 0, 0, 0, 0, numberedText);
-	AddBigMessageQ(numberedText, Params[1].nVar, (unsigned short)Params[2].nVar - 1);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, 0, 0, 0, 0, 0, numberedText);
+	CMessages::AddBigMessageQ(numberedText, Params[1].nVar, (unsigned short)Params[2].nVar - 1);
 	return OR_CONTINUE;
 }
 
@@ -867,7 +731,7 @@ eOpcodeResult WINAPI PRINT_WITH_NUMBER_BIG_Q(CScript *script)
 eOpcodeResult WINAPI SET_FREE_BOMBS(CScript *script)
 {
 	script->Collect(1);
-	*freeBombs = (BYTE)(Params[0].nVar ? 1 : 0);
+	CGarages::bombsAreFree = !!Params[0].nVar;
 	return OR_CONTINUE;
 }
 
@@ -875,7 +739,7 @@ eOpcodeResult WINAPI SET_FREE_BOMBS(CScript *script)
 eOpcodeResult WINAPI SET_ALL_TAXI_LIGHTS(CScript *script)
 {
 	script->Collect(1);
-	*allTaxiLights = (BYTE)(Params[0].nVar ? 1 : 0);
+	*allTaxiLights = !!Params[0].nVar;
 	return OR_CONTINUE;
 }
 
@@ -883,11 +747,7 @@ eOpcodeResult WINAPI SET_ALL_TAXI_LIGHTS(CScript *script)
 eOpcodeResult WINAPI IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script)
 {
 	script->Collect(1);
-	if (*(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x1FE) & 7) {
-		script->UpdateCompareFlag(true);
-		return OR_CONTINUE;
-	}
-	script->UpdateCompareFlag(false);
+	script->UpdateCompareFlag(!!(CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->bombState & 7));
 	return OR_CONTINUE;
 }
 
@@ -895,11 +755,7 @@ eOpcodeResult WINAPI IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script)
 eOpcodeResult WINAPI IS_CAR_ARMED_WITH_BOMB(CScript *script)
 {
 	script->Collect(2);
-	if ((*(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x1FE) & 7) == Params[1].nVar) {
-		script->UpdateCompareFlag(true);
-		return OR_CONTINUE;
-	}
-	script->UpdateCompareFlag(false);
+	script->UpdateCompareFlag((CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->bombState & 7) == Params[1].nVar);
 	return OR_CONTINUE;
 }
 
@@ -907,15 +763,8 @@ eOpcodeResult WINAPI IS_CAR_ARMED_WITH_BOMB(CScript *script)
 eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 {
 	script->Collect(2);
-	DWORD player = playerPedPool[0x2E * Params[0].nVar];
-	uintptr_t object = ObjectPoolGetStruct(*objectPool, Params[1].nVar);
-	if (!*(BYTE *)(player + 0x3AC)) {
-		if (GetHasCollidedWith(player, object)) {
-			script->UpdateCompareFlag(true);
-			return OR_CONTINUE;
-		}
-	}
-	script->UpdateCompareFlag(false);
+	CPlayerPed *player = CWorld::Players[Params[0].nVar].playerEntity;
+	script->UpdateCompareFlag(!player->isInAnyVehicle && player->GetHasCollidedWith(CPools::ms_pObjectPool->GetAt(Params[1].nVar)));
 	return OR_CONTINUE;
 }
 
@@ -923,15 +772,8 @@ eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 {
 	script->Collect(2);
-	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
-	uintptr_t object = ObjectPoolGetStruct(*objectPool, Params[1].nVar);
-	if (!*(BYTE *)(ped + 0x3AC)) {
-		if (GetHasCollidedWith(ped, object)) {
-			script->UpdateCompareFlag(true);
-			return OR_CONTINUE;
-		}
-	}
-	script->UpdateCompareFlag(false);
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	script->UpdateCompareFlag(!ped->isInAnyVehicle && ped->GetHasCollidedWith(CPools::ms_pObjectPool->GetAt(Params[1].nVar)));
 	return OR_CONTINUE;
 }
 
@@ -954,8 +796,7 @@ eOpcodeResult WINAPI SET_REPEATED_PHONE_MESSAGE(CScript *script)
 	script->Collect(1);
 	char gxt[8];
 	script->ReadShortString(gxt);
-	wchar_t *string = GetText(ctext, gxt);
-	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string, NULL, NULL, NULL, NULL, NULL);
+	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, VCGlobals::TheText.Get(gxt), NULL, NULL, NULL, NULL, NULL);
 	return OR_CONTINUE;
 }
 
@@ -965,8 +806,7 @@ eOpcodeResult WINAPI SET_PHONE_MESSAGE(CScript *script)
 	script->Collect(1);
 	char gxt[8];
 	script->ReadShortString(gxt);
-	wchar_t *string = GetText(ctext, gxt);
-	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string, NULL, NULL, NULL, NULL, NULL);
+	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, VCGlobals::TheText.Get(gxt), NULL, NULL, NULL, NULL, NULL);
 	return OR_CONTINUE;
 }
 
@@ -990,7 +830,7 @@ eOpcodeResult WINAPI RESTART_CRITICAL_MISSION(CScript *script)
 {
 	script->Collect(4);
 	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
+		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
 	}
 	CVector pos;
 	pos.x = Params[0].fVar;
@@ -1000,8 +840,8 @@ eOpcodeResult WINAPI RESTART_CRITICAL_MISSION(CScript *script)
 	DWORD player = *currentPlayer * 0x170 + (DWORD)playerPedPool;
 	if (*(BYTE *)(player + 0xCC) == 0) {
 		*(BYTE *)(player + 0xCC) = 3;
-		*(DWORD *)(player + 0xD0) = *gameTimer;
-		ResetOnPlayerDeath();
+		*(DWORD *)(player + 0xD0) = CTimer::m_snTimeInMilliseconds;
+		CDarkel::ResetOnPlayerDeath();
 	}
 	return OR_CONTINUE;
 }
@@ -1010,7 +850,7 @@ eOpcodeResult WINAPI RESTART_CRITICAL_MISSION(CScript *script)
 eOpcodeResult WINAPI IS_TAXI(CScript *script)
 {
 	script->Collect(1);
-	WORD model = *(WORD *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x5C);
+	unsigned short model = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->modelIndex;
 	script->UpdateCompareFlag(model == 0x96 || model == 0xA8 || model == 0xBC || model == 0xD8);
 	return OR_CONTINUE;
 }
@@ -1019,13 +859,10 @@ eOpcodeResult WINAPI IS_TAXI(CScript *script)
 eOpcodeResult WINAPI ACTIVATE_GARAGE(CScript *script)
 {
 	script->Collect(1);
-	BYTE *pgarage = (BYTE *)(Params[0].nVar * 0xA8 + cgarage);
-	if (*pgarage == 11) {
-		if (*(pgarage + 1) == 0) {
-			*(pgarage + 1) = 3;
-		}
+	if (CGarages::garages[Params[0].nVar].type == 11 && CGarages::garages[Params[0].nVar].state == 0) {
+		CGarages::garages[Params[0].nVar].state = 3;
 	}
-	*(pgarage + 5) = 0;
+	CGarages::garages[Params[0].nVar].isInactive = 0;
 	return OR_CONTINUE;
 }
 
@@ -1033,7 +870,7 @@ eOpcodeResult WINAPI ACTIVATE_GARAGE(CScript *script)
 eOpcodeResult WINAPI IS_BOAT(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag(*(DWORD *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x29C) == 1);
+	script->UpdateCompareFlag(CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->type == 1);
 	return OR_CONTINUE;
 }
 
@@ -1062,10 +899,10 @@ eOpcodeResult WINAPI IS_CHAR_STOPPED(CScript *script)
 eOpcodeResult WINAPI ADD_SPRITE_BLIP_FOR_CAR(CScript *script)
 {
 	script->Collect(2);
-	VehiclePoolGetStruct(*carPool, Params[0].nVar);
-	GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
-	Params[0].nVar = SetEntityBlip(1, Params[0].nVar, 0, 3);
-	SetBlipSprite(Params[0].nVar, Params[1].nVar);
+	CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	CRadar::GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
+	Params[0].nVar = CRadar::SetEntityBlip(1, Params[0].nVar, 0, 3);
+	CRadar::SetBlipSprite(Params[0].nVar, Params[1].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -1074,10 +911,10 @@ eOpcodeResult WINAPI ADD_SPRITE_BLIP_FOR_CAR(CScript *script)
 eOpcodeResult WINAPI ADD_SPRITE_BLIP_FOR_CHAR(CScript *script)
 {
 	script->Collect(2);
-	PedPoolGetStruct(*pedPool, Params[0].nVar);
-	GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
-	Params[0].nVar = SetEntityBlip(2, Params[0].nVar, 1, 3);
-	SetBlipSprite(Params[0].nVar, Params[1].nVar);
+	CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	CRadar::GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
+	Params[0].nVar = CRadar::SetEntityBlip(2, Params[0].nVar, 1, 3);
+	CRadar::SetBlipSprite(Params[0].nVar, Params[1].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -1086,10 +923,10 @@ eOpcodeResult WINAPI ADD_SPRITE_BLIP_FOR_CHAR(CScript *script)
 eOpcodeResult WINAPI ADD_SPRITE_BLIP_FOR_OBJECT(CScript *script)
 {
 	script->Collect(2);
-	ObjectPoolGetStruct(*objectPool, Params[0].nVar);
-	GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
-	Params[0].nVar = SetEntityBlip(3, Params[0].nVar, 6, 3);
-	SetBlipSprite(Params[0].nVar, Params[1].nVar);
+	CPools::ms_pObjectPool->GetAt(Params[0].nVar);
+	CRadar::GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
+	Params[0].nVar = CRadar::SetEntityBlip(3, Params[0].nVar, 6, 3);
+	CRadar::SetBlipSprite(Params[0].nVar, Params[1].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -1098,7 +935,7 @@ eOpcodeResult WINAPI ADD_SPRITE_BLIP_FOR_OBJECT(CScript *script)
 eOpcodeResult WINAPI DEACTIVATE_GARAGE(CScript *script)
 {
 	script->Collect(1);
-	*((BYTE *)(Params[0].nVar * 0xA8 + cgarage + 5)) = 1;
+	CGarages::garages[Params[0].nVar].isInactive = 1;
 	return OR_CONTINUE;
 }
 
@@ -1106,14 +943,11 @@ eOpcodeResult WINAPI DEACTIVATE_GARAGE(CScript *script)
 eOpcodeResult WINAPI SET_SWAT_REQUIRED(CScript *script)
 {
 	script->Collect(1);
-	DWORD player = FindPlayerPed();
-	DWORD police = *(DWORD *)(player + 0x5F4);
-	BYTE swat = *(BYTE *)(police + 0x1E);
-	swat &= 0xFB;
+	CPlayerPed *player = VCGlobals::FindPlayerPed();
+	player->wanted->activity &= 0xFB;
 	if (Params[0].nVar) {
-		swat |= 4;
+		player->wanted->activity |= 4;
 	}
-	*(BYTE *)(police + 0x1E) = swat;
 	return OR_CONTINUE;
 }
 
@@ -1121,14 +955,11 @@ eOpcodeResult WINAPI SET_SWAT_REQUIRED(CScript *script)
 eOpcodeResult WINAPI SET_FBI_REQUIRED(CScript *script)
 {
 	script->Collect(1);
-	DWORD player = FindPlayerPed();
-	DWORD police = *(DWORD *)(player + 0x5F4);
-	BYTE fbi = *(BYTE *)(police + 0x1E);
-	fbi &= 0xF7;
+	CPlayerPed *player = VCGlobals::FindPlayerPed();
+	player->wanted->activity &= 0xF7;
 	if (Params[0].nVar) {
-		fbi |= 8;
+		player->wanted->activity |= 8;
 	}
-	*(BYTE *)(police + 0x1E) = fbi;
 	return OR_CONTINUE;
 }
 
@@ -1136,14 +967,11 @@ eOpcodeResult WINAPI SET_FBI_REQUIRED(CScript *script)
 eOpcodeResult WINAPI SET_ARMY_REQUIRED(CScript *script)
 {
 	script->Collect(1);
-	DWORD player = FindPlayerPed();
-	DWORD police = *(DWORD *)(player + 0x5F4);
-	BYTE army = *(BYTE *)(police + 0x1E);
-	army &= 0xEF;
+	CPlayerPed *player = VCGlobals::FindPlayerPed();
+	player->wanted->activity &= 0xEF;
 	if (Params[0].nVar) {
-		army |= 16;
+		player->wanted->activity |= 16;
 	}
-	*(BYTE *)(police + 0x1E) = army;
 	return OR_CONTINUE;
 }
 
@@ -1215,9 +1043,13 @@ eOpcodeResult WINAPI DROP_MINE(CScript *script)
 {
 	script->Collect(3);
 	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
+		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
 	}
-	CreatePickup(Params[0].fVar, Params[1].fVar, Params[2].fVar, *barrel1, 9, 0, 0, 0, 0);
+	CVector pos;
+	pos.x = Params[0].fVar;
+	pos.y = Params[1].fVar;
+	pos.z = Params[2].fVar;
+	CPickups::GenerateNewOne(pos, *barrel1, 9, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1226,9 +1058,13 @@ eOpcodeResult WINAPI DROP_NAUTICAL_MINE(CScript *script)
 {
 	script->Collect(3);
 	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
+		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
 	}
-	CreatePickup(Params[0].fVar, Params[1].fVar, Params[2].fVar, *barrel2, 11, 0, 0, 0, 0);
+	CVector pos;
+	pos.x = Params[0].fVar;
+	pos.y = Params[1].fVar;
+	pos.z = Params[2].fVar;
+	CPickups::GenerateNewOne(pos, *barrel2, 11, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1248,7 +1084,7 @@ eOpcodeResult WINAPI ACTIVATE_CRUSHER_CRANE(CScript *script)
 		Params[3].fVar = temp;
 	}
 	Params[9].fVar = Params[9].fVar * 3.1415927f * 5.5555557e-3f;
-	CCranes::ActivateCrane(Params[2].fVar, Params[4].fVar, Params[3].fVar, Params[5].fVar, Params[6].fVar, Params[7].fVar, Params[8].fVar, Params[9].fVar, true, false, Params[0].fVar, Params[1].fVar);
+	CCranesHack::ActivateCrane(Params[2].fVar, Params[4].fVar, Params[3].fVar, Params[5].fVar, Params[6].fVar, Params[7].fVar, Params[8].fVar, Params[9].fVar, true, false, Params[0].fVar, Params[1].fVar);
 	return OR_CONTINUE;
 }
 
@@ -1257,9 +1093,8 @@ eOpcodeResult WINAPI PRINT_WITH_2_NUMBERS(CScript *script)
 {
 	char gxt[8];
 	script->ReadShortString(gxt);
-	wchar_t *string = GetText(ctext, gxt);
 	script->Collect(4);
-	AddMessageWithNumber(string, Params[2].nVar, (unsigned short)Params[3].nVar, Params[0].nVar, Params[1].nVar, -1, -1, -1, -1);
+	CMessages::AddMessageWithNumber(VCGlobals::TheText.Get(gxt), Params[2].nVar, (unsigned short)Params[3].nVar, Params[0].nVar, Params[1].nVar, -1, -1, -1, -1);
 	return OR_CONTINUE;
 }
 
@@ -1268,9 +1103,8 @@ eOpcodeResult WINAPI PRINT_WITH_3_NUMBERS_NOW(CScript *script)
 {
 	char gxt[8];
 	script->ReadShortString(gxt);
-	wchar_t *string = GetText(ctext, gxt);
 	script->Collect(5);
-	AddMessageJumpQWithNumber(string, Params[3].nVar, (unsigned short)Params[4].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, -1, -1, -1);
+	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), Params[3].nVar, (unsigned short)Params[4].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, -1, -1, -1);
 	return OR_CONTINUE;
 }
 
@@ -1279,9 +1113,8 @@ eOpcodeResult WINAPI PRINT_WITH_4_NUMBERS_NOW(CScript *script)
 {
 	char gxt[8];
 	script->ReadShortString(gxt);
-	wchar_t *string = GetText(ctext, gxt);
 	script->Collect(6);
-	AddMessageJumpQWithNumber(string, Params[4].nVar, (unsigned short)Params[5].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, -1, -1);
+	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), Params[4].nVar, (unsigned short)Params[5].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, -1, -1);
 	return OR_CONTINUE;
 }
 
@@ -1290,9 +1123,8 @@ eOpcodeResult WINAPI PRINT_WITH_5_NUMBERS(CScript *script)
 {
 	char gxt[8];
 	script->ReadShortString(gxt);
-	wchar_t *string = GetText(ctext, gxt);
 	script->Collect(7);
-	AddMessageWithNumber(string, Params[5].nVar, (unsigned short)Params[6].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, -1);
+	CMessages::AddMessageWithNumber(VCGlobals::TheText.Get(gxt), Params[5].nVar, (unsigned short)Params[6].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, -1);
 	return OR_CONTINUE;
 }
 
@@ -1301,9 +1133,8 @@ eOpcodeResult WINAPI PRINT_WITH_5_NUMBERS_NOW(CScript *script)
 {
 	char gxt[8];
 	script->ReadShortString(gxt);
-	wchar_t *string = GetText(ctext, gxt);
 	script->Collect(7);
-	AddMessageJumpQWithNumber(string, Params[5].nVar, (unsigned short)Params[6].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, -1);
+	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), Params[5].nVar, (unsigned short)Params[6].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, -1);
 	return OR_CONTINUE;
 }
 
@@ -1312,9 +1143,8 @@ eOpcodeResult WINAPI PRINT_WITH_6_NUMBERS_NOW(CScript *script)
 {
 	char gxt[8];
 	script->ReadShortString(gxt);
-	wchar_t *string = GetText(ctext, gxt);
 	script->Collect(8);
-	AddMessageJumpQWithNumber(string, Params[6].nVar, (unsigned short)Params[7].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, Params[5].nVar);
+	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), Params[6].nVar, (unsigned short)Params[7].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, Params[5].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1322,7 +1152,7 @@ eOpcodeResult WINAPI PRINT_WITH_6_NUMBERS_NOW(CScript *script)
 eOpcodeResult WINAPI IS_FIRST_CAR_COLOUR(CScript *script)
 {
 	script->Collect(2);
-	script->UpdateCompareFlag((DWORD)*(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x1A0) == Params[1].nVar);
+	script->UpdateCompareFlag((int)CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->firstColour == Params[1].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1330,7 +1160,21 @@ eOpcodeResult WINAPI IS_FIRST_CAR_COLOUR(CScript *script)
 eOpcodeResult WINAPI IS_SECOND_CAR_COLOUR(CScript *script)
 {
 	script->Collect(2);
-	script->UpdateCompareFlag((DWORD)*(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x1A1) == Params[1].nVar);
+	script->UpdateCompareFlag((int)CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->secondColour == Params[1].nVar);
+	return OR_CONTINUE;
+}
+
+/* 0338 */
+eOpcodeResult WINAPI SET_CAR_VISIBLE(CScript *script)
+{
+	script->Collect(2);
+	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
+	BYTE flag = *(BYTE *)(car + 0x52);
+	flag &= 0xFB;
+	if (Params[1].nVar) {
+		flag |= 4;
+	}
+	*(BYTE *)(car + 0x52) = flag;
 	return OR_CONTINUE;
 }
 
@@ -1375,7 +1219,7 @@ eOpcodeResult WINAPI IS_NASTY_GAME(CScript *script)
 eOpcodeResult WINAPI IS_EXPLOSION_IN_AREA(CScript *script)
 {
 	script->Collect(7);
-	script->UpdateCompareFlag(TestForExplosionInArea(Params[0].nVar, Params[1].fVar, Params[4].fVar, Params[2].fVar, Params[5].fVar, Params[3].fVar, Params[6].fVar));
+	script->UpdateCompareFlag(CExplosionHack::TestForExplosionInArea(Params[0].nVar, Params[1].fVar, Params[4].fVar, Params[2].fVar, Params[5].fVar, Params[3].fVar, Params[6].fVar));
 	return OR_CONTINUE;
 }
 
@@ -1387,7 +1231,7 @@ eOpcodeResult WINAPI IS_EXPLOSION_IN_ZONE(CScript *script)
 	script->ReadShortString(gxt);
 	for (uintptr_t address = infoZone; address < infoZone + *numInfoZone * 0x38; address += 0x38) {
 		if (!strncmp(gxt, (char *)address, 8)) {
-			if (TestForExplosionInArea(Params[0].nVar, *(float *)(address + 8), *(float *)(address + 0x14), *(float *)(address + 0xC), *(float *)(address + 0x18), *(float *)(address + 0x10), *(float *)(address + 0x1C))) {
+			if (CExplosionHack::TestForExplosionInArea(Params[0].nVar, *(float *)(address + 8), *(float *)(address + 0x14), *(float *)(address + 0xC), *(float *)(address + 0x18), *(float *)(address + 0x10), *(float *)(address + 0x1C))) {
 				script->UpdateCompareFlag(true);
 				return OR_CONTINUE;
 			}
@@ -1395,7 +1239,7 @@ eOpcodeResult WINAPI IS_EXPLOSION_IN_ZONE(CScript *script)
 	}
 	for (uintptr_t address = navigZone; address < navigZone + *numNavigZone * 0x38; address += 0x38) {
 		if (!strncmp(gxt, (char *)address, 8)) {
-			if (TestForExplosionInArea(Params[0].nVar, *(float *)(address + 8), *(float *)(address + 0x14), *(float *)(address + 0xC), *(float *)(address + 0x18), *(float *)(address + 0x10), *(float *)(address + 0x1C))) {
+			if (CExplosionHack::TestForExplosionInArea(Params[0].nVar, *(float *)(address + 8), *(float *)(address + 0x14), *(float *)(address + 0xC), *(float *)(address + 0x18), *(float *)(address + 0x10), *(float *)(address + 0x1C))) {
 				script->UpdateCompareFlag(true);
 				return OR_CONTINUE;
 			}
@@ -1410,12 +1254,11 @@ eOpcodeResult WINAPI START_KILL_FRENZY_HEADSHOT(CScript *script)
 {
 	char gxt[8];
 	script->ReadShortString(gxt);
-	wchar_t *string = GetText(ctext, gxt);
 	script->Collect(8);
 	if (Params[7].nVar) {
 		Params[7].nVar = 1;
 	}
-	StartFrenzy(Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, string, Params[4].nVar, Params[5].nVar, Params[6].nVar, !!Params[7].nVar, true);
+	CDarkel::StartFrenzy(Params[0].nVar, Params[1].nVar, (unsigned short)Params[2].nVar, Params[3].nVar, VCGlobals::TheText.Get(gxt), Params[4].nVar, Params[5].nVar, Params[6].nVar, !!Params[7].nVar, true);
 	return OR_CONTINUE;
 }
 
@@ -1435,7 +1278,7 @@ eOpcodeResult WINAPI ACTIVATE_MILITARY_CRANE(CScript *script)
 		Params[3].fVar = temp;
 	}
 	Params[9].fVar = Params[9].fVar * 3.1415927f * 5.5555557e-3f;
-	CCranes::ActivateCrane(Params[2].fVar, Params[4].fVar, Params[3].fVar, Params[5].fVar, Params[6].fVar, Params[7].fVar, Params[8].fVar, Params[9].fVar, false, true, Params[0].fVar, Params[1].fVar);
+	CCranesHack::ActivateCrane(Params[2].fVar, Params[4].fVar, Params[3].fVar, Params[5].fVar, Params[6].fVar, Params[7].fVar, Params[8].fVar, Params[9].fVar, false, true, Params[0].fVar, Params[1].fVar);
 	return OR_CONTINUE;
 }
 
@@ -1445,8 +1288,8 @@ eOpcodeResult WINAPI PRINT_WITH_3_NUMBERS_BIG(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(5);
-	InsertNumberInString(GetText(ctext, gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, 0, 0, 0, numberedText);
-	AddBigMessage(numberedText, Params[3].nVar, (unsigned short)Params[4].nVar - 1);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, 0, 0, 0, numberedText);
+	CMessages::AddBigMessage(numberedText, Params[3].nVar, (unsigned short)Params[4].nVar - 1);
 	return OR_CONTINUE;
 }
 
@@ -1456,8 +1299,8 @@ eOpcodeResult WINAPI PRINT_WITH_4_NUMBERS_BIG(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(6);
-	InsertNumberInString(GetText(ctext, gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, 0, 0, numberedText);
-	AddBigMessage(numberedText, Params[4].nVar, (unsigned short)Params[5].nVar - 1);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, 0, 0, numberedText);
+	CMessages::AddBigMessage(numberedText, Params[4].nVar, (unsigned short)Params[5].nVar - 1);
 	return OR_CONTINUE;
 }
 
@@ -1467,8 +1310,8 @@ eOpcodeResult WINAPI PRINT_WITH_5_NUMBERS_BIG(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(7);
-	InsertNumberInString(GetText(ctext, gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, 0, numberedText);
-	AddBigMessage(numberedText, Params[5].nVar, (unsigned short)Params[6].nVar - 1);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, 0, numberedText);
+	CMessages::AddBigMessage(numberedText, Params[5].nVar, (unsigned short)Params[6].nVar - 1);
 	return OR_CONTINUE;
 }
 
@@ -1478,8 +1321,8 @@ eOpcodeResult WINAPI PRINT_WITH_6_NUMBERS_BIG(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(8);
-	InsertNumberInString(GetText(ctext, gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, Params[5].nVar, numberedText);
-	AddBigMessage(numberedText, Params[6].nVar, (unsigned short)Params[7].nVar - 1);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, Params[5].nVar, numberedText);
+	CMessages::AddBigMessage(numberedText, Params[6].nVar, (unsigned short)Params[7].nVar - 1);
 	return OR_CONTINUE;
 }
 
@@ -1490,9 +1333,9 @@ eOpcodeResult WINAPI SET_2_REPEATED_PHONE_MESSAGES(CScript *script)
 	char gxt[8];
 	wchar_t *string[2];
 	script->ReadShortString(gxt);
-	string[0] = GetText(ctext, gxt);
+	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[1] = GetText(ctext, gxt);
+	string[1] = VCGlobals::TheText.Get(gxt);
 	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], NULL, NULL, NULL, NULL);
 	return OR_CONTINUE;
 }
@@ -1504,9 +1347,9 @@ eOpcodeResult WINAPI SET_2_PHONE_MESSAGES(CScript *script)
 	char gxt[8];
 	wchar_t *string[2];
 	script->ReadShortString(gxt);
-	string[0] = GetText(ctext, gxt);
+	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[1] = GetText(ctext, gxt);
+	string[1] = VCGlobals::TheText.Get(gxt);
 	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], NULL, NULL, NULL, NULL);
 	return OR_CONTINUE;
 }
@@ -1518,11 +1361,11 @@ eOpcodeResult WINAPI SET_3_REPEATED_PHONE_MESSAGES(CScript *script)
 	char gxt[8];
 	wchar_t *string[3];
 	script->ReadShortString(gxt);
-	string[0] = GetText(ctext, gxt);
+	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[1] = GetText(ctext, gxt);
+	string[1] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[2] = GetText(ctext, gxt);
+	string[2] = VCGlobals::TheText.Get(gxt);
 	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], NULL, NULL, NULL);
 	return OR_CONTINUE;
 }
@@ -1534,11 +1377,11 @@ eOpcodeResult WINAPI SET_3_PHONE_MESSAGES(CScript *script)
 	char gxt[8];
 	wchar_t *string[3];
 	script->ReadShortString(gxt);
-	string[0] = GetText(ctext, gxt);
+	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[1] = GetText(ctext, gxt);
+	string[1] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[2] = GetText(ctext, gxt);
+	string[2] = VCGlobals::TheText.Get(gxt);
 	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], NULL, NULL, NULL);
 	return OR_CONTINUE;
 }
@@ -1550,13 +1393,13 @@ eOpcodeResult WINAPI SET_4_REPEATED_PHONE_MESSAGES(CScript *script)
 	char gxt[8];
 	wchar_t *string[4];
 	script->ReadShortString(gxt);
-	string[0] = GetText(ctext, gxt);
+	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[1] = GetText(ctext, gxt);
+	string[1] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[2] = GetText(ctext, gxt);
+	string[2] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[3] = GetText(ctext, gxt);
+	string[3] = VCGlobals::TheText.Get(gxt);
 	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], NULL, NULL);
 	return OR_CONTINUE;
 }
@@ -1568,20 +1411,22 @@ eOpcodeResult WINAPI SET_4_PHONE_MESSAGES(CScript *script)
 	char gxt[8];
 	wchar_t *string[4];
 	script->ReadShortString(gxt);
-	string[0] = GetText(ctext, gxt);
+	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[1] = GetText(ctext, gxt);
+	string[1] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[2] = GetText(ctext, gxt);
+	string[2] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[3] = GetText(ctext, gxt);
+	string[3] = VCGlobals::TheText.Get(gxt);
 	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], NULL, NULL);
 	return OR_CONTINUE;
 }
 
 /* 037F */
-eOpcodeResult WINAPI GIVE_PLAYER_DETONATOR(CScript *script)
+eOpcodeResult WINAPI GIVE_PLAYER_DETONATOR(CScript *)
 {
+	CStreaming::RequestModel(291, 1);
+	CStreaming::LoadAllRequestedModels(false);
 	DWORD player = FindPlayerPed();
 	GiveWeapon(player, 0x22, 1, 1);
 	int slot = *(DWORD *)(GetWeaponInfo(0x22) + 0x60);
@@ -1596,15 +1441,15 @@ eOpcodeResult WINAPI SET_5_REPEATED_PHONE_MESSAGES(CScript *script)
 	char gxt[8];
 	wchar_t *string[5];
 	script->ReadShortString(gxt);
-	string[0] = GetText(ctext, gxt);
+	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[1] = GetText(ctext, gxt);
+	string[1] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[2] = GetText(ctext, gxt);
+	string[2] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[3] = GetText(ctext, gxt);
+	string[3] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[4] = GetText(ctext, gxt);
+	string[4] = VCGlobals::TheText.Get(gxt);
 	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], string[4], NULL);
 	return OR_CONTINUE;
 }
@@ -1616,15 +1461,15 @@ eOpcodeResult WINAPI SET_5_PHONE_MESSAGES(CScript *script)
 	char gxt[8];
 	wchar_t *string[5];
 	script->ReadShortString(gxt);
-	string[0] = GetText(ctext, gxt);
+	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[1] = GetText(ctext, gxt);
+	string[1] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[2] = GetText(ctext, gxt);
+	string[2] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[3] = GetText(ctext, gxt);
+	string[3] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[4] = GetText(ctext, gxt);
+	string[4] = VCGlobals::TheText.Get(gxt);
 	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], string[4], NULL);
 	return OR_CONTINUE;
 }
@@ -1636,17 +1481,17 @@ eOpcodeResult WINAPI SET_6_REPEATED_PHONE_MESSAGES(CScript *script)
 	char gxt[8];
 	wchar_t *string[6];
 	script->ReadShortString(gxt);
-	string[0] = GetText(ctext, gxt);
+	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[1] = GetText(ctext, gxt);
+	string[1] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[2] = GetText(ctext, gxt);
+	string[2] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[3] = GetText(ctext, gxt);
+	string[3] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[4] = GetText(ctext, gxt);
+	string[4] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[5] = GetText(ctext, gxt);
+	string[5] = VCGlobals::TheText.Get(gxt);
 	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], string[4], string[5]);
 	return OR_CONTINUE;
 }
@@ -1658,17 +1503,17 @@ eOpcodeResult WINAPI SET_6_PHONE_MESSAGES(CScript *script)
 	char gxt[8];
 	wchar_t *string[6];
 	script->ReadShortString(gxt);
-	string[0] = GetText(ctext, gxt);
+	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[1] = GetText(ctext, gxt);
+	string[1] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[2] = GetText(ctext, gxt);
+	string[2] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[3] = GetText(ctext, gxt);
+	string[3] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[4] = GetText(ctext, gxt);
+	string[4] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
-	string[5] = GetText(ctext, gxt);
+	string[5] = VCGlobals::TheText.Get(gxt);
 	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], string[4], string[5]);
 	return OR_CONTINUE;
 }
@@ -1689,7 +1534,7 @@ eOpcodeResult WINAPI SET_CHAR_ANIM_SPEED(CScript *script)
 eOpcodeResult WINAPI IS_CRANE_LIFTING_CAR(CScript *script)
 {
 	script->Collect(3);
-	script->UpdateCompareFlag(CCranes::IsThisCarPickedUp(Params[0].fVar, Params[1].fVar, VehiclePoolGetStruct(*carPool, Params[2].nVar)));
+	script->UpdateCompareFlag(CCranesHack::IsThisCarPickedUp(Params[0].fVar, Params[1].fVar, CPools::ms_pVehiclePool->GetAt(Params[2].nVar)));
 	return OR_CONTINUE;
 }
 
@@ -1697,7 +1542,7 @@ eOpcodeResult WINAPI IS_CRANE_LIFTING_CAR(CScript *script)
 eOpcodeResult WINAPI CHANGE_GARAGE_TYPE_WITH_CAR_MODEL(CScript *script)
 {
 	script->Collect(3);
-	ChangeGarageType((WORD)Params[0].nVar, (BYTE)Params[1].nVar, Params[2].nVar);
+	CGarages::ChangeGarageType((short)Params[0].nVar, (char)Params[1].nVar, Params[2].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1732,9 +1577,8 @@ eOpcodeResult WINAPI IS_CAR_VISIBLY_DAMAGED(CScript *script)
 eOpcodeResult WINAPI ADD_BLIP_FOR_PICKUP_OLD(CScript *script)
 {
 	script->Collect(3);
-	int var = GetActualPickupIndex(Params[0].nVar) * 0x34 + pickupEntity;
-	GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
-	Params[0].nVar = SetEntityBlip(3, ObjectPoolGetHandle(*objectPool, *(void **)var), Params[1].nVar, Params[2].nVar);
+	CRadar::GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
+	Params[0].nVar = CRadar::SetEntityBlip(3, CPools::ms_pObjectPool->GetIndex(CPickups::pickups[CPickups::GetActualPickupIndex(Params[0].nVar)].object), Params[1].nVar, Params[2].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -1743,10 +1587,9 @@ eOpcodeResult WINAPI ADD_BLIP_FOR_PICKUP_OLD(CScript *script)
 eOpcodeResult WINAPI ADD_SPRITE_BLIP_FOR_PICKUP(CScript *script)
 {
 	script->Collect(2);
-	int var = GetActualPickupIndex(Params[0].nVar) * 0x34 + pickupEntity;
-	GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
-	Params[0].nVar = SetEntityBlip(3, ObjectPoolGetHandle(*objectPool, *(void **)var), 6, 3);
-	SetBlipSprite(Params[0].nVar, Params[1].nVar);
+	CRadar::GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
+	Params[0].nVar = CRadar::SetEntityBlip(3, CPools::ms_pObjectPool->GetIndex(CPickups::pickups[CPickups::GetActualPickupIndex(Params[0].nVar)].object), 6, 3);
+	CRadar::SetBlipSprite(Params[0].nVar, Params[1].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -1755,14 +1598,14 @@ eOpcodeResult WINAPI ADD_SPRITE_BLIP_FOR_PICKUP(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_CONTROL(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag(IsPedInControl(PedPoolGetStruct(*pedPool, Params[0].nVar)));
+	script->UpdateCompareFlag(CPools::ms_pPedPool->GetAt(Params[0].nVar)->IsPedInControl());
 	return OR_CONTINUE;
 }
 
 /* 03EC */
 eOpcodeResult WINAPI HAS_MILITARY_CRANE_COLLECTED_ALL_CARS(CScript *script)
 {
-	script->UpdateCompareFlag((*militaryCraneCollected & 0x7F) == 0x7F);
+	script->UpdateCompareFlag((CCranes::carsCollectedMilitaryCrane & 0x7F) == 0x7F);
 	return OR_CONTINUE;
 }
 
@@ -1778,7 +1621,7 @@ eOpcodeResult WINAPI SET_GANG_PED_MODEL_PREFERENCE(CScript *script)
 eOpcodeResult WINAPI SET_GET_OUT_OF_JAIL_FREE(CScript *script)
 {
 	script->Collect(2);
-	*(BYTE *)(Params[0].nVar * 0x170 + (DWORD)playerPedPool + 0x145) = (BYTE)(Params[1].nVar ? 1 : 0);
+	*(BYTE *)(Params[0].nVar * 0x170 + (DWORD)playerPedPool + 0x145) = !!Params[1].nVar;
 	return OR_CONTINUE;
 }
 
@@ -1794,7 +1637,7 @@ eOpcodeResult WINAPI IS_CAR_DOOR_CLOSED(CScript *script)
 }
 
 /* 041B */
-eOpcodeResult WINAPI REGISTER_KILL_FRENZY_PASSED(CScript *script)
+eOpcodeResult WINAPI REGISTER_KILL_FRENZY_PASSED(CScript *)
 {
 	AnotherKillFrenzyPassed();
 	return OR_CONTINUE;
@@ -1804,7 +1647,7 @@ eOpcodeResult WINAPI REGISTER_KILL_FRENZY_PASSED(CScript *script)
 eOpcodeResult WINAPI SET_CHAR_SAY(CScript *script)
 {
 	script->Collect(2);
-	Say(PedPoolGetStruct(*pedPool, Params[0].nVar), Params[1].nVar);
+	CPools::ms_pPedPool->GetAt(Params[0].nVar)->Say((unsigned short)Params[1].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1828,7 +1671,7 @@ eOpcodeResult WINAPI OVERRIDE_POLICE_STATION_LEVEL(CScript *script)
 eOpcodeResult WINAPI FORCE_RAIN(CScript *script)
 {
 	script->Collect(1);
-	*forceRain = (BYTE)(Params[0].nVar ? 1 : 0);
+	CWeather::bScriptsForceRain = !!Params[0].nVar;
 	return OR_CONTINUE;
 }
 
@@ -1836,7 +1679,7 @@ eOpcodeResult WINAPI FORCE_RAIN(CScript *script)
 eOpcodeResult WINAPI DOES_GARAGE_CONTAIN_CAR(CScript *script)
 {
 	script->Collect(2);
-	script->UpdateCompareFlag(IsEntityEntirelyInside3D(Params[0].nVar * 0xA8 + cgarage, VehiclePoolGetStruct(*carPool, Params[1].nVar), 0.0));
+	script->UpdateCompareFlag(CGarages::garages[Params[0].nVar].IsEntityEntirelyInside3D(CPools::ms_pVehiclePool->GetAt(Params[1].nVar), 0.0));
 	return OR_CONTINUE;
 }
 
@@ -1844,7 +1687,7 @@ eOpcodeResult WINAPI DOES_GARAGE_CONTAIN_CAR(CScript *script)
 eOpcodeResult WINAPI IS_THREAT_FOR_PED_TYPE(CScript *script)
 {
 	script->Collect(2);
-	script->UpdateCompareFlag(Params[1].nVar == (*(DWORD *)(*(DWORD *)(cpedtype + Params[0].nVar * 4) + 0x18) & Params[1].nVar));
+	script->UpdateCompareFlag(Params[1].nVar == (*(int *)(*(DWORD *)(cpedtype + Params[0].nVar * 4) + 0x18) & Params[1].nVar));
 	return OR_CONTINUE;
 }
 
@@ -1861,7 +1704,7 @@ eOpcodeResult WINAPI GET_CHAR_IN_CAR_PASSENGER_SEAT(CScript *script)
 eOpcodeResult WINAPI SET_SCRIPT_FIRE_AUDIO(CScript *script)
 {
 	script->Collect(2);
-	*(BYTE *)(Params[0].nVar * 0x30 + cfire + 7) = (BYTE)(Params[1].nVar ? 1 : 0);
+	*(BYTE *)(Params[0].nVar * 0x30 + cfire + 7) = !!Params[1].nVar;
 	return OR_CONTINUE;
 }
 
@@ -1869,7 +1712,7 @@ eOpcodeResult WINAPI SET_SCRIPT_FIRE_AUDIO(CScript *script)
 eOpcodeResult WINAPI IS_PLAYER_LIFTING_A_PHONE(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag(*(DWORD *)(playerPedPool[0x2E * Params[0].nVar] + 0x244) == 0x13);
+	script->UpdateCompareFlag(CWorld::Players[Params[0].nVar].playerEntity->state == 0x13);
 	return OR_CONTINUE;
 }
 
@@ -1877,7 +1720,7 @@ eOpcodeResult WINAPI IS_PLAYER_LIFTING_A_PHONE(CScript *script)
 eOpcodeResult WINAPI GET_NUMBER_OF_SEATS_IN_MODEL(CScript *script)
 {
 	script->Collect(1);
-	Params[0].nVar = GetMaximumNumberOfPassengersFromNumberOfDoors(Params[0].nVar) + 1;
+	Params[0].nVar = GetNumberOfPassengerSeats(Params[0].nVar) + 1;
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -1979,10 +1822,10 @@ eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_COORD_OLD(CScript *script)
 {
 	script->Collect(5);
 	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
+		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
 	}
-	GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
-	Params[0].nVar = SetShortRangeCoordBlip(4, Params[0].fVar, Params[1].fVar, Params[2].fVar, Params[3].nVar, Params[4].nVar);
+	CRadar::GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
+	Params[0].nVar = CRadar::SetShortRangeCoordBlip(4, Params[0].fVar, Params[1].fVar, Params[2].fVar, Params[3].nVar, Params[4].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -1992,11 +1835,11 @@ eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_COORD(CScript *script)
 {
 	script->Collect(3);
 	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
+		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
 	}
-	GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
-	Params[0].nVar = SetShortRangeCoordBlip(4, Params[0].fVar, Params[1].fVar, Params[2].fVar, 5, 3);
-	ChangeBlipScale(Params[0].nVar, 3);
+	CRadar::GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
+	Params[0].nVar = CRadar::SetShortRangeCoordBlip(4, Params[0].fVar, Params[1].fVar, Params[2].fVar, 5, 3);
+	CRadar::ChangeBlipScale(Params[0].nVar, 3);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -2015,8 +1858,8 @@ eOpcodeResult WINAPI PRINT_HELP_WITH_NUMBER(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(1);
-	InsertNumberInString(GetText(ctext, gxt), Params[0].nVar, 0, 0, 0, 0, 0, numberedText);
-	SetHelpMessage(numberedText, 0, 0);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, 0, 0, 0, 0, 0, numberedText);
+	CHud::SetHelpMessage(numberedText, false, false);
 	return OR_CONTINUE;
 }
 
@@ -2026,8 +1869,8 @@ eOpcodeResult WINAPI PRINT_HELP_FOREVER_WITH_NUMBER(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(1);
-	InsertNumberInString(GetText(ctext, gxt), Params[0].nVar, 0, 0, 0, 0, 0, numberedText);
-	SetHelpMessage(numberedText, 0, 1);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, 0, 0, 0, 0, 0, numberedText);
+	CHud::SetHelpMessage(numberedText, false, true);
 	return OR_CONTINUE;
 }
 
@@ -2087,15 +1930,12 @@ eOpcodeResult WINAPI ADD_SHOOTING_RANGE_RANK(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_TOUCHING_VEHICLE(CScript *script)
 {
 	script->Collect(2);
-	uintptr_t source = PedPoolGetStruct(*pedPool, Params[0].nVar);
-	uintptr_t target = VehiclePoolGetStruct(*carPool, Params[1].nVar);
-	if (*(BYTE *)(source + 0x3AC)) {
-		uintptr_t car = *(uintptr_t *)(source + 0x3A8);
-		if (car != NULL) {
-			source = car;
-		}
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	CPhysical *source = ped;
+	if (ped->isInAnyVehicle && ped->vehicle) {
+		source = ped->vehicle;
 	}
-	script->UpdateCompareFlag(GetHasCollidedWith(source, target));
+	script->UpdateCompareFlag(source->GetHasCollidedWith(CPools::ms_pVehiclePool->GetAt(Params[1].nVar)));
 	return OR_CONTINUE;
 }
 
@@ -2104,16 +1944,16 @@ eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT(CScript *script)
 {
 	script->Collect(3);
 	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
+		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
 	}
-	GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
-	Params[0].nVar = SetShortRangeCoordBlip(5, Params[0].fVar, Params[1].fVar, Params[2].fVar, 2, 3);
-	ChangeBlipScale(Params[0].nVar, 3);
+	CRadar::GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
+	Params[0].nVar = CRadar::SetShortRangeCoordBlip(5, Params[0].fVar, Params[1].fVar, Params[2].fVar, 2, 3);
+	CRadar::ChangeBlipScale(Params[0].nVar, 3);
 	script->Store(1);
 	return OR_CONTINUE;
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
+BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 {
 	if (reason == DLL_PROCESS_ATTACH)
 	{
@@ -2184,6 +2024,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		Opcodes::RegisterOpcode(0x031B, IS_FIRST_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x031C, IS_SECOND_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x032D, SET_CAR_BLOCK_CAR);
+		Opcodes::RegisterOpcode(0x0338, SET_CAR_VISIBLE);
 		Opcodes::RegisterOpcode(0x0346, SET_TEXT_BACKGROUND_COLOUR);
 		Opcodes::RegisterOpcode(0x0351, IS_NASTY_GAME);
 		Opcodes::RegisterOpcode(0x0356, IS_EXPLOSION_IN_AREA);
@@ -2260,7 +2101,7 @@ uintptr_t(__thiscall *VehiclePoolGetStruct)(void *, int); // cpool_cvehicle_caut
 uintptr_t(__thiscall *PedPoolGetStruct)(void *, int); // cpool_cped_cplayerped::getat
 BYTE(__thiscall *GetHasCollidedWith)(DWORD, uintptr_t); // cphysical::gethascollidedwith
 DWORD(__cdecl *FindPlayerPed)(void); // findplayerped
-void(__cdecl *SetHelpMessage)(wchar_t *, char, int); // chud::sethelpmessage
+void(__cdecl *SetHelpMessage)(wchar_t *, bool); // chud::sethelpmessage
 void(__cdecl *InsertNumberInString)(wchar_t *, int, int, int, int, int, int, wchar_t *); // cmessages::insertnumberinstring
 wchar_t *(__thiscall *GetText)(uintptr_t, char *); // ctext::get
 DWORD *maxWantedLevel = NULL;
@@ -2281,7 +2122,7 @@ GtaGame::GtaGame()
 		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x43EB30;
 		GetHasCollidedWith = (BYTE(__thiscall *)(DWORD, uintptr_t))0x497240;
 		FindPlayerPed = (DWORD(__cdecl *)(void))0x4A1150;
-		SetHelpMessage = (void(__cdecl *)(wchar_t *, char, int))0x5051E0;
+		SetHelpMessage = (void(__cdecl *)(wchar_t *, bool))0x5051E0;
 		InsertNumberInString = (void(__cdecl *)(wchar_t *, int, int, int, int, int, int, wchar_t *))0x52A1A0;
 		GetText = (wchar_t *(__thiscall *)(uintptr_t, char *))0x52C5A0;
 		maxWantedLevel = (DWORD *)0x5F7714;
@@ -2351,7 +2192,7 @@ eOpcodeResult WINAPI PRINT_HELP_WITH_NUMBER(CScript *script)
 	script->ReadShortString(gxt);
 	script->Collect(1);
 	InsertNumberInString(GetText(ctext, gxt), Params[0].nVar, 0, 0, 0, 0, 0, numberedText);
-	SetHelpMessage(numberedText, 0, 0);
+	SetHelpMessage(numberedText, false);
 	return OR_CONTINUE;
 }
 
