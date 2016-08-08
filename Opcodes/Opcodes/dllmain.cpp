@@ -33,14 +33,14 @@ public:
 GtaGame game;
 
 #if _VC
-#pragma comment (lib, "..\\..\\..\\VC.CLEO.lib")
-#include "..\\..\\..\\VC.CLEO.h"
+#pragma comment (lib, "..\\..\\III.VC.CLEO\\CLEO_SDK\\VC.CLEO.lib")
+#include "..\\..\\III.VC.CLEO\\CLEO_SDK\\VC.CLEO.h"
 
-#pragma comment (lib, "vcclasses\\vcclasses.lib")
-#pragma comment (lib, "vcversion\\vcversion.lib")
-#include "vcclasses\\vcclasses.h"
-#include "vcclasses\\Globals.h"
-#include "vcversion\\vcversion.h"
+#pragma comment (lib, "..\\Release (Without WPO)\\vcclasses.lib")
+#pragma comment (lib, "..\\Release (Without WPO)\\vcversion.lib")
+#include "..\\..\\gtalc-dinput8\\vcclasses\\include\\vcclasses.h"
+#include "..\\..\\gtalc-dinput8\\vcclasses\\include\\Globals.h"
+#include "..\\..\\gtalc-dinput8\\vcversion\\include\\vcversion.h"
 
 tScriptVar *Params;
 
@@ -2092,8 +2092,8 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 }
 
 #else if _III
-#pragma comment (lib, "..\\..\\..\\III.CLEO.lib")
-#include "..\\..\\..\\III.CLEO.h"
+#pragma comment (lib, "..\\..\\III.VC.CLEO\\CLEO_SDK\\III.CLEO.lib")
+#include "..\\..\\III.VC.CLEO\\CLEO_SDK\\III.CLEO.h"
 
 tScriptVar *Params;
 

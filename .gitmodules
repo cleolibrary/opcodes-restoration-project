@@ -1,0 +1,6 @@
+[submodule "III.VC.CLEO"]
+	path = III.VC.CLEO
+	url = https://github.com/cleolibrary/III.VC.CLEO
+[submodule "gtalc-dinput8"]
+	path = gtalc-dinput8
+	url = https://github.com/spaceeinstein/gtalc-dinput8
