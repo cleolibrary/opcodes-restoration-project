@@ -29,6 +29,9 @@
 0228:   car 0@ bomb_status == 1
 023A:   player $PLAYER_CHAR touching_object 0@ on_foot
 023B:   actor 0@ touching_object 1@ on_foot
+023E: flash_car 0@ 1
+023F: flash_actor 0@ 1
+0240: flash_object 0@ 1
 0242: set_car 0@ bomb_status_to 1
 024B: set_phone 0@ message_repeated 'ADMIRAL'
 024C: set_phone 0@ message 'ADMIRAL'
@@ -93,6 +96,8 @@
 03DD: create_marker_above_pickup 0@ icon 4 handle 1@
 03E9:   actor 0@ in_control
 03EC:   ev_crane_collected_all_cars
+03FB: set_car 0@ stays_in_current_level 1
+03FC: set_actor 0@ stays_in_current_level 1
 0410: override_gang_model 0 0
 0413: set_player $PLAYER_CHAR get_out_of_jail_free 1
 0415:   car 0@ door 0 closed
@@ -104,8 +109,12 @@
 0422:   garage_contain_car $655 0@
 042A:   ped_threat_exists 8 1
 0432: get_actor_in_car 0@ passenger_seat 0 store_to 1@
+0438: set_actor 0@ ignore_level_transitions 1
 0444: set_fire 0@ audio 0
 0447:   player $PLAYER_CHAR lifting_a_phone
+044E: set_car 0@ ignore_level_transitions 1
+044F: make_car 0@ a_bit_stronger 1
+0452: enable_player_control_camera
 047D: get_number_of_seats_in_model #ADMIRAL store_to 0@
 04A7:   actor 0@ in_any_boat
 04A9:   actor 0@ in_any_heli

@@ -29,6 +29,9 @@
 0228=2,  car %1d% bomb_status == %2d%
 023A=2,  player %1d% touching_object %2d% on_foot
 023B=2,  actor %1d% touching_object %2d% on_foot
+023E=2,flash_car %1d% %2d%
+023F=2,flash_actor %1d% %2d%
+0240=2,flash_object %1d% %2d%
 0242=2,set_car %1d% bomb_status_to %2d%
 024B=2,set_phone %1d% message_repeated %2g%
 024C=2,set_phone %1d% message %2g%
@@ -93,6 +96,8 @@
 03DD=3,create_marker_above_pickup %1d% icon %2d% handle %3d%
 03E9=1,  actor %1d% in_control
 03EC=0,  ev_crane_collected_all_cars
+03FB=2,set_car %1d% stays_in_current_level %2d%
+03FC=2,set_actor %1d% stays_in_current_level %2d%
 0410=2,override_gang_model %1d% %2d%
 0413=2,set_player %1d% get_out_of_jail_free %2d%
 0415=2,  car %1d% door %2d% closed
@@ -104,8 +109,12 @@
 0422=2,  garage_contain_car %1d% %2d%
 042A=2,  ped_threat_exists %1u% %2u%
 0432=3,get_actor_in_car %1d% passenger_seat %2d% store_to %3d%
+0438=2,set_actor %1d% ignore_level_transitions %2d%
 0444=2,set_fire %1d% audio %2d%
 0447=1,  player %1d% lifting_a_phone
+044E=2,set_car %1d% ignore_level_transitions %2d%
+044F=2,make_car %1d% a_bit_stronger %2d%
+0452=0,enable_player_control_camera
 047D=2,get_number_of_seats_in_model %1d% store_to %2d%
 04A7=1,  actor %1d% in_any_boat
 04A9=1,  actor %1d% in_any_heli

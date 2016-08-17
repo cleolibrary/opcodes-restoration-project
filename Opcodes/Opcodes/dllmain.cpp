@@ -1,15 +1,11 @@
 /*************************************************************************
-	Opcodes Restoration Project
+    Opcodes Restoration Project
 
-	Plugin for CLEO v2.0.0.4 and above for Grand Theft Auto III and Grand
-	Theft Auto: Vice City that aims to restore functionality to many
-	unsupported opcodes
-	http://www.gtamodding.com/wiki/Opcodes_Restoration_Project
+    Plugin for CLEO v2.0.0.4 and above for Grand Theft Auto III and Grand
+    Theft Auto: Vice City that aims to restore functionality to many
+    unsupported opcodes
+    http://www.gtamodding.com/wiki/Opcodes_Restoration_Project
 *************************************************************************/
-
-// configuration manager
-// active solution configuration: VC or III
-// active solution platform: x86
 
 #include "stdafx.h"
 #include <math.h>
@@ -52,62 +48,51 @@ public:
 	static void ActivateCrane(float pickupX1, float pickupX2, float pickupY1, float pickupY2, float dropoffX, float dropoffY, float dropoffZ, float dropoffHeading, bool isCrusher, bool isMilitary, float positionX, float positionY);
 };
 
-class CCraneHack : public CCrane
-{
-public:
-	bool DoesCranePickUpThisCarType(unsigned int model);
-};
-
 class CExplosionHack : public CExplosion
 {
 public:
 	static bool TestForExplosionInArea(int explosionType, float x1, float x2, float y1, float y2, float z1, float z2);
 };
 
+class CPhoneInfoHack : public CPhoneInfo
+{
+public:
+	void SetPhoneMessage_Repeatedly(int index, wchar_t *string1, wchar_t *string2, wchar_t *string3, wchar_t *string4, wchar_t *string5, wchar_t *string6);
+};
+
+class CProjectileInfoHack : public CProjectileInfo
+{
+public:
+	static bool IsProjectileInRange(float x1, float y1, float z1, float x2, float y2, float z2, bool flag);
+};
+
 DWORD(__cdecl *RpAnimBlendClumpGetFirstAssociation)(uintptr_t); // rpanimblendclumpgetfirstassociation
-void(__thiscall *SetPhoneMessage_JustOnce)(uintptr_t, int, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *); // cphoneinfo::setphonemessage_justonce
-void(__cdecl *OverrideNextRestart)(CVector *, float); // crestart::overridenextrestart
-void(__thiscall *RemoveEntityFromList)(uintptr_t, int, unsigned char); // cmissioncleanup::removeentityfromlist
 uintptr_t(__thiscall *VehiclePoolGetStruct)(void *, int); // cpool_cvehicle_cautomobile::getat
 uintptr_t(__thiscall *PedPoolGetStruct)(void *, int); // cpool_cped_cplayerped::getat
 int(__thiscall *PedPoolGetHandle)(void *, void *); // cpool_cped_cplayerped::getindex
 void(__cdecl *HighlightImportantArea)(CScript *, float, float, float, float, float); // cthescripts::highlightimportantarea
-WORD(__thiscall *GetPadState)(CScript *, unsigned short, unsigned short); // crunningscript::getpadstate
 bool(__thiscall *IsWithinArea_3d)(uintptr_t, float, float, float, float, float, float); // cplaceable::iswithinarea
 bool(__thiscall *IsWithinArea_2d)(uintptr_t, float, float, float, float); // cplaceable::iswithinarea
-DWORD(__cdecl *FindPlayerPed)(void); // findplayerped
 void(__thiscall *RegisterReference)(uintptr_t, uintptr_t); // centity::registerreference
 void(__cdecl *AnotherKillFrenzyPassed)(void); // cstats::anotherkillfrenzypassed
-DWORD(__cdecl *Remove)(DWORD); // cworld::remove
-void(__thiscall *GrantAmmo)(uintptr_t, DWORD, unsigned int); // cped::grantammo
-void(__thiscall *GiveWeapon)(uintptr_t, DWORD, DWORD, DWORD); // cped::giveweapon
 DWORD(__cdecl *GetNumberOfPassengerSeats)(DWORD);
-DWORD(__cdecl *GetWeaponInfo)(DWORD); // cweaponinfo::getweaponinfo
+void(__cdecl *WindowHandler)(int, int);
 bool *isNastyGame = NULL;
-DWORD *barrel1 = NULL;
-DWORD *barrel2 = NULL;
 DWORD *maxWantedLevel = NULL;
 BYTE *phoneDisplayMessage = NULL;
-DWORD *currentPhone = NULL;
-uintptr_t cprojectileinfo = NULL;
+unsigned long *currentPhone = NULL;
 uintptr_t gangPedModelOverride = NULL;
 uintptr_t textDraw = NULL;
 uintptr_t infoZoneCarDensity = NULL;
 uintptr_t infoZonePedDensity = NULL;
-uintptr_t cgarage = NULL;
-uintptr_t cphoneinfo = NULL;
 wchar_t *numberedText = NULL;
 uintptr_t infoZone = NULL;
-uintptr_t pickupEntity = NULL;
 uintptr_t *playerPedPool = NULL;
-uintptr_t *playerPedState = NULL;
-uintptr_t *projectileObject = NULL;
+unsigned long *projectileObject = NULL;
 uintptr_t navigZone = NULL;
-void **objectPool = NULL;
 float *shootingRangeRank = NULL;
 float *garbagePickups = NULL;
 float *loanSharkVisits = NULL;
-uintptr_t cmissioncleanup = NULL;
 void **pedPool = NULL;
 uintptr_t cfire = NULL;
 float *topShootingRangeScore = NULL;
@@ -118,10 +103,6 @@ void **carPool = NULL;
 WORD *numInfoZone = NULL;
 WORD *currentTextDraw = NULL;
 WORD *numNavigZone = NULL;
-BYTE *allTaxiLights = NULL;
-BYTE *overrideHospital = NULL;
-BYTE *overridePolice = NULL;
-BYTE *currentPlayer = NULL;
 
 GtaGame::GtaGame()
 {
@@ -130,49 +111,32 @@ GtaGame::GtaGame()
 	case 0x74FF5064:
 		version = V1_0;
 		RpAnimBlendClumpGetFirstAssociation = (DWORD(__cdecl *)(uintptr_t))0x402E20;
-		SetPhoneMessage_JustOnce = (void(__thiscall *)(uintptr_t, int, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *))0x43C430;
-		OverrideNextRestart = (void(__cdecl *)(CVector *, float))0x4429E0;
-		RemoveEntityFromList = (void(__thiscall *)(uintptr_t, int, unsigned char))0x4518E0;
 		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x451C70;
 		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x451CB0;
 		PedPoolGetHandle = (int(__thiscall *)(void *, void *))0x451CF0;
 		HighlightImportantArea = (void(__cdecl *)(CScript *, float, float, float, float, float))0x45F080;
-		GetPadState = (WORD(__thiscall *)(CScript *, unsigned short, unsigned short))0x460C00;
 		IsWithinArea_3d = (bool(__thiscall *)(uintptr_t, float, float, float, float, float, float))0x4BB900;
 		IsWithinArea_2d = (bool(__thiscall *)(uintptr_t, float, float, float, float))0x4BB9E0;
-		FindPlayerPed = (DWORD(__cdecl *)(void))0x4BC120;
 		RegisterReference = (void(__thiscall *)(uintptr_t, uintptr_t))0x4C6AC0;
 		AnotherKillFrenzyPassed = (void(__cdecl *)(void))0x4CDBA7;
-		Remove = (DWORD(__cdecl *)(DWORD))0x4DB310;
-		GrantAmmo = (void(__thiscall *)(uintptr_t, DWORD, unsigned int))0x4FF840;
-		GiveWeapon = (void(__thiscall *)(uintptr_t, DWORD, DWORD, DWORD))0x4FFA30;
 		GetNumberOfPassengerSeats = (DWORD(__cdecl *)(DWORD))0x578A70;
-		GetWeaponInfo = (DWORD(__cdecl *)(DWORD))0x5D5710;
+		WindowHandler = (void(__cdecl *)(int, int))0x602EE0;
 		isNastyGame = (bool *)0x68DD68;
-		barrel1 = (DWORD *)0x68E8B0;
-		barrel2 = (DWORD *)0x68E910;
 		maxWantedLevel = (DWORD *)0x6910D8;
 		phoneDisplayMessage = (BYTE *)0x7030E4;
-		currentPhone = (DWORD *)0x7030E8;
-		cprojectileinfo = 0x7DB888;
+		currentPhone = (unsigned long *)0x7030E8;
 		gangPedModelOverride = 0x7D925C;
 		textDraw = 0x7F0EA0;
 		infoZoneCarDensity = 0x7FA370;
 		infoZonePedDensity = 0x7FA39C;
-		cgarage = 0x812668;
-		cphoneinfo = 0x817CF0;
 		numberedText = (wchar_t *)0x821068;
 		infoZone = 0x862508;
-		pickupEntity = 0x945D40;
 		playerPedPool = (uintptr_t *)0x94AD28;
-		playerPedState = (uintptr_t *)0x94ADF4;
-		projectileObject = (uintptr_t *)0x94B708;
+		projectileObject = (unsigned long *)0x94B708;
 		navigZone = 0x94B990;
-		objectPool = (void **)0x94DBE0;
 		shootingRangeRank = (float *)0x974B08;
 		garbagePickups = (float *)0x974C00;
 		loanSharkVisits = (float*)0x974C28;
-		cmissioncleanup = 0x97F060;
 		pedPool = (void **)0x97F2AC;
 		cfire = 0x97F8A0;
 		topShootingRangeScore = (float *)0xA0D8A4;
@@ -183,57 +147,36 @@ GtaGame::GtaGame()
 		numInfoZone = (WORD *)0xA1096A;
 		currentTextDraw = (WORD *)0xA10A48;
 		numNavigZone = (WORD *)0xA10A58;
-		allTaxiLights = (BYTE *)0xA10ABB;
-		overrideHospital = (BYTE *)0xA10AE6;
-		overridePolice = (BYTE *)0xA10AEA;
-		currentPlayer = (BYTE *)0xA10AFB;
 		break;
 	case 0x00408DC0:
 		version = V1_1;
 		RpAnimBlendClumpGetFirstAssociation = (DWORD(__cdecl *)(uintptr_t))0x402E20;
-		SetPhoneMessage_JustOnce = (void(__thiscall *)(uintptr_t, int, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *, wchar_t *))0x43C430;
-		OverrideNextRestart = (void(__cdecl *)(CVector *, float))0x4429E0;
-		RemoveEntityFromList = (void(__thiscall *)(uintptr_t, int, unsigned char))0x4518E0;
 		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x451C70;
 		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x451CB0;
 		PedPoolGetHandle = (int(__thiscall *)(void *, void *))0x451CF0;
 		HighlightImportantArea = (void(__cdecl *)(CScript *, float, float, float, float, float))0x45F080;
-		GetPadState = (WORD(__thiscall *)(CScript *, unsigned short, unsigned short))0x460C00;
 		IsWithinArea_3d = (bool(__thiscall *)(uintptr_t, float, float, float, float, float, float))(0x4BB900 + 0x20);
 		IsWithinArea_2d = (bool(__thiscall *)(uintptr_t, float, float, float, float))(0x4BB9E0 + 0x20);
-		FindPlayerPed = (DWORD(__cdecl *)(void))(0x4BC120 + 0x20);
 		RegisterReference = (void(__thiscall *)(uintptr_t, uintptr_t))(0x4C6AC0 + 0x20);
 		AnotherKillFrenzyPassed = (void(__cdecl *)(void))(0x4CDBA7 + 0x20);
-		Remove = (DWORD(__cdecl *)(DWORD))(0x4DB310 + 0x20);
-		GrantAmmo = (void(__thiscall *)(uintptr_t, DWORD, unsigned int))(0x4FF840 + 0x20);
-		GiveWeapon = (void(__thiscall *)(uintptr_t, DWORD, DWORD, DWORD))(0x4FFA30 + 0x20);
 		GetNumberOfPassengerSeats = (DWORD(__cdecl *)(DWORD))(0x578A70 + 0x20);
-		GetWeaponInfo = (DWORD(__cdecl *)(DWORD))(0x5D5710 + 0x20);
+		WindowHandler = (void(__cdecl *)(int, int))(0x602EE0 + 0x20);
 		isNastyGame = (bool *)0x68DD68;
-		barrel1 = (DWORD *)0x68E8B0;
-		barrel2 = (DWORD *)0x68E910;
 		maxWantedLevel = (DWORD *)0x6910D8;
 		phoneDisplayMessage = (BYTE *)0x7030E4;
-		currentPhone = (DWORD *)0x7030E8;
-		cprojectileinfo = 0x7DB888 + 8;
+		currentPhone = (unsigned long *)0x7030E8;
 		gangPedModelOverride = 0x7D925C + 8;
 		textDraw = 0x7F0EA0 + 8;
 		infoZoneCarDensity = 0x7FA370 + 8;
 		infoZonePedDensity = 0x7FA39C + 8;
-		cgarage = 0x812668 + 8;
-		cphoneinfo = 0x817CF0 + 8;
 		numberedText = (wchar_t *)(0x821068 + 8);
 		infoZone = 0x862508 + 8;
-		pickupEntity = 0x945D40 + 8;
 		playerPedPool = (uintptr_t *)(0x94AD28 + 8);
-		playerPedState = (uintptr_t *)(0x94ADF4 + 8);
-		projectileObject = (uintptr_t *)(0x94B708 + 8);
+		projectileObject = (unsigned long *)(0x94B708 + 8);
 		navigZone = 0x94B990 + 8;
-		objectPool = (void **)(0x94DBE0 + 8);
 		shootingRangeRank = (float *)(0x974B08 + 8);
 		garbagePickups = (float *)(0x974C00 + 8);
 		loanSharkVisits = (float*)(0x974C28 + 8);
-		cmissioncleanup = 0x97F060 + 8;
 		pedPool = (void **)(0x97F2AC + 8);
 		cfire = 0x97F8A0 + 8;
 		topShootingRangeScore = (float *)(0xA0D8A4 + 8);
@@ -244,34 +187,23 @@ GtaGame::GtaGame()
 		numInfoZone = (WORD *)(0xA1096A + 8);
 		currentTextDraw = (WORD *)(0xA10A48 + 8);
 		numNavigZone = (WORD *)(0xA10A58 + 8);
-		allTaxiLights = (BYTE *)(0xA10ABB + 8);
-		overrideHospital = (BYTE *)(0xA10AE6 + 8);
-		overridePolice = (BYTE *)(0xA10AEA + 8);
-		currentPlayer = (BYTE *)(0xA10AFB + 8);
 		break;
 	case 0x00004824:
 		version = VSTEAM;
 		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, int))(0x451C70 - 0x120);
 		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, int))(0x451CB0 - 0x120);
-		cprojectileinfo = 0x7DB888 - 0xFF8;
 		gangPedModelOverride = 0x7D925C - 0xFF8;
 		textDraw = 0x7F0EA0 - 0xFF8;
 		infoZoneCarDensity = 0x7FA370 - 0xFF8;
 		infoZonePedDensity = 0x7FA39C - 0xFF8;
-		cgarage = 0x812668 - 0xFF8;
-		cphoneinfo = 0x817CF0 - 0xFF8;
 		numberedText = (wchar_t *)(0x821068 - 0xFF8);
 		infoZone = 0x862508 - 0xFF8;
-		pickupEntity = 0x945D40 - 0xFF8;
 		playerPedPool = (uintptr_t *)(0x94AD28 - 0xFF8);
-		playerPedState = (uintptr_t *)(0x94ADF4 - 0xFF8);
-		projectileObject = (uintptr_t *)(0x94B708 - 0xFF8);
+		projectileObject = (unsigned long *)(0x94B708 - 0xFF8);
 		navigZone = 0x94B990 - 0xFF8;
-		objectPool = (void **)(0x94DBE0 - 0xFF8);
 		shootingRangeRank = (float *)(0x974B08 - 0xFF8);
 		garbagePickups = (float *)(0x974C00 - 0xFF8);
 		loanSharkVisits = (float*)(0x974C28 - 0xFF8);
-		cmissioncleanup = 0x97F060 - 0xFF8;
 		pedPool = (void **)(0x97F2AC - 0xFF8);
 		cfire = 0x97F8A0 - 0xFF8;
 		topShootingRangeScore = (float *)(0xA0D8A4 - 0xFF8);
@@ -288,14 +220,14 @@ GtaGame::GtaGame()
 
 bool CCranesHack::IsThisCarPickedUp(float positionX, float positionY, CVehicle *vehicle)
 {
-	float craneObjectX, craneObjectY, distance;
+	float distance;
 	if (numCranes > 0) {
 		for (int i = 0; i < numCranes; i++) {
-			craneObjectX = *(float *)(cranes[i].object + 0x34);
-			craneObjectY = *(float *)(cranes[i].object + 0x38);
-			distance = sqrt(pow(positionX - craneObjectX, 2) + pow(positionY - craneObjectY, 2));
-			if (distance < 100.0 && cranes[i].vehicle == vehicle && (cranes[i].status == 2 || cranes[i].status == 4)) {
-				return true;
+			if (cranes[i].object) {
+				distance = sqrt(pow(positionX - cranes[i].object->matrix.pos.x, 2) + pow(positionY - cranes[i].object->matrix.pos.y, 2));
+				if (distance < 100.0 && cranes[i].vehicle == vehicle && (cranes[i].status == 2 || cranes[i].status == 4)) {
+					return true;
+				}
 			}
 		}
 	}
@@ -305,16 +237,16 @@ bool CCranesHack::IsThisCarPickedUp(float positionX, float positionY, CVehicle *
 void CCranesHack::DeActivateCrane(float positionX, float positionY)
 {
 	int index = -1;
-	float craneObjectX, craneObjectY, minDistance, distance;
+	float minDistance, distance;
 	minDistance = 100.0;
 	if (numCranes > 0) {
 		for (int i = 0; i < numCranes; i++) {
-			craneObjectX = *(float *)(cranes[i].object + 0x34);
-			craneObjectY = *(float *)(cranes[i].object + 0x38);
-			distance = sqrt(pow(positionX - craneObjectX, 2) + pow(positionY - craneObjectY, 2));
-			if (distance < minDistance) {
-				index = i;
-				minDistance = distance;
+			if (cranes[i].object) {
+				distance = sqrt(pow(positionX - cranes[i].object->matrix.pos.x, 2) + pow(positionY - cranes[i].object->matrix.pos.y, 2));
+				if (distance < minDistance) {
+					index = i;
+					minDistance = distance;
+				}
 			}
 		}
 	}
@@ -330,12 +262,12 @@ void CCranesHack::ActivateCrane(float pickupX1, float pickupX2, float pickupY1, 
 	minDistance = 100.0;
 	if (numCranes > 0) {
 		for (int i = 0; i < numCranes; i++) {
-			craneObjectX = *(float *)(cranes[i].object + 0x34);
-			craneObjectY = *(float *)(cranes[i].object + 0x38);
-			distance = sqrt(pow(positionX - craneObjectX, 2) + pow(positionY - craneObjectY, 2));
-			if (distance < minDistance) {
-				index = i;
-				minDistance = distance;
+			if (cranes[i].object) {
+				distance = sqrt(pow(positionX - cranes[i].object->matrix.pos.x, 2) + pow(positionY - cranes[i].object->matrix.pos.y, 2));
+				if (distance < minDistance) {
+					index = i;
+					minDistance = distance;
+				}
 			}
 		}
 	}
@@ -348,7 +280,7 @@ void CCranesHack::ActivateCrane(float pickupX1, float pickupX2, float pickupY1, 
 	cranes[index].dropoffY = dropoffY;
 	cranes[index].dropoffZ = dropoffZ;
 	cranes[index].activity = 1;
-	cranes[index].vehicle = NULL;
+	cranes[index].vehicle = 0;
 	cranes[index].countCollected = 0;
 	cranes[index].dropoffHeading = dropoffHeading;
 	cranes[index].isCrusher = isCrusher;
@@ -357,8 +289,8 @@ void CCranesHack::ActivateCrane(float pickupX1, float pickupX2, float pickupY1, 
 	cranes[index].status = 0;
 	pickupCenterX = (pickupX1 + pickupX2) / 2;
 	pickupCenterY = (pickupY1 + pickupY2) / 2;
-	craneObjectX = *(float *)(cranes[index].object + 0x34);
-	craneObjectY = *(float *)(cranes[index].object + 0x38);
+	craneObjectX = cranes[index].object->matrix.pos.x;
+	craneObjectY = cranes[index].object->matrix.pos.y;
 	/*if (isCrusher) {
 		cranes[index].armPickupHeight = -0.95099998f;
 	} else if (isMilitary) {
@@ -374,20 +306,21 @@ void CCranesHack::ActivateCrane(float pickupX1, float pickupX2, float pickupY1, 
 	cranes[index].armDropoffHeight = dropoffZ;
 }
 
-bool IsProjectileInRange(float x1, float y1, float z1, float x2, float y2, float z2, bool flag)
+bool CProjectileInfoHack::IsProjectileInRange(float x1, float y1, float z1, float x2, float y2, float z2, bool flag)
 {
-	uintptr_t *object = projectileObject;
-	for (uintptr_t info = cprojectileinfo; info < cprojectileinfo + 0x20 * 0x1C; info += 0x1C, object++) {
-		if (*object != NULL) {
-			if (*(BYTE *)(info + 0xC) != 0 && *(DWORD *)info >= 12 && *(DWORD *)info <= 16) {
-				if (*(float *)(*object + 0x34) >= x1 && *(float *)(*object + 0x34) <= x2) {
-					if (*(float *)(*object + 0x38) >= y1 && *(float *)(*object + 0x38) <= y2) {
-						if (*(float *)(*object + 0x3C) >= z1 && *(float *)(*object + 0x3C) <= z2) {
+	unsigned long *address = projectileObject;
+	for (int i = 0; i < 0x20; i++, address++) {
+		CObject *object = *(CObject **)address;
+		if (object) {
+			if (projectiles[i].doesProjectileExist && projectiles[i].weaponType >= 12 && projectiles[i].weaponType <= 16) {
+				if (object->matrix.pos.x >= x1 && object->matrix.pos.x <= x2) {
+					if (object->matrix.pos.y >= y1 && object->matrix.pos.y <= y2) {
+						if (object->matrix.pos.z >= z1 && object->matrix.pos.z <= z2) {
 							if (flag) {
-								*(BYTE *)(info + 0xC) = 0;
-								auto Destroy = (void(__thiscall *)(uintptr_t, int))*(uintptr_t *)((*(uintptr_t *)(*object)) + 8);
-								Remove(*object);
-								Destroy(*object, 1);
+								projectiles[i].doesProjectileExist = 0;
+								auto Destroy = (void(__thiscall *)(CObject *, int))*(unsigned long *)(object->vtbl + 8);
+								CWorld::Remove(object);
+								Destroy(object, 1);
 							}
 							return true;
 						}
@@ -399,16 +332,15 @@ bool IsProjectileInRange(float x1, float y1, float z1, float x2, float y2, float
 	return false;
 }
 
-void SetPhoneMessage_Repeatedly(uintptr_t cphoneinfo, int phone, wchar_t *string1, wchar_t *string2, wchar_t *string3, wchar_t *string4, wchar_t *string5, wchar_t *string6)
+void CPhoneInfoHack::SetPhoneMessage_Repeatedly(int index, wchar_t *string1, wchar_t *string2, wchar_t *string3, wchar_t *string4, wchar_t *string5, wchar_t *string6)
 {
-	phone = phone * 0x34 + cphoneinfo;
-	*(wchar_t **)(phone + 0x14) = string1;
-	*(wchar_t **)(phone + 0x18) = string2;
-	*(wchar_t **)(phone + 0x1C) = string3;
-	*(wchar_t **)(phone + 0x20) = string4;
-	*(wchar_t **)(phone + 0x24) = string5;
-	*(wchar_t **)(phone + 0x28) = string6;
-	*(unsigned int *)(phone + 0x34) = 5;
+	this->phones[index].message1 = string1;
+	this->phones[index].message2 = string2;
+	this->phones[index].message3 = string3;
+	this->phones[index].message4 = string4;
+	this->phones[index].message5 = string5;
+	this->phones[index].message6 = string6;
+	this->phones[index].state = 5;
 }
 
 bool CExplosionHack::TestForExplosionInArea(int explosionType, float x1, float x2, float y1, float y2, float z1, float z2)
@@ -450,13 +382,7 @@ eOpcodeResult WINAPI IS_CHAR_STILL_ALIVE(CScript *script)
 {
 	script->Collect(1);
 	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
-	if (ped) {
-		if (ped->state != 0x37 && ped->state != 0x36) {
-			script->UpdateCompareFlag(true);
-			return OR_CONTINUE;
-		}
-	}
-	script->UpdateCompareFlag(false);
+	script->UpdateCompareFlag(ped && ped->state != 0x37 && ped->state != 0x36);
 	return OR_CONTINUE;
 }
 
@@ -464,20 +390,8 @@ eOpcodeResult WINAPI IS_CHAR_STILL_ALIVE(CScript *script)
 eOpcodeResult WINAPI IS_CAR_STILL_ALIVE(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t car = (uintptr_t)CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
-	if (car) {
-		BYTE flag = *(BYTE *)(car + 0x50);
-		flag >>= 3;
-		if (flag != 5) {
-			flag = *(BYTE *)(car + 0x1FD);
-			flag &= 1;
-			if (flag != 1) {
-				script->UpdateCompareFlag(true);
-				return OR_CONTINUE;
-			}
-		}
-	}
-	script->UpdateCompareFlag(false);
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	script->UpdateCompareFlag(vehicle && (vehicle->status >> 3) != 5 && (vehicle->field_1FD & 1) != 1);
 	return OR_CONTINUE;
 }
 
@@ -499,7 +413,7 @@ eOpcodeResult WINAPI RETURN_FALSE(CScript *script)
 eOpcodeResult WINAPI GET_PAD_STATE(CScript *script)
 {
 	script->Collect(2);
-	Params[0].nVar = (unsigned int)GetPadState(script, (unsigned short)Params[0].nVar, (unsigned short)Params[1].nVar);
+	Params[0].nVar = (unsigned int)((CRunningScript *)script)->GetPadState((unsigned short)Params[0].nVar, (unsigned short)Params[1].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -508,7 +422,7 @@ eOpcodeResult WINAPI GET_PAD_STATE(CScript *script)
 eOpcodeResult WINAPI ADD_AMMO_TO_PLAYER(CScript *script)
 {
 	script->Collect(3);
-	GrantAmmo(playerPedPool[0x2E * Params[0].nVar], Params[1].nVar, Params[2].nVar);
+	CWorld::Players[Params[0].nVar].playerEntity->GrantAmmo(Params[1].nVar, Params[2].nVar);
 	return OR_CONTINUE;
 }
 
@@ -516,7 +430,7 @@ eOpcodeResult WINAPI ADD_AMMO_TO_PLAYER(CScript *script)
 eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag(playerPedState[0x2E * Params[0].nVar] != 1);
+	script->UpdateCompareFlag(CWorld::Players[Params[0].nVar].deathArrestState != 1);
 	return OR_CONTINUE;
 }
 
@@ -524,7 +438,7 @@ eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script)
 eOpcodeResult WINAPI HAS_PLAYER_BEEN_ARRESTED(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag(playerPedState[0x2E * Params[0].nVar] == 2);
+	script->UpdateCompareFlag(CWorld::Players[Params[0].nVar].deathArrestState == 2);
 	return OR_CONTINUE;
 }
 
@@ -532,8 +446,8 @@ eOpcodeResult WINAPI HAS_PLAYER_BEEN_ARRESTED(CScript *script)
 eOpcodeResult WINAPI CHANGE_CAR_LOCK(CScript *script)
 {
 	script->Collect(2);
-	if (CVehicle *car = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
-		car->lock = Params[1].nVar;
+	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
+		vehicle->lock = Params[1].nVar;
 	}
 	return OR_CONTINUE;
 }
@@ -550,14 +464,11 @@ eOpcodeResult WINAPI SHAKE_CAM_WITH_POINT(CScript *script)
 eOpcodeResult WINAPI IS_CAR_DEAD_IN_AREA_2D(CScript *script)
 {
 	script->Collect(6);
-	uintptr_t car = (uintptr_t)CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
 	if (Params[5].nVar) {
 		HighlightImportantArea(script, Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar, -100.0);
 	}
-	if (car) {
-		BYTE flag = *(BYTE *)(car + 0x50);
-		flag >>= 3;
-		if (flag == 5 && IsWithinArea_2d(car + 4, Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar)) {
+	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
+		if ((vehicle->status >> 3) == 5 && IsWithinArea_2d((unsigned long)&vehicle->matrix, Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar)) {
 			script->UpdateCompareFlag(true);
 			return OR_CONTINUE;
 		}
@@ -570,14 +481,11 @@ eOpcodeResult WINAPI IS_CAR_DEAD_IN_AREA_2D(CScript *script)
 eOpcodeResult WINAPI IS_CAR_DEAD_IN_AREA_3D(CScript *script)
 {
 	script->Collect(8);
-	uintptr_t car = (uintptr_t)CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
 	if (Params[7].nVar) {
 		HighlightImportantArea(script, Params[1].fVar, Params[2].fVar, Params[4].fVar, Params[5].fVar, (Params[3].fVar + Params[6].fVar) * 0.5f);
 	}
-	if (car != NULL) {
-		BYTE flag = *(BYTE *)(car + 0x50);
-		flag >>= 3;
-		if (flag == 5 && IsWithinArea_3d(car + 4, Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar, Params[5].fVar, Params[6].fVar)) {
+	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
+		if ((vehicle->status >> 3) == 5 && IsWithinArea_3d((unsigned long)&vehicle->matrix, Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar, Params[5].fVar, Params[6].fVar)) {
 			script->UpdateCompareFlag(true);
 			return OR_CONTINUE;
 		}
@@ -645,14 +553,16 @@ eOpcodeResult WINAPI ADD_BLIP_FOR_OBJECT_OLD(CScript *script)
 eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT(CScript *script)
 {
 	script->Collect(2);
-	CPlayerPed *player = CWorld::Players[Params[0].nVar].playerEntity;
-	CPhysical *source = player;
-	if (player->isInAnyVehicle) {
-		if (player->vehicle) {
+	if (CObject *object = CPools::ms_pObjectPool->GetAt(Params[1].nVar)) {
+		CPlayerPed *player = CWorld::Players[Params[0].nVar].playerEntity;
+		CPhysical *source = player;
+		if (player->isInAnyVehicle && player->vehicle) {
 			source = player->vehicle;
 		}
+		script->UpdateCompareFlag(source->GetHasCollidedWith(object));
+		return OR_CONTINUE;
 	}
-	script->UpdateCompareFlag(source->GetHasCollidedWith(CPools::ms_pObjectPool->GetAt(Params[1].nVar)));
+	script->UpdateCompareFlag(false);
 	return OR_CONTINUE;
 }
 
@@ -661,13 +571,16 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT(CScript *script)
 {
 	script->Collect(2);
 	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
-	CPhysical *source = ped;
-	if (ped->isInAnyVehicle) {
-		if (ped->vehicle) {
+	CObject *object = CPools::ms_pObjectPool->GetAt(Params[1].nVar);
+	if (ped && object) {
+		CPhysical *source = ped;
+		if (ped->isInAnyVehicle && ped->vehicle) {
 			source = ped->vehicle;
 		}
+		script->UpdateCompareFlag(source->GetHasCollidedWith(object));
+		return OR_CONTINUE;
 	}
-	script->UpdateCompareFlag(source->GetHasCollidedWith(CPools::ms_pObjectPool->GetAt(Params[1].nVar)));
+	script->UpdateCompareFlag(false);
 	return OR_CONTINUE;
 }
 
@@ -675,7 +588,9 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT(CScript *script)
 eOpcodeResult WINAPI SET_CHAR_AMMO(CScript *script)
 {
 	script->Collect(3);
-	CPools::ms_pPedPool->GetAt(Params[0].nVar)->SetAmmo(Params[1].nVar, Params[2].nVar);
+	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
+		ped->SetAmmo(Params[1].nVar, Params[2].nVar);
+	}
 	return OR_CONTINUE;
 }
 
@@ -683,8 +598,9 @@ eOpcodeResult WINAPI SET_CHAR_AMMO(CScript *script)
 eOpcodeResult WINAPI DONT_REMOVE_CAR(CScript *script)
 {
 	script->Collect(1);
-	CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
-	RemoveEntityFromList(cmissioncleanup, Params[0].nVar, 1);
+	if (CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
+		VCGlobals::TheMissionCleanup.RemoveEntityFromList(Params[0].nVar, 1);
+	}
 	return OR_CONTINUE;
 }
 
@@ -739,7 +655,7 @@ eOpcodeResult WINAPI SET_FREE_BOMBS(CScript *script)
 eOpcodeResult WINAPI SET_ALL_TAXI_LIGHTS(CScript *script)
 {
 	script->Collect(1);
-	*allTaxiLights = !!Params[0].nVar;
+	CAutomobile::m_sAllTaxiLights = !!Params[0].nVar;
 	return OR_CONTINUE;
 }
 
@@ -747,7 +663,8 @@ eOpcodeResult WINAPI SET_ALL_TAXI_LIGHTS(CScript *script)
 eOpcodeResult WINAPI IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag(!!(CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->bombState & 7));
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	script->UpdateCompareFlag(vehicle && (vehicle->bombState & 7));
 	return OR_CONTINUE;
 }
 
@@ -755,7 +672,8 @@ eOpcodeResult WINAPI IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script)
 eOpcodeResult WINAPI IS_CAR_ARMED_WITH_BOMB(CScript *script)
 {
 	script->Collect(2);
-	script->UpdateCompareFlag((CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->bombState & 7) == Params[1].nVar);
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	script->UpdateCompareFlag(vehicle && (vehicle->bombState & 7) == Params[1].nVar);
 	return OR_CONTINUE;
 }
 
@@ -764,7 +682,8 @@ eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 {
 	script->Collect(2);
 	CPlayerPed *player = CWorld::Players[Params[0].nVar].playerEntity;
-	script->UpdateCompareFlag(!player->isInAnyVehicle && player->GetHasCollidedWith(CPools::ms_pObjectPool->GetAt(Params[1].nVar)));
+	CObject *object = CPools::ms_pObjectPool->GetAt(Params[1].nVar);
+	script->UpdateCompareFlag(object && !player->isInAnyVehicle && player->GetHasCollidedWith(object));
 	return OR_CONTINUE;
 }
 
@@ -773,7 +692,47 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 {
 	script->Collect(2);
 	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
-	script->UpdateCompareFlag(!ped->isInAnyVehicle && ped->GetHasCollidedWith(CPools::ms_pObjectPool->GetAt(Params[1].nVar)));
+	CObject *object = CPools::ms_pObjectPool->GetAt(Params[1].nVar);
+	script->UpdateCompareFlag(ped && object && !ped->isInAnyVehicle && ped->GetHasCollidedWith(object));
+	return OR_CONTINUE;
+}
+
+/* 023E */
+eOpcodeResult WINAPI FLASH_CAR(CScript *script)
+{
+	script->Collect(2);
+	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
+		vehicle->field_052 &= 0xDF;
+		if (Params[1].nVar) {
+			vehicle->field_052 |= 0x20;
+		}
+	}
+	return OR_CONTINUE;
+}
+
+/* 023F */
+eOpcodeResult WINAPI FLASH_CHAR(CScript *script)
+{
+	script->Collect(2);
+	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
+		ped->field_052 &= 0xDF;
+		if (Params[1].nVar) {
+			ped->field_052 |= 0x20;
+		}
+	}
+	return OR_CONTINUE;
+}
+
+/* 0240 */
+eOpcodeResult WINAPI FLASH_OBJECT(CScript *script)
+{
+	script->Collect(2);
+	if (CObject *object = CPools::ms_pObjectPool->GetAt(Params[0].nVar)) {
+		object->field_052 &= 0xDF;
+		if (Params[1].nVar) {
+			object->field_052 |= 0x20;
+		}
+	}
 	return OR_CONTINUE;
 }
 
@@ -781,12 +740,10 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 eOpcodeResult WINAPI ARM_CAR_WITH_BOMB(CScript *script)
 {
 	script->Collect(2);
-	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
-	BYTE input = ((BYTE)Params[1].nVar) & 7;
-	BYTE state = (*(BYTE *)(car + 0x1FE) & 0xF8);
-	state |= input;
-	*(BYTE *)(car + 0x1FE) = state;
-	*(DWORD *)(car + 0x210) = FindPlayerPed();
+	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
+		vehicle->bombState = (vehicle->bombState & 0xF8) | (((unsigned char)Params[1].nVar) & 7);
+		vehicle->bombOwner = VCGlobals::FindPlayerPed();
+	}
 	return OR_CONTINUE;
 }
 
@@ -796,7 +753,7 @@ eOpcodeResult WINAPI SET_REPEATED_PHONE_MESSAGE(CScript *script)
 	script->Collect(1);
 	char gxt[8];
 	script->ReadShortString(gxt);
-	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, VCGlobals::TheText.Get(gxt), NULL, NULL, NULL, NULL, NULL);
+	((CPhoneInfoHack *)&VCGlobals::ThePhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, VCGlobals::TheText.Get(gxt), 0, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -806,7 +763,7 @@ eOpcodeResult WINAPI SET_PHONE_MESSAGE(CScript *script)
 	script->Collect(1);
 	char gxt[8];
 	script->ReadShortString(gxt);
-	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, VCGlobals::TheText.Get(gxt), NULL, NULL, NULL, NULL, NULL);
+	VCGlobals::ThePhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, VCGlobals::TheText.Get(gxt), 0, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -815,7 +772,7 @@ eOpcodeResult WINAPI HAS_PHONE_DISPLAYED_MESSAGE(CScript *script)
 {
 	script->Collect(1);
 	if (*phoneDisplayMessage == 0) {
-		DWORD state = *(DWORD *)(Params[0].nVar * 0x34 + cphoneinfo + 0x34);
+		unsigned int state = VCGlobals::ThePhoneInfo.phones[Params[0].nVar].state;
 		if (state == 6 || state == 7 || state == 8) {
 			script->UpdateCompareFlag(true);
 			return OR_CONTINUE;
@@ -836,11 +793,11 @@ eOpcodeResult WINAPI RESTART_CRITICAL_MISSION(CScript *script)
 	pos.x = Params[0].fVar;
 	pos.y = Params[1].fVar;
 	pos.z = Params[2].fVar;
-	OverrideNextRestart(&pos, Params[3].fVar);
-	DWORD player = *currentPlayer * 0x170 + (DWORD)playerPedPool;
-	if (*(BYTE *)(player + 0xCC) == 0) {
-		*(BYTE *)(player + 0xCC) = 3;
-		*(DWORD *)(player + 0xD0) = CTimer::m_snTimeInMilliseconds;
+	CRestart::OverrideNextRestart(pos, Params[3].fVar);
+	CPlayerInfo *player = &CWorld::Players[VCGlobals::currentPlayer];
+	if (player->deathArrestState == 0) {
+		player->deathArrestState = 3;
+		player->timeDeathArrest = CTimer::m_snTimeInMilliseconds;
 		CDarkel::ResetOnPlayerDeath();
 	}
 	return OR_CONTINUE;
@@ -850,8 +807,12 @@ eOpcodeResult WINAPI RESTART_CRITICAL_MISSION(CScript *script)
 eOpcodeResult WINAPI IS_TAXI(CScript *script)
 {
 	script->Collect(1);
-	unsigned short model = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->modelIndex;
-	script->UpdateCompareFlag(model == 0x96 || model == 0xA8 || model == 0xBC || model == 0xD8);
+	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
+		unsigned short model = vehicle->modelIndex;
+		script->UpdateCompareFlag(model == 0x96 || model == 0xA8 || model == 0xBC || model == 0xD8);
+		return OR_CONTINUE;
+	}
+	script->UpdateCompareFlag(false);
 	return OR_CONTINUE;
 }
 
@@ -859,10 +820,11 @@ eOpcodeResult WINAPI IS_TAXI(CScript *script)
 eOpcodeResult WINAPI ACTIVATE_GARAGE(CScript *script)
 {
 	script->Collect(1);
-	if (CGarages::garages[Params[0].nVar].type == 11 && CGarages::garages[Params[0].nVar].state == 0) {
-		CGarages::garages[Params[0].nVar].state = 3;
+	CGarage *garage = &CGarages::garages[Params[0].nVar];
+	if (garage->type == 11 && garage->state == 0) {
+		garage->state = 3;
 	}
-	CGarages::garages[Params[0].nVar].isInactive = 0;
+	garage->isInactive = 0;
 	return OR_CONTINUE;
 }
 
@@ -870,7 +832,8 @@ eOpcodeResult WINAPI ACTIVATE_GARAGE(CScript *script)
 eOpcodeResult WINAPI IS_BOAT(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag(CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->type == 1);
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	script->UpdateCompareFlag(vehicle && vehicle->type == 1);
 	return OR_CONTINUE;
 }
 
@@ -878,17 +841,18 @@ eOpcodeResult WINAPI IS_BOAT(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_STOPPED(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
-	if (*(BYTE *)(ped + 0x3AC)) {
-		uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
-		if (*(float *)(car + 0x100) == 0.0) {
-			script->UpdateCompareFlag(true);
-			return OR_CONTINUE;
-		}
-	} else {
-		if (*(DWORD *)(ped + 0x24C) <= 1) {
-			script->UpdateCompareFlag(true);
-			return OR_CONTINUE;
+	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
+		if (ped->isInAnyVehicle) {
+			CVehicle *vehicle = ped->vehicle;
+			if (vehicle && vehicle->speed < CTimer::ms_fTimeStep * 0.01) {
+				script->UpdateCompareFlag(true);
+				return OR_CONTINUE;
+			}
+		} else {
+			if (ped->moveState <= 1) {
+				script->UpdateCompareFlag(true);
+				return OR_CONTINUE;
+			}
 		}
 	}
 	script->UpdateCompareFlag(false);
@@ -1010,7 +974,7 @@ eOpcodeResult WINAPI IS_PROJECTILE_IN_AREA(CScript *script)
 		Params[5].fVar = Params[2].fVar;
 		Params[2].fVar = temp;
 	}
-	script->UpdateCompareFlag(IsProjectileInRange(Params[0].fVar, Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar, Params[5].fVar, 0));
+	script->UpdateCompareFlag(CProjectileInfoHack::IsProjectileInRange(Params[0].fVar, Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar, Params[5].fVar, 0));
 	return OR_CONTINUE;
 }
 
@@ -1034,7 +998,7 @@ eOpcodeResult WINAPI DESTROY_PROJECTILES_IN_AREA(CScript *script)
 		Params[5].fVar = Params[2].fVar;
 		Params[2].fVar = temp;
 	}
-	script->UpdateCompareFlag(IsProjectileInRange(Params[0].fVar, Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar, Params[5].fVar, 1));
+	script->UpdateCompareFlag(CProjectileInfoHack::IsProjectileInRange(Params[0].fVar, Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar, Params[5].fVar, 1));
 	return OR_CONTINUE;
 }
 
@@ -1049,7 +1013,7 @@ eOpcodeResult WINAPI DROP_MINE(CScript *script)
 	pos.x = Params[0].fVar;
 	pos.y = Params[1].fVar;
 	pos.z = Params[2].fVar;
-	CPickups::GenerateNewOne(pos, *barrel1, 9, 0, 0, 0, 0);
+	CPickups::GenerateNewOne(pos, VCGlobals::MI_CARMINE, 9, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1064,7 +1028,7 @@ eOpcodeResult WINAPI DROP_NAUTICAL_MINE(CScript *script)
 	pos.x = Params[0].fVar;
 	pos.y = Params[1].fVar;
 	pos.z = Params[2].fVar;
-	CPickups::GenerateNewOne(pos, *barrel2, 11, 0, 0, 0, 0);
+	CPickups::GenerateNewOne(pos, VCGlobals::MI_NAUTICALMINE, 11, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1152,7 +1116,8 @@ eOpcodeResult WINAPI PRINT_WITH_6_NUMBERS_NOW(CScript *script)
 eOpcodeResult WINAPI IS_FIRST_CAR_COLOUR(CScript *script)
 {
 	script->Collect(2);
-	script->UpdateCompareFlag((int)CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->firstColour == Params[1].nVar);
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	script->UpdateCompareFlag(vehicle && (int)vehicle->firstColour == Params[1].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1160,7 +1125,8 @@ eOpcodeResult WINAPI IS_FIRST_CAR_COLOUR(CScript *script)
 eOpcodeResult WINAPI IS_SECOND_CAR_COLOUR(CScript *script)
 {
 	script->Collect(2);
-	script->UpdateCompareFlag((int)CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->secondColour == Params[1].nVar);
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	script->UpdateCompareFlag(vehicle && (int)vehicle->secondColour == Params[1].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1168,13 +1134,11 @@ eOpcodeResult WINAPI IS_SECOND_CAR_COLOUR(CScript *script)
 eOpcodeResult WINAPI SET_CAR_VISIBLE(CScript *script)
 {
 	script->Collect(2);
-	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
-	BYTE flag = *(BYTE *)(car + 0x52);
-	flag &= 0xFB;
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	vehicle->field_052 &= 0xFB;
 	if (Params[1].nVar) {
-		flag |= 4;
+		vehicle->field_052 |= 4;
 	}
-	*(BYTE *)(car + 0x52) = flag;
 	return OR_CONTINUE;
 }
 
@@ -1182,17 +1146,15 @@ eOpcodeResult WINAPI SET_CAR_VISIBLE(CScript *script)
 eOpcodeResult WINAPI SET_CAR_BLOCK_CAR(CScript *script)
 {
 	script->Collect(2);
-	uintptr_t car = VehiclePoolGetStruct(*carPool, Params[0].nVar);
-	uintptr_t target = VehiclePoolGetStruct(*carPool, Params[1].nVar);
-	*(DWORD *)(car + 0x19C) = target;
-	RegisterReference(target, car + 0x19C);
-	*(BYTE *)(car + 0x156) = 0x11;
-	BYTE flag = *(BYTE *)(car + 0x1F9);
-	flag &= 0xEF;
-	flag |= 0x10;
-	*(BYTE *)(car + 0x1F9) = flag;
-	if (*(BYTE *)(car + 0x160) < 6) {
-		*(BYTE *)(car + 0x160) = 6;
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	CVehicle *target = CPools::ms_pVehiclePool->GetAt(Params[1].nVar);
+	vehicle->targetEntity = target;
+	target->RegisterReference(&vehicle->targetEntity);
+	vehicle->targetBehavior = 0x11;
+	vehicle->field_1F9 &= 0xEF;
+	vehicle->field_1F9 |= 0x10;
+	if (vehicle->cruiseSpeed < 6) {
+		vehicle->cruiseSpeed = 6;
 	}
 	return OR_CONTINUE;
 }
@@ -1255,9 +1217,6 @@ eOpcodeResult WINAPI START_KILL_FRENZY_HEADSHOT(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(8);
-	if (Params[7].nVar) {
-		Params[7].nVar = 1;
-	}
 	CDarkel::StartFrenzy(Params[0].nVar, Params[1].nVar, (unsigned short)Params[2].nVar, Params[3].nVar, VCGlobals::TheText.Get(gxt), Params[4].nVar, Params[5].nVar, Params[6].nVar, !!Params[7].nVar, true);
 	return OR_CONTINUE;
 }
@@ -1336,7 +1295,7 @@ eOpcodeResult WINAPI SET_2_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[1] = VCGlobals::TheText.Get(gxt);
-	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], NULL, NULL, NULL, NULL);
+	((CPhoneInfoHack *)&VCGlobals::ThePhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1350,7 +1309,7 @@ eOpcodeResult WINAPI SET_2_PHONE_MESSAGES(CScript *script)
 	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[1] = VCGlobals::TheText.Get(gxt);
-	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], NULL, NULL, NULL, NULL);
+	VCGlobals::ThePhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1366,7 +1325,7 @@ eOpcodeResult WINAPI SET_3_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[1] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[2] = VCGlobals::TheText.Get(gxt);
-	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], NULL, NULL, NULL);
+	((CPhoneInfoHack *)&VCGlobals::ThePhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], string[2], 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1382,7 +1341,7 @@ eOpcodeResult WINAPI SET_3_PHONE_MESSAGES(CScript *script)
 	string[1] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[2] = VCGlobals::TheText.Get(gxt);
-	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], NULL, NULL, NULL);
+	VCGlobals::ThePhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], string[2], 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1400,7 +1359,7 @@ eOpcodeResult WINAPI SET_4_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[2] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[3] = VCGlobals::TheText.Get(gxt);
-	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], NULL, NULL);
+	((CPhoneInfoHack *)&VCGlobals::ThePhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], string[2], string[3], 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1418,7 +1377,7 @@ eOpcodeResult WINAPI SET_4_PHONE_MESSAGES(CScript *script)
 	string[2] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[3] = VCGlobals::TheText.Get(gxt);
-	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], NULL, NULL);
+	VCGlobals::ThePhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], string[2], string[3], 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1427,10 +1386,9 @@ eOpcodeResult WINAPI GIVE_PLAYER_DETONATOR(CScript *)
 {
 	CStreaming::RequestModel(291, 1);
 	CStreaming::LoadAllRequestedModels(false);
-	DWORD player = FindPlayerPed();
-	GiveWeapon(player, 0x22, 1, 1);
-	int slot = *(DWORD *)(GetWeaponInfo(0x22) + 0x60);
-	*(int *)(player + slot * 0x18 + 0x40C) = 0;
+	VCGlobals::FindPlayerPed()->GiveWeapon(34, 1, 1);
+	int slot = *(int *)(CWeaponInfo::GetWeaponInfo(34) + 0x60);
+	VCGlobals::FindPlayerPed()->weapons[slot].state = 0;
 	return OR_CONTINUE;
 }
 
@@ -1450,7 +1408,7 @@ eOpcodeResult WINAPI SET_5_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[3] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[4] = VCGlobals::TheText.Get(gxt);
-	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], string[4], NULL);
+	((CPhoneInfoHack *)&VCGlobals::ThePhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], string[2], string[3], string[4], 0);
 	return OR_CONTINUE;
 }
 
@@ -1470,7 +1428,7 @@ eOpcodeResult WINAPI SET_5_PHONE_MESSAGES(CScript *script)
 	string[3] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[4] = VCGlobals::TheText.Get(gxt);
-	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], string[4], NULL);
+	VCGlobals::ThePhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], string[2], string[3], string[4], 0);
 	return OR_CONTINUE;
 }
 
@@ -1492,7 +1450,7 @@ eOpcodeResult WINAPI SET_6_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[4] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[5] = VCGlobals::TheText.Get(gxt);
-	SetPhoneMessage_Repeatedly(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], string[4], string[5]);
+	((CPhoneInfoHack *)&VCGlobals::ThePhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], string[2], string[3], string[4], string[5]);
 	return OR_CONTINUE;
 }
 
@@ -1514,7 +1472,7 @@ eOpcodeResult WINAPI SET_6_PHONE_MESSAGES(CScript *script)
 	string[4] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[5] = VCGlobals::TheText.Get(gxt);
-	SetPhoneMessage_JustOnce(cphoneinfo, Params[0].nVar, string[0], string[1], string[2], string[3], string[4], string[5]);
+	VCGlobals::ThePhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], string[2], string[3], string[4], string[5]);
 	return OR_CONTINUE;
 }
 
@@ -1524,7 +1482,7 @@ eOpcodeResult WINAPI SET_CHAR_ANIM_SPEED(CScript *script)
 	script->Collect(2);
 	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
 	int var = RpAnimBlendClumpGetFirstAssociation(*(uintptr_t *)(ped + 0x4C));
-	if (var != NULL) {
+	if (var) {
 		*(float *)(var + 0x24) = Params[1].fVar;
 	}
 	return OR_CONTINUE;
@@ -1550,7 +1508,7 @@ eOpcodeResult WINAPI CHANGE_GARAGE_TYPE_WITH_CAR_MODEL(CScript *script)
 eOpcodeResult WINAPI IS_PHONE_DISPLAYING_MESSAGE(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag((Params[0].nVar * 0x34 + cphoneinfo + 8) == *currentPhone);
+	script->UpdateCompareFlag((unsigned long)&VCGlobals::ThePhoneInfo.phones[Params[0].nVar] == *currentPhone);
 	return OR_CONTINUE;
 }
 
@@ -1566,10 +1524,8 @@ eOpcodeResult WINAPI IS_COLLISION_IN_MEMORY(CScript *script)
 eOpcodeResult WINAPI IS_CAR_VISIBLY_DAMAGED(CScript *script)
 {
 	script->Collect(1);
-	BYTE flag = *(BYTE *)(VehiclePoolGetStruct(*carPool, Params[0].nVar) + 0x1FB);
-	flag >>= 1;
-	flag &= 1;
-	script->UpdateCompareFlag(flag == 1);
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	script->UpdateCompareFlag(vehicle && (vehicle->field_1FB & 2));
 	return OR_CONTINUE;
 }
 
@@ -1606,6 +1562,26 @@ eOpcodeResult WINAPI IS_CHAR_IN_CONTROL(CScript *script)
 eOpcodeResult WINAPI HAS_MILITARY_CRANE_COLLECTED_ALL_CARS(CScript *script)
 {
 	script->UpdateCompareFlag((CCranes::carsCollectedMilitaryCrane & 0x7F) == 0x7F);
+	return OR_CONTINUE;
+}
+
+/* 03FB */
+eOpcodeResult WINAPI SET_CAR_STAYS_IN_CURRENT_LEVEL(CScript *script)
+{
+	script->Collect(2);
+	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
+		vehicle->originLevel = Params[1].nVar ? (char)CTheZones::GetLevelFromPosition(&vehicle->matrix.pos) : 0;
+	}
+	return OR_CONTINUE;
+}
+
+/* 03FC */
+eOpcodeResult WINAPI SET_CHAR_STAYS_IN_CURRENT_LEVEL(CScript *script)
+{
+	script->Collect(2);
+	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
+		ped->originLevel = Params[1].nVar ? (char)CTheZones::GetLevelFromPosition(&ped->matrix.pos) : 0;
+	}
 	return OR_CONTINUE;
 }
 
@@ -1655,7 +1631,7 @@ eOpcodeResult WINAPI SET_CHAR_SAY(CScript *script)
 eOpcodeResult WINAPI OVERRIDE_HOSPITAL_LEVEL(CScript *script)
 {
 	script->Collect(1);
-	*overrideHospital = (BYTE)Params[0].nVar;
+	CRestart::OverrideHospitalLevel = (unsigned char)Params[0].nVar;
 	return OR_CONTINUE;
 }
 
@@ -1663,7 +1639,7 @@ eOpcodeResult WINAPI OVERRIDE_HOSPITAL_LEVEL(CScript *script)
 eOpcodeResult WINAPI OVERRIDE_POLICE_STATION_LEVEL(CScript *script)
 {
 	script->Collect(1);
-	*overridePolice = (BYTE)Params[0].nVar;
+	CRestart::OverridePoliceStationLevel = (unsigned char)Params[0].nVar;
 	return OR_CONTINUE;
 }
 
@@ -1700,6 +1676,16 @@ eOpcodeResult WINAPI GET_CHAR_IN_CAR_PASSENGER_SEAT(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 0438 */
+eOpcodeResult WINAPI SET_CHAR_IGNORE_LEVEL_TRANSITIONS(CScript *script)
+{
+	script->Collect(2);
+	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
+		ped->originLevel = Params[1].nVar ? -1 : (char)CTheZones::GetLevelFromPosition(&ped->matrix.pos);
+	}
+	return OR_CONTINUE;
+}
+
 /* 0444 */
 eOpcodeResult WINAPI SET_SCRIPT_FIRE_AUDIO(CScript *script)
 {
@@ -1716,6 +1702,36 @@ eOpcodeResult WINAPI IS_PLAYER_LIFTING_A_PHONE(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 044E */
+eOpcodeResult WINAPI SET_CAR_IGNORE_LEVEL_TRANSITIONS(CScript *script)
+{
+	script->Collect(2);
+	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
+		vehicle->originLevel = Params[1].nVar ? -1 : (char)CTheZones::GetLevelFromPosition(&vehicle->matrix.pos);
+	}
+	return OR_CONTINUE;
+}
+
+/* 044F */
+eOpcodeResult WINAPI MAKE_CRAIGS_CAR_A_BIT_STRONGER(CScript *script)
+{
+	script->Collect(2);
+	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
+		vehicle->field_501 &= 0xDF;
+		if (Params[1].nVar) {
+			vehicle->field_501 |= 0x20;
+		}
+	}
+	return OR_CONTINUE;
+}
+
+/* 0452 */
+eOpcodeResult WINAPI ENABLE_PLAYER_CONTROL_CAMERA(CScript *)
+{
+	*(unsigned short *)(CPad::GetPad(0) + 0xF0) &= 0xFFFE;
+	return OR_CONTINUE;
+}
+
 /* 047D */
 eOpcodeResult WINAPI GET_NUMBER_OF_SEATS_IN_MODEL(CScript *script)
 {
@@ -1729,13 +1745,11 @@ eOpcodeResult WINAPI GET_NUMBER_OF_SEATS_IN_MODEL(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_ANY_BOAT(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
-	if (ped != NULL) {
-		if (*(BYTE *)(ped + 0x3AC)) {
-			uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
-			if (car != NULL) {
-				DWORD handling = *(DWORD *)(car + 0x120);
-				DWORD flags = *(DWORD *)(handling + 0xCC);
+	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
+		if (ped->isInAnyVehicle) {
+			if (CVehicle *vehicle = ped->vehicle) {
+				unsigned long handling = vehicle->handlingData;
+				unsigned int flags = *(unsigned int *)(handling + 0xCC);
 				flags &= 0xF0000;
 				if (flags == 0x80000) {
 					script->UpdateCompareFlag(true);
@@ -1752,13 +1766,11 @@ eOpcodeResult WINAPI IS_CHAR_IN_ANY_BOAT(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_ANY_HELI(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
-	if (ped != NULL) {
-		if (*(BYTE *)(ped + 0x3AC)) {
-			uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
-			if (car != NULL) {
-				DWORD handling = *(DWORD *)(car + 0x120);
-				DWORD flags = *(DWORD *)(handling + 0xCC);
+	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
+		if (ped->isInAnyVehicle) {
+			if (CVehicle *vehicle = ped->vehicle) {
+				unsigned long handling = vehicle->handlingData;
+				unsigned int flags = *(unsigned int *)(handling + 0xCC);
 				flags &= 0xF0000;
 				if (flags == 0x20000) {
 					script->UpdateCompareFlag(true);
@@ -1775,13 +1787,11 @@ eOpcodeResult WINAPI IS_CHAR_IN_ANY_HELI(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_ANY_PLANE(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
-	if (ped != NULL) {
-		if (*(BYTE *)(ped + 0x3AC)) {
-			uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
-			if (car != NULL) {
-				DWORD handling = *(DWORD *)(car + 0x120);
-				DWORD flags = *(DWORD *)(handling + 0xCC);
+	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
+		if (ped->isInAnyVehicle) {
+			if (CVehicle *vehicle = ped->vehicle) {
+				unsigned long handling = vehicle->handlingData;
+				unsigned int flags = *(unsigned int *)(handling + 0xCC);
 				flags &= 0xF0000;
 				if (flags == 0x40000) {
 					script->UpdateCompareFlag(true);
@@ -1798,13 +1808,11 @@ eOpcodeResult WINAPI IS_CHAR_IN_ANY_PLANE(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_FLYING_VEHICLE(CScript *script)
 {
 	script->Collect(1);
-	uintptr_t ped = PedPoolGetStruct(*pedPool, Params[0].nVar);
-	if (ped != NULL) {
-		if (*(BYTE *)(ped + 0x3AC)) {
-			uintptr_t car = *(uintptr_t *)(ped + 0x3A8);
-			if (car != NULL) {
-				DWORD handling = *(DWORD *)(car + 0x120);
-				DWORD flags = *(DWORD *)(handling + 0xCC);
+	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
+		if (ped->isInAnyVehicle) {
+			if (CVehicle *vehicle = ped->vehicle) {
+				unsigned long handling = vehicle->handlingData;
+				unsigned int flags = *(unsigned int *)(handling + 0xCC);
 				flags &= 0xF0000;
 				if (flags == 0x20000 || flags == 0x40000) {
 					script->UpdateCompareFlag(true);
@@ -1931,11 +1939,16 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_VEHICLE(CScript *script)
 {
 	script->Collect(2);
 	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
-	CPhysical *source = ped;
-	if (ped->isInAnyVehicle && ped->vehicle) {
-		source = ped->vehicle;
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[1].nVar);
+	if (ped && vehicle) {
+		CPhysical *source = ped;
+		if (ped->isInAnyVehicle && ped->vehicle) {
+			source = ped->vehicle;
+		}
+		script->UpdateCompareFlag(source->GetHasCollidedWith(vehicle));
+		return OR_CONTINUE;
 	}
-	script->UpdateCompareFlag(source->GetHasCollidedWith(CPools::ms_pVehiclePool->GetAt(Params[1].nVar)));
+	script->UpdateCompareFlag(false);
 	return OR_CONTINUE;
 }
 
@@ -1959,7 +1972,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 	{
 		if (CLEO_GetVersion() < CLEO_VERSION)
 		{
-			MessageBox(HWND_DESKTOP, TEXT("An incorrect version of CLEO was loaded."), TEXT("Opcodes.cleo"), MB_ICONERROR);
+			MessageBox(HWND_DESKTOP, TEXT("An incorrect version of CLEO was loaded."), TEXT("VC.Opcodes.cleo"), MB_ICONERROR);
 			return FALSE;
 		}
 
@@ -1993,6 +2006,9 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x0228, IS_CAR_ARMED_WITH_BOMB);
 		Opcodes::RegisterOpcode(0x023A, IS_PLAYER_TOUCHING_OBJECT_ON_FOOT);
 		Opcodes::RegisterOpcode(0x023B, IS_CHAR_TOUCHING_OBJECT_ON_FOOT);
+		Opcodes::RegisterOpcode(0x023E, FLASH_CAR);
+		Opcodes::RegisterOpcode(0x023F, FLASH_CHAR);
+		Opcodes::RegisterOpcode(0x0240, FLASH_OBJECT);
 		Opcodes::RegisterOpcode(0x0242, ARM_CAR_WITH_BOMB);
 		Opcodes::RegisterOpcode(0x024B, SET_REPEATED_PHONE_MESSAGE);
 		Opcodes::RegisterOpcode(0x024C, SET_PHONE_MESSAGE);
@@ -2056,6 +2072,8 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x03DD, ADD_SPRITE_BLIP_FOR_PICKUP);
 		Opcodes::RegisterOpcode(0x03E9, IS_CHAR_IN_CONTROL);
 		Opcodes::RegisterOpcode(0x03EC, HAS_MILITARY_CRANE_COLLECTED_ALL_CARS);
+		Opcodes::RegisterOpcode(0x03FB, SET_CAR_STAYS_IN_CURRENT_LEVEL);
+		Opcodes::RegisterOpcode(0x03FC, SET_CHAR_STAYS_IN_CURRENT_LEVEL);
 		Opcodes::RegisterOpcode(0x0410, SET_GANG_PED_MODEL_PREFERENCE);
 		Opcodes::RegisterOpcode(0x0413, SET_GET_OUT_OF_JAIL_FREE);
 		Opcodes::RegisterOpcode(0x0415, IS_CAR_DOOR_CLOSED);
@@ -2067,8 +2085,12 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x0422, DOES_GARAGE_CONTAIN_CAR);
 		Opcodes::RegisterOpcode(0x042A, IS_THREAT_FOR_PED_TYPE);
 		Opcodes::RegisterOpcode(0x0432, GET_CHAR_IN_CAR_PASSENGER_SEAT);
+		Opcodes::RegisterOpcode(0x0438, SET_CHAR_IGNORE_LEVEL_TRANSITIONS);
 		Opcodes::RegisterOpcode(0x0444, SET_SCRIPT_FIRE_AUDIO);
 		Opcodes::RegisterOpcode(0x0447, IS_PLAYER_LIFTING_A_PHONE);
+		Opcodes::RegisterOpcode(0x044E, SET_CAR_IGNORE_LEVEL_TRANSITIONS);
+		Opcodes::RegisterOpcode(0x044F, MAKE_CRAIGS_CAR_A_BIT_STRONGER);
+		Opcodes::RegisterOpcode(0x0452, ENABLE_PLAYER_CONTROL_CAMERA);
 		Opcodes::RegisterOpcode(0x047D, GET_NUMBER_OF_SEATS_IN_MODEL);
 		Opcodes::RegisterOpcode(0x04A7, IS_CHAR_IN_ANY_BOAT);
 		Opcodes::RegisterOpcode(0x04A9, IS_CHAR_IN_ANY_HELI);
@@ -2234,7 +2256,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 	{
 		if (CLEO_GetVersion() < CLEO_VERSION)
 		{
-			MessageBox(HWND_DESKTOP, TEXT("An incorrect version of CLEO was loaded."), TEXT("Opcodes.cleo"), MB_ICONERROR);
+			MessageBox(HWND_DESKTOP, TEXT("An incorrect version of CLEO was loaded."), TEXT("III.Opcodes.cleo"), MB_ICONERROR);
 			return FALSE;
 		}
 

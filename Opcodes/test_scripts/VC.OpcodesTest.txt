@@ -108,6 +108,8 @@ while true
     gosub @HAS_PLAYER_BEEN_ARRESTED
     gosub @CHANGE_CAR_LOCK
     gosub @SHAKE_CAM_WITH_POINT
+    gosub @IS_CAR_DEAD_IN_AREA_2D
+    gosub @IS_CAR_DEAD_IN_AREA_3D
     gosub @IS_CAR_IN_AIR
     gosub @ADD_BLIP_FOR_OBJECT_OLD
     gosub @IS_PLAYER_TOUCHING_OBJECT
@@ -207,28 +209,6 @@ while true
         01C4: mark_object_as_no_longer_needed SPAWN_OBJ
         01C3: mark_car_as_no_longer_needed SPAWN_BIKE
         0164: disable_marker BLIP
-        // remove created garage
-        05E5: GAME_VERS = game_version
-        if
-            GAME_VERS == 0
-        then
-            05E0: TEMP_VAR = read_memory 0x978DA4 size 4 virtual_protect 0
-            TEMP_VAR -= 1
-            05DF: write_memory 0x978DA4 size 4 value TEMP_VAR virtual_protect 0
-            GARAGE *= 0xA8
-            GARAGE += 0x812668
-            05DF: write_memory GARAGE size 1 value 0 virtual_protect 0
-        end
-        if
-            GAME_VERS == 1
-        then
-            05E0: TEMP_VAR = read_memory 0x978DAC size 4 virtual_protect 0
-            TEMP_VAR -= 1
-            05DF: write_memory 0x978DAC size 4 value TEMP_VAR virtual_protect 0
-            GARAGE *= 0xA8
-            GARAGE += 0x812670
-            05DF: write_memory GARAGE size 1 value 0 virtual_protect 0
-        end
         $ONMISSION = 0
         03F0: enable_text_draw 0
         05DC: end_custom_thread
@@ -282,6 +262,23 @@ while true
         05FE: TEMP_VAR3 = TEMP_VAR3 SHR 16
         // aim_key, maxwanted, drunk, seats, var, page
         0308: text_6numbers 'HJSTATW' AIM_KEY TEMP_VAR2 TEMP_VAR3 TEMP_VAR 10@ PAGE time 10 flag 5
+    end
+    // manipulate spawned car
+    if
+        0ADC: test_cheat "PUTCAR"
+    then
+        018C: play_sound 1 at 0.0 0.0 0.0
+        0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+        00AB: put_car SPAWN_BIKE at POSX POSY POSZ
+    end
+    if
+        0ADC: test_cheat "CREATECAR"
+    then
+        018C: play_sound 1 at 0.0 0.0 0.0
+        01C3: mark_car_as_no_longer_needed SPAWN_BIKE
+        00A6: destroy_car SPAWN_BIKE
+        0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+        00A5: SPAWN_BIKE = create_car #CADDY at POSX POSY POSZ
     end
 end
 
@@ -416,6 +413,36 @@ then
     0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
     POSX += 100.0
     0136: shake_camera 5000 with_point POSX POSY POSZ
+end
+return
+
+:IS_CAR_DEAD_IN_AREA_2D
+if
+    PAGE == 0
+then
+    gosub @TEXT_STYLE
+    if
+        013B:   car SPAWN_BIKE dead_in_rectangle 238.4 -1282.2 242.4 -1278.2 1
+    then
+        0608: show_text_position 10.0 LINE text "013B: Golf cart is dead in marker"
+    else
+        0608: show_text_position 10.0 LINE text "013B: Golf cart is not dead in marker"
+    end
+end
+return
+
+:IS_CAR_DEAD_IN_AREA_3D
+if
+    PAGE == 0
+then
+    gosub @TEXT_STYLE
+    if
+        013C:   car SPAWN_BIKE dead_in_cube 242.4 -1282.2 8.5 246.4 -1278.2 11.5 1
+    then
+        0608: show_text_position 10.0 LINE text "013C: Golf cart is dead in marker"
+    else
+        0608: show_text_position 10.0 LINE text "013C: Golf cart is not dead in marker"
+    end
 end
 return
 
