@@ -48,7 +48,15 @@
 02BC=1,set_swat_required %1d%
 02BD=1,set_fbi_required %1d%
 02BE=1,set_army_required %1d%
+02C3=1,start_pacman_race %1d%
+02C5=1,get_number_of_power_pills_eaten %1d%
+02C6=0,clear_pacman
+02C7=5,start_pacman_scramble %1d% %2d% %3d% radius %4d% count %5d%
+02C8=1,get_number_of_power_pills_carried %1d%
+02C9=0,clear_number_of_power_pills_carried
 02D6=6,  actor %1d% shooting_in_area %2d% %3d% %4d% %5d% %6d%
+02D9=0,clear_number_of_power_pills_eaten
+02DA=3,add_power_pill %1d% %2d% %3d%
 02EE=6,  projectile_in_cube %1d% %2d% %3d% %4d% %5d% %6d%
 02EF=6,destroy_projectile_in_cube %1d% %2d% %3d% %4d% %5d% %6d%
 02F0=3,create_explosive_barrel_at %1d% %2d% %3d%

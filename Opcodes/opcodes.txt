@@ -48,7 +48,15 @@
 02BC: set_swat_required 1
 02BD: set_fbi_required 1
 02BE: set_army_required 1
+02C3: start_pacman_race 0
+02C5: get_number_of_power_pills_eaten 0@
+02C6: clear_pacman
+02C7: start_pacman_scramble 0.0 0.0 0.0 radius 10.0 count 10
+02C8: get_number_of_power_pills_carried 0@
+02C9: clear_number_of_power_pills_carried
 02D6:   actor 0@ shooting_in_area 0.0 0.0 0.0 0.0 0
+02D9: clear_number_of_power_pills_eaten
+02DA: add_power_pill 0.0 0.0 0.0
 02EE:   projectile_in_cube 0.0 0.0 0.0 0.0 0.0 0.0
 02EF: destroy_projectile_in_cube 0.0 0.0 0.0 0.0 0.0 0.0
 02F0: create_explosive_barrel_at 0.0 0.0 0.0
