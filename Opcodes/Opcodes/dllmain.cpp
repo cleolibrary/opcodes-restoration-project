@@ -18,17 +18,6 @@
 
 #define CLEO_VERSION ((CLEO_VERSION_MAIN << 16)|(CLEO_VERSION_MAJOR << 12)|(CLEO_VERSION_MINOR << 8)|(CLEO_VERSION_BINARY))
 
-enum gameVersion{ V1_0, V1_1, VSTEAM, VUNKOWN = -1 };
-
-class GtaGame
-{
-public:
-	gameVersion version;
-	GtaGame();
-};
-
-GtaGame game;
-
 #if _VC
 #pragma comment (lib, "..\\..\\III.VC.CLEO\\CLEO_SDK\\VC.CLEO.lib")
 #include "..\\..\\III.VC.CLEO\\CLEO_SDK\\VC.CLEO.h"
@@ -95,101 +84,19 @@ public:
 	static bool IsProjectileInRange(float x1, float y1, float z1, float x2, float y2, float z2, bool flag);
 };
 
-DWORD(__cdecl *RpAnimBlendClumpGetFirstAssociation)(unsigned long); // rpanimblendclumpgetfirstassociation
-DWORD(__cdecl *GetNumberOfPassengerSeats)(DWORD);
-void(__cdecl *WindowHandler)(int, int);
-bool *isNastyGame = NULL;
-DWORD *maxWantedLevel = NULL;
-BYTE *phoneDisplayMessage = NULL;
-unsigned long *currentPhone = NULL;
-uintptr_t gangPedModelOverride = NULL;
-uintptr_t textDraw = NULL;
-uintptr_t infoZoneCarDensity = NULL;
-uintptr_t infoZonePedDensity = NULL;
-wchar_t *numberedText = NULL;
-uintptr_t infoZone = NULL;
-unsigned long *baseModelInfo = NULL;
-unsigned long *projectileObject = NULL;
-uintptr_t navigZone = NULL;
-uintptr_t cfire = NULL;
-int *levelName = NULL;
-uintptr_t cpedtype = NULL;
-WORD *numInfoZone = NULL;
-WORD *currentTextDraw = NULL;
-WORD *numNavigZone = NULL;
-
-GtaGame::GtaGame()
-{
-	version = VUNKOWN;
-	switch ((*(unsigned int *)0x61C11C)) { // get version signature
-	case 0x74FF5064:
-		version = V1_0;
-		RpAnimBlendClumpGetFirstAssociation = (DWORD(__cdecl *)(unsigned long))0x402E20;
-		GetNumberOfPassengerSeats = (DWORD(__cdecl *)(DWORD))0x578A70;
-		WindowHandler = (void(__cdecl *)(int, int))0x602EE0;
-		isNastyGame = (bool *)0x68DD68;
-		maxWantedLevel = (DWORD *)0x6910D8;
-		phoneDisplayMessage = (BYTE *)0x7030E4;
-		currentPhone = (unsigned long *)0x7030E8;
-		gangPedModelOverride = 0x7D925C;
-		textDraw = 0x7F0EA0;
-		infoZoneCarDensity = 0x7FA370;
-		infoZonePedDensity = 0x7FA39C;
-		numberedText = (wchar_t *)0x821068;
-		infoZone = 0x862508;
-		baseModelInfo = (unsigned long *)0x0092D4C8;
-		projectileObject = (unsigned long *)0x94B708;
-		navigZone = 0x94B990;
-		cfire = 0x97F8A0;
-		levelName = (int *)0xA0D9AC;
-		cpedtype = (uintptr_t)0xA0DA64;
-		numInfoZone = (WORD *)0xA1096A;
-		currentTextDraw = (WORD *)0xA10A48;
-		numNavigZone = (WORD *)0xA10A58;
-		break;
-	case 0x00408DC0:
-		version = V1_1;
-		RpAnimBlendClumpGetFirstAssociation = (DWORD(__cdecl *)(unsigned long))0x402E20;
-		GetNumberOfPassengerSeats = (DWORD(__cdecl *)(DWORD))(0x578A70 + 0x20);
-		WindowHandler = (void(__cdecl *)(int, int))(0x602EE0 + 0x20);
-		isNastyGame = (bool *)0x68DD68;
-		maxWantedLevel = (DWORD *)0x6910D8;
-		phoneDisplayMessage = (BYTE *)0x7030E4;
-		currentPhone = (unsigned long *)0x7030E8;
-		gangPedModelOverride = 0x7D925C + 8;
-		textDraw = 0x7F0EA0 + 8;
-		infoZoneCarDensity = 0x7FA370 + 8;
-		infoZonePedDensity = 0x7FA39C + 8;
-		numberedText = (wchar_t *)(0x821068 + 8);
-		infoZone = 0x862508 + 8;
-		projectileObject = (unsigned long *)(0x94B708 + 8);
-		navigZone = 0x94B990 + 8;
-		cfire = 0x97F8A0 + 8;
-		levelName = (int *)(0xA0D9AC + 8);
-		cpedtype = (uintptr_t)(0xA0DA64 + 8);
-		numInfoZone = (WORD *)(0xA1096A + 8);
-		currentTextDraw = (WORD *)(0xA10A48 + 8);
-		numNavigZone = (WORD *)(0xA10A58 + 8);
-		break;
-	case 0x00004824:
-		version = VSTEAM;
-		gangPedModelOverride = 0x7D925C - 0xFF8;
-		textDraw = 0x7F0EA0 - 0xFF8;
-		infoZoneCarDensity = 0x7FA370 - 0xFF8;
-		infoZonePedDensity = 0x7FA39C - 0xFF8;
-		numberedText = (wchar_t *)(0x821068 - 0xFF8);
-		infoZone = 0x862508 - 0xFF8;
-		projectileObject = (unsigned long *)(0x94B708 - 0xFF8);
-		navigZone = 0x94B990 - 0xFF8;
-		cfire = 0x97F8A0 - 0xFF8;
-		levelName = (int *)(0xA0D9AC - 0xFF8);
-		cpedtype = (uintptr_t)(0xA0DA64 - 0xFF8);
-		numInfoZone = (WORD *)(0xA1096A - 0xFF8);
-		currentTextDraw = (WORD *)(0xA10A48 - 0xFF8);
-		numNavigZone = (WORD *)(0xA10A58 - 0xFF8);
-		break;
-	}
-}
+auto RpAnimBlendClumpGetFirstAssociation = (DWORD(__cdecl *)(unsigned long))vcversion::AdjustOffset(0x00402E20);
+auto GetMaximumNumberOfPassengersFromNumberOfDoors = (DWORD(__cdecl *)(int))vcversion::AdjustOffset(0x00578A70);
+auto WindowHandler = (void(__cdecl *)(int, int))vcversion::AdjustOffset(0x00602EE0);
+auto phoneDisplayMessage = (BYTE *)vcversion::AdjustOffset(0x007030E4);
+auto currentPhone = (unsigned long *)vcversion::AdjustOffset(0x007030E8);
+auto gangPedModelOverride = vcversion::AdjustOffset(0x007D925C);
+auto textDraw = vcversion::AdjustOffset(0x007F0EA0);
+auto numberedText = (wchar_t *)vcversion::AdjustOffset(0x00821068);
+auto baseModelInfo = (unsigned long *)vcversion::AdjustOffset(0x0092D4C8);
+auto projectileObject = (unsigned long *)vcversion::AdjustOffset(0x0094B708);
+auto cfire = vcversion::AdjustOffset(0x0097F8A0);
+auto cpedtype = (uintptr_t)vcversion::AdjustOffset(0x00A0DA64);
+auto currentTextDraw = (WORD *)vcversion::AdjustOffset(0x00A10A48);
 
 bool CCranesHack::IsThisCarPickedUp(float positionX, float positionY, CVehicle *vehicle)
 {
@@ -473,7 +380,7 @@ void CPacManPickupsHack::Render(void)
 						matrix->UpdateRW();
 						aPMPickups[i].object->UpdateRwFrame();
 					}
-					CSprite::RenderOneXLUSprite(pos.x, pos.y, pos.z, width * 0.8f * sin(time), height * 0.8f, 100, 50, 5, 255, 1.0f / pos.z, 255);
+					CSprite::RenderOneXLUSprite(pos.x, pos.y, pos.z, abs(width * 0.8f * sin(time)), height * 0.8f, 100, 50, 5, 255, 1.0f / pos.z, 255);
 				}
 			}
 		}
@@ -633,7 +540,7 @@ eOpcodeResult WINAPI RETURN_FALSE(CScript *script)
 eOpcodeResult WINAPI GET_PAD_STATE(CScript *script)
 {
 	script->Collect(2);
-	Params[0].nVar = (int)((CRunningScript *)script)->GetPadState((unsigned short)Params[0].nVar, (unsigned short)Params[1].nVar);
+	Params[0].nVar = static_cast<int>(reinterpret_cast<CRunningScript *>(script)->GetPadState(static_cast<unsigned short>(Params[0].nVar), static_cast<unsigned short>(Params[1].nVar)));
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -666,9 +573,8 @@ eOpcodeResult WINAPI HAS_PLAYER_BEEN_ARRESTED(CScript *script)
 eOpcodeResult WINAPI CHANGE_CAR_LOCK(CScript *script)
 {
 	script->Collect(2);
-	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
-		vehicle->lock = Params[1].nVar;
-	}
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	vehicle->lock = Params[1].nVar;
 	return OR_CONTINUE;
 }
 
@@ -720,13 +626,10 @@ eOpcodeResult WINAPI SET_CAR_DENSITY(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(2);
-	for (uintptr_t address = infoZone; address < infoZone + *numInfoZone * 0x38; address += 0x38) {
-		if (!strncmp(gxt, (char *)address, 8)) {
-			int offset;
-			offset = (BYTE)Params[0].nVar ? *(WORD *)(address + 0x28) : *(WORD *)(address + 0x2A);
-			offset *= 0x44;
-			offset += infoZoneCarDensity;
-			*(WORD *)offset = (WORD)Params[1].nVar;
+	for (int i = 0; i < CTheZones::TotalNumberOfInfoZones; i++) {
+		if (!strncmp(gxt, CTheZones::InfoZoneArray[i].name, 8)) {
+			int offset = Params[0].nVar ? CTheZones::InfoZoneArray[i].night : CTheZones::InfoZoneArray[i].day;
+			CTheZones::ZoneInfoArray[offset].carDensity = static_cast<unsigned short>(Params[1].nVar);
 		}
 	}
 	return OR_CONTINUE;
@@ -738,13 +641,10 @@ eOpcodeResult WINAPI SET_PED_DENSITY(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(2);
-	for (uintptr_t address = infoZone; address < infoZone + *numInfoZone * 0x38; address += 0x38) {
-		if (!strncmp(gxt, (char *)address, 8)) {
-			int offset;
-			offset = (BYTE)Params[0].nVar ? *(WORD *)(address + 0x28) : *(WORD *)(address + 0x2A);
-			offset *= 0x44;
-			offset += infoZonePedDensity;
-			*(WORD *)offset = (WORD)Params[1].nVar;
+	for (int i = 0; i < CTheZones::TotalNumberOfInfoZones; i++) {
+		if (!strncmp(gxt, CTheZones::InfoZoneArray[i].name, 8)) {
+			int offset = Params[0].nVar ? CTheZones::InfoZoneArray[i].night : CTheZones::InfoZoneArray[i].day;
+			CTheZones::ZoneInfoArray[offset].pedDensity = static_cast<unsigned short>(Params[1].nVar);
 		}
 	}
 	return OR_CONTINUE;
@@ -754,7 +654,8 @@ eOpcodeResult WINAPI SET_PED_DENSITY(CScript *script)
 eOpcodeResult WINAPI IS_CAR_IN_AIR(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag(CPools::ms_pVehiclePool->GetAt(Params[0].nVar)->numberOfWheelsOnGround == 0);
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	script->UpdateCompareFlag(vehicle->numberOfWheelsOnGround == 0);
 	return OR_CONTINUE;
 }
 
@@ -773,16 +674,13 @@ eOpcodeResult WINAPI ADD_BLIP_FOR_OBJECT_OLD(CScript *script)
 eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT(CScript *script)
 {
 	script->Collect(2);
-	if (CObject *object = CPools::ms_pObjectPool->GetAt(Params[1].nVar)) {
-		CPlayerPed *player = CWorld::Players[Params[0].nVar].playerEntity;
-		CPhysical *source = player;
-		if (player->isInAnyVehicle && player->vehicle) {
-			source = player->vehicle;
-		}
-		script->UpdateCompareFlag(source->GetHasCollidedWith(object));
-		return OR_CONTINUE;
+	CPlayerPed *player = CWorld::Players[Params[0].nVar].playerEntity;
+	CObject *object = CPools::ms_pObjectPool->GetAt(Params[1].nVar);
+	CPhysical *source = player;	
+	if (player->isInAnyVehicle && player->vehicle) {
+		source = player->vehicle;
 	}
-	script->UpdateCompareFlag(false);
+	script->UpdateCompareFlag(source->GetHasCollidedWith(object));
 	return OR_CONTINUE;
 }
 
@@ -792,15 +690,11 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT(CScript *script)
 	script->Collect(2);
 	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
 	CObject *object = CPools::ms_pObjectPool->GetAt(Params[1].nVar);
-	if (ped && object) {
-		CPhysical *source = ped;
-		if (ped->isInAnyVehicle && ped->vehicle) {
-			source = ped->vehicle;
-		}
-		script->UpdateCompareFlag(source->GetHasCollidedWith(object));
-		return OR_CONTINUE;
+	CPhysical *source = ped;
+	if (ped->isInAnyVehicle && ped->vehicle) {
+		source = ped->vehicle;
 	}
-	script->UpdateCompareFlag(false);
+	script->UpdateCompareFlag(source->GetHasCollidedWith(object));
 	return OR_CONTINUE;
 }
 
@@ -808,9 +702,8 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT(CScript *script)
 eOpcodeResult WINAPI SET_CHAR_AMMO(CScript *script)
 {
 	script->Collect(3);
-	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
-		ped->SetAmmo(Params[1].nVar, Params[2].nVar);
-	}
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	ped->SetAmmo(Params[1].nVar, Params[2].nVar);
 	return OR_CONTINUE;
 }
 
@@ -818,9 +711,8 @@ eOpcodeResult WINAPI SET_CHAR_AMMO(CScript *script)
 eOpcodeResult WINAPI DONT_REMOVE_CAR(CScript *script)
 {
 	script->Collect(1);
-	if (CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
-		VCGlobals::TheMissionCleanup.RemoveEntityFromList(Params[0].nVar, 1);
-	}
+	CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	VCGlobals::TheMissionCleanup.RemoveEntityFromList(Params[0].nVar, 1);
 	return OR_CONTINUE;
 }
 
@@ -884,7 +776,7 @@ eOpcodeResult WINAPI IS_CAR_ARMED_WITH_ANY_BOMB(CScript *script)
 {
 	script->Collect(1);
 	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
-	script->UpdateCompareFlag(vehicle && (vehicle->bombState & 7));
+	script->UpdateCompareFlag(!!(vehicle->bombState & 7));
 	return OR_CONTINUE;
 }
 
@@ -893,7 +785,7 @@ eOpcodeResult WINAPI IS_CAR_ARMED_WITH_BOMB(CScript *script)
 {
 	script->Collect(2);
 	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
-	script->UpdateCompareFlag(vehicle && (vehicle->bombState & 7) == Params[1].nVar);
+	script->UpdateCompareFlag((vehicle->bombState & 7) == Params[1].nVar);
 	return OR_CONTINUE;
 }
 
@@ -903,7 +795,7 @@ eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 	script->Collect(2);
 	CPlayerPed *player = CWorld::Players[Params[0].nVar].playerEntity;
 	CObject *object = CPools::ms_pObjectPool->GetAt(Params[1].nVar);
-	script->UpdateCompareFlag(object && !player->isInAnyVehicle && player->GetHasCollidedWith(object));
+	script->UpdateCompareFlag(!player->isInAnyVehicle && player->GetHasCollidedWith(object));
 	return OR_CONTINUE;
 }
 
@@ -921,11 +813,10 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 eOpcodeResult WINAPI FLASH_CAR(CScript *script)
 {
 	script->Collect(2);
-	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
-		vehicle->field_052 &= 0xDF;
-		if (Params[1].nVar) {
-			vehicle->field_052 |= 0x20;
-		}
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	vehicle->field_052 &= 0xDF;
+	if (Params[1].nVar) {
+		vehicle->field_052 |= 0x20;
 	}
 	return OR_CONTINUE;
 }
@@ -934,11 +825,10 @@ eOpcodeResult WINAPI FLASH_CAR(CScript *script)
 eOpcodeResult WINAPI FLASH_CHAR(CScript *script)
 {
 	script->Collect(2);
-	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
-		ped->field_052 &= 0xDF;
-		if (Params[1].nVar) {
-			ped->field_052 |= 0x20;
-		}
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	ped->field_052 &= 0xDF;
+	if (Params[1].nVar) {
+		ped->field_052 |= 0x20;
 	}
 	return OR_CONTINUE;
 }
@@ -947,11 +837,10 @@ eOpcodeResult WINAPI FLASH_CHAR(CScript *script)
 eOpcodeResult WINAPI FLASH_OBJECT(CScript *script)
 {
 	script->Collect(2);
-	if (CObject *object = CPools::ms_pObjectPool->GetAt(Params[0].nVar)) {
-		object->field_052 &= 0xDF;
-		if (Params[1].nVar) {
-			object->field_052 |= 0x20;
-		}
+	CObject *object = CPools::ms_pObjectPool->GetAt(Params[0].nVar);
+	object->field_052 &= 0xDF;
+	if (Params[1].nVar) {
+		object->field_052 |= 0x20;
 	}
 	return OR_CONTINUE;
 }
@@ -960,10 +849,9 @@ eOpcodeResult WINAPI FLASH_OBJECT(CScript *script)
 eOpcodeResult WINAPI ARM_CAR_WITH_BOMB(CScript *script)
 {
 	script->Collect(2);
-	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
-		vehicle->bombState = (vehicle->bombState & 0xF8) | (static_cast<unsigned char>(Params[1].nVar) & 7);
-		vehicle->bombOwner = VCGlobals::FindPlayerPed();
-	}
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	vehicle->bombState = (vehicle->bombState & 0xF8) | (static_cast<unsigned char>(Params[1].nVar) & 7);
+	vehicle->bombOwner = VCGlobals::FindPlayerPed();
 	return OR_CONTINUE;
 }
 
@@ -1006,10 +894,10 @@ eOpcodeResult WINAPI HAS_PHONE_DISPLAYED_MESSAGE(CScript *script)
 eOpcodeResult WINAPI RESTART_CRITICAL_MISSION(CScript *script)
 {
 	script->Collect(4);
-	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
-	}
 	CVector pos = { Params[0].fVar, Params[1].fVar, Params[2].fVar };
+	if (pos.z <= -100.0) {
+		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+	}
 	CRestart::OverrideNextRestart(pos, Params[3].fVar);
 	CPlayerInfo *player = &CWorld::Players[CWorld::PlayerInFocus];
 	if (player->deathArrestState == 0) {
@@ -1024,12 +912,9 @@ eOpcodeResult WINAPI RESTART_CRITICAL_MISSION(CScript *script)
 eOpcodeResult WINAPI IS_TAXI(CScript *script)
 {
 	script->Collect(1);
-	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
-		unsigned short model = vehicle->modelIndex;
-		script->UpdateCompareFlag(model == 0x96 || model == 0xA8 || model == 0xBC || model == 0xD8);
-		return OR_CONTINUE;
-	}
-	script->UpdateCompareFlag(false);
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	unsigned short model = vehicle->modelIndex;
+	script->UpdateCompareFlag(model == 0x96 || model == 0xA8 || model == 0xBC || model == 0xD8);
 	return OR_CONTINUE;
 }
 
@@ -1050,7 +935,7 @@ eOpcodeResult WINAPI IS_BOAT(CScript *script)
 {
 	script->Collect(1);
 	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
-	script->UpdateCompareFlag(vehicle && vehicle->type == 1);
+	script->UpdateCompareFlag(vehicle->type == 1);
 	return OR_CONTINUE;
 }
 
@@ -1058,18 +943,17 @@ eOpcodeResult WINAPI IS_BOAT(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_STOPPED(CScript *script)
 {
 	script->Collect(1);
-	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
-		if (ped->isInAnyVehicle) {
-			CVehicle *vehicle = ped->vehicle;
-			if (vehicle && vehicle->speed < CTimer::ms_fTimeStep * 0.01) {
-				script->UpdateCompareFlag(true);
-				return OR_CONTINUE;
-			}
-		} else {
-			if (ped->moveState <= 1) {
-				script->UpdateCompareFlag(true);
-				return OR_CONTINUE;
-			}
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	if (ped->isInAnyVehicle) {
+		CVehicle *vehicle = ped->vehicle;
+		if (vehicle && vehicle->speed < CTimer::ms_fTimeStep * 0.01) {
+			script->UpdateCompareFlag(true);
+			return OR_CONTINUE;
+		}
+	} else {
+		if (ped->moveState <= 1) {
+			script->UpdateCompareFlag(true);
+			return OR_CONTINUE;
 		}
 	}
 	script->UpdateCompareFlag(false);
@@ -1184,10 +1068,10 @@ eOpcodeResult WINAPI CLEAR_PACMAN(CScript *)
 eOpcodeResult WINAPI START_PACMAN_SCRAMBLE(CScript *script)
 {
 	script->Collect(5);
-	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
-	}
 	CVector pos = { Params[0].fVar, Params[1].fVar, Params[2].fVar };
+	if (pos.z <= -100.0) {
+		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+	}
 	CPacManPickupsHack::GeneratePMPickUps(pos, Params[3].fVar, (short)Params[4].nVar);
 	return OR_CONTINUE;
 }
@@ -1296,10 +1180,10 @@ eOpcodeResult WINAPI DESTROY_PROJECTILES_IN_AREA(CScript *script)
 eOpcodeResult WINAPI DROP_MINE(CScript *script)
 {
 	script->Collect(3);
-	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
-	}
 	CVector pos = { Params[0].fVar, Params[1].fVar, Params[2].fVar };
+	if (pos.z <= -100.0) {
+		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + 0.5f;
+	}
 	CPickups::GenerateNewOne(pos, VCGlobals::MI_CARMINE, 9, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
@@ -1308,10 +1192,10 @@ eOpcodeResult WINAPI DROP_MINE(CScript *script)
 eOpcodeResult WINAPI DROP_NAUTICAL_MINE(CScript *script)
 {
 	script->Collect(3);
-	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar) + 0.5f;
-	}
 	CVector pos = { Params[0].fVar, Params[1].fVar, Params[2].fVar };
+	if (pos.z <= -100.0) {
+		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + 0.5f;
+	}
 	CPickups::GenerateNewOne(pos, VCGlobals::MI_NAUTICALMINE, 11, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
@@ -1342,7 +1226,7 @@ eOpcodeResult WINAPI PRINT_WITH_2_NUMBERS(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(4);
-	CMessages::AddMessageWithNumber(VCGlobals::TheText.Get(gxt), Params[2].nVar, (unsigned short)Params[3].nVar, Params[0].nVar, Params[1].nVar, -1, -1, -1, -1);
+	CMessages::AddMessageWithNumber(VCGlobals::TheText.Get(gxt), Params[2].nVar, static_cast<unsigned short>(Params[3].nVar), Params[0].nVar, Params[1].nVar, -1, -1, -1, -1);
 	return OR_CONTINUE;
 }
 
@@ -1352,7 +1236,7 @@ eOpcodeResult WINAPI PRINT_WITH_3_NUMBERS_NOW(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(5);
-	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), Params[3].nVar, (unsigned short)Params[4].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, -1, -1, -1);
+	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), Params[3].nVar, static_cast<unsigned short>(Params[4].nVar), Params[0].nVar, Params[1].nVar, Params[2].nVar, -1, -1, -1);
 	return OR_CONTINUE;
 }
 
@@ -1362,7 +1246,7 @@ eOpcodeResult WINAPI PRINT_WITH_4_NUMBERS_NOW(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(6);
-	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), Params[4].nVar, (unsigned short)Params[5].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, -1, -1);
+	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), Params[4].nVar, static_cast<unsigned short>(Params[5].nVar), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, -1, -1);
 	return OR_CONTINUE;
 }
 
@@ -1372,7 +1256,7 @@ eOpcodeResult WINAPI PRINT_WITH_5_NUMBERS(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(7);
-	CMessages::AddMessageWithNumber(VCGlobals::TheText.Get(gxt), Params[5].nVar, (unsigned short)Params[6].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, -1);
+	CMessages::AddMessageWithNumber(VCGlobals::TheText.Get(gxt), Params[5].nVar, static_cast<unsigned short>(Params[6].nVar), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, -1);
 	return OR_CONTINUE;
 }
 
@@ -1382,7 +1266,7 @@ eOpcodeResult WINAPI PRINT_WITH_5_NUMBERS_NOW(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(7);
-	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), Params[5].nVar, (unsigned short)Params[6].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, -1);
+	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), Params[5].nVar, static_cast<unsigned short>(Params[6].nVar), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, -1);
 	return OR_CONTINUE;
 }
 
@@ -1392,7 +1276,7 @@ eOpcodeResult WINAPI PRINT_WITH_6_NUMBERS_NOW(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(8);
-	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), Params[6].nVar, (unsigned short)Params[7].nVar, Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, Params[5].nVar);
+	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), Params[6].nVar, static_cast<unsigned short>(Params[7].nVar), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, Params[5].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1418,11 +1302,10 @@ eOpcodeResult WINAPI IS_SECOND_CAR_COLOUR(CScript *script)
 eOpcodeResult WINAPI SET_CAR_VISIBLE(CScript *script)
 {
 	script->Collect(2);
-	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
-		vehicle->field_052 &= 0xFB;
-		if (Params[1].nVar) {
-			vehicle->field_052 |= 4;
-		}
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	vehicle->field_052 &= 0xFB;
+	if (Params[1].nVar) {
+		vehicle->field_052 |= 4;
 	}
 	return OR_CONTINUE;
 }
@@ -1460,7 +1343,7 @@ eOpcodeResult WINAPI SET_TEXT_BACKGROUND_COLOUR(CScript *script)
 /* 0351 */
 eOpcodeResult WINAPI IS_NASTY_GAME(CScript *script)
 {
-	script->UpdateCompareFlag(*isNastyGame);
+	script->UpdateCompareFlag(!!CGame::nastyGame);
 	return OR_CONTINUE;
 }
 
@@ -1478,17 +1361,23 @@ eOpcodeResult WINAPI IS_EXPLOSION_IN_ZONE(CScript *script)
 	script->Collect(1);
 	char gxt[8];
 	script->ReadShortString(gxt);
-	for (uintptr_t address = infoZone; address < infoZone + *numInfoZone * 0x38; address += 0x38) {
-		if (!strncmp(gxt, (char *)address, 8)) {
-			if (CExplosionHack::TestForExplosionInArea(Params[0].nVar, *(float *)(address + 8), *(float *)(address + 0x14), *(float *)(address + 0xC), *(float *)(address + 0x18), *(float *)(address + 0x10), *(float *)(address + 0x1C))) {
+	for (int i = 0; i < CTheZones::TotalNumberOfInfoZones; i++) {
+		if (!strncmp(gxt, CTheZones::InfoZoneArray[i].name, 8)) {
+			if (CExplosionHack::TestForExplosionInArea(Params[0].nVar,
+				CTheZones::InfoZoneArray[i].corner1.x, CTheZones::InfoZoneArray[i].corner2.x,
+				CTheZones::InfoZoneArray[i].corner1.y, CTheZones::InfoZoneArray[i].corner2.y,
+				CTheZones::InfoZoneArray[i].corner1.z, CTheZones::InfoZoneArray[i].corner2.z)) {
 				script->UpdateCompareFlag(true);
 				return OR_CONTINUE;
 			}
 		}
 	}
-	for (uintptr_t address = navigZone; address < navigZone + *numNavigZone * 0x38; address += 0x38) {
-		if (!strncmp(gxt, (char *)address, 8)) {
-			if (CExplosionHack::TestForExplosionInArea(Params[0].nVar, *(float *)(address + 8), *(float *)(address + 0x14), *(float *)(address + 0xC), *(float *)(address + 0x18), *(float *)(address + 0x10), *(float *)(address + 0x1C))) {
+	for (int i = 0; i < CTheZones::TotalNumberOfNavigationZones; i++) {
+		if (!strncmp(gxt, CTheZones::NavigationZoneArray[i].name, 8)) {
+			if (CExplosionHack::TestForExplosionInArea(Params[0].nVar,
+				CTheZones::NavigationZoneArray[i].corner1.x, CTheZones::NavigationZoneArray[i].corner2.x,
+				CTheZones::NavigationZoneArray[i].corner1.y, CTheZones::NavigationZoneArray[i].corner2.y,
+				CTheZones::NavigationZoneArray[i].corner1.z, CTheZones::NavigationZoneArray[i].corner2.z)) {
 				script->UpdateCompareFlag(true);
 				return OR_CONTINUE;
 			}
@@ -1504,7 +1393,7 @@ eOpcodeResult WINAPI START_KILL_FRENZY_HEADSHOT(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(8);
-	CDarkel::StartFrenzy(Params[0].nVar, Params[1].nVar, (unsigned short)Params[2].nVar, Params[3].nVar, VCGlobals::TheText.Get(gxt), Params[4].nVar, Params[5].nVar, Params[6].nVar, !!Params[7].nVar, true);
+	CDarkel::StartFrenzy(Params[0].nVar, Params[1].nVar, static_cast<unsigned short>(Params[2].nVar), Params[3].nVar, VCGlobals::TheText.Get(gxt), Params[4].nVar, Params[5].nVar, Params[6].nVar, !!Params[7].nVar, true);
 	return OR_CONTINUE;
 }
 
@@ -1535,7 +1424,7 @@ eOpcodeResult WINAPI PRINT_WITH_3_NUMBERS_BIG(CScript *script)
 	script->ReadShortString(gxt);
 	script->Collect(5);
 	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, 0, 0, 0, numberedText);
-	CMessages::AddBigMessage(numberedText, Params[3].nVar, (unsigned short)Params[4].nVar - 1);
+	CMessages::AddBigMessage(numberedText, Params[3].nVar, static_cast<unsigned short>(Params[4].nVar - 1));
 	return OR_CONTINUE;
 }
 
@@ -1546,7 +1435,7 @@ eOpcodeResult WINAPI PRINT_WITH_4_NUMBERS_BIG(CScript *script)
 	script->ReadShortString(gxt);
 	script->Collect(6);
 	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, 0, 0, numberedText);
-	CMessages::AddBigMessage(numberedText, Params[4].nVar, (unsigned short)Params[5].nVar - 1);
+	CMessages::AddBigMessage(numberedText, Params[4].nVar, static_cast<unsigned short>(Params[5].nVar - 1));
 	return OR_CONTINUE;
 }
 
@@ -1557,7 +1446,7 @@ eOpcodeResult WINAPI PRINT_WITH_5_NUMBERS_BIG(CScript *script)
 	script->ReadShortString(gxt);
 	script->Collect(7);
 	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, 0, numberedText);
-	CMessages::AddBigMessage(numberedText, Params[5].nVar, (unsigned short)Params[6].nVar - 1);
+	CMessages::AddBigMessage(numberedText, Params[5].nVar, static_cast<unsigned short>(Params[6].nVar - 1));
 	return OR_CONTINUE;
 }
 
@@ -1568,7 +1457,7 @@ eOpcodeResult WINAPI PRINT_WITH_6_NUMBERS_BIG(CScript *script)
 	script->ReadShortString(gxt);
 	script->Collect(8);
 	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, Params[5].nVar, numberedText);
-	CMessages::AddBigMessage(numberedText, Params[6].nVar, (unsigned short)Params[7].nVar - 1);
+	CMessages::AddBigMessage(numberedText, Params[6].nVar, static_cast<unsigned short>(Params[7].nVar - 1));
 	return OR_CONTINUE;
 }
 
@@ -1778,7 +1667,8 @@ eOpcodeResult WINAPI SET_CHAR_ANIM_SPEED(CScript *script)
 eOpcodeResult WINAPI IS_CRANE_LIFTING_CAR(CScript *script)
 {
 	script->Collect(3);
-	script->UpdateCompareFlag(CCranesHack::IsThisCarPickedUp(Params[0].fVar, Params[1].fVar, CPools::ms_pVehiclePool->GetAt(Params[2].nVar)));
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[2].nVar);
+	script->UpdateCompareFlag(CCranesHack::IsThisCarPickedUp(Params[0].fVar, Params[1].fVar, vehicle));
 	return OR_CONTINUE;
 }
 
@@ -1786,7 +1676,7 @@ eOpcodeResult WINAPI IS_CRANE_LIFTING_CAR(CScript *script)
 eOpcodeResult WINAPI CHANGE_GARAGE_TYPE_WITH_CAR_MODEL(CScript *script)
 {
 	script->Collect(3);
-	CGarages::ChangeGarageType((short)Params[0].nVar, (char)Params[1].nVar, Params[2].nVar);
+	CGarages::ChangeGarageType(static_cast<short>(Params[0].nVar), static_cast<unsigned char>(Params[1].nVar), Params[2].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1802,7 +1692,7 @@ eOpcodeResult WINAPI IS_PHONE_DISPLAYING_MESSAGE(CScript *script)
 eOpcodeResult WINAPI IS_COLLISION_IN_MEMORY(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag(Params[0].nVar == *levelName);
+	script->UpdateCompareFlag(Params[0].nVar == CGame::currLevel);
 	return OR_CONTINUE;
 }
 
@@ -1811,7 +1701,7 @@ eOpcodeResult WINAPI IS_CAR_VISIBLY_DAMAGED(CScript *script)
 {
 	script->Collect(1);
 	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
-	script->UpdateCompareFlag(vehicle && (vehicle->field_1FB & 2));
+	script->UpdateCompareFlag(!!(vehicle->field_1FB & 2));
 	return OR_CONTINUE;
 }
 
@@ -1840,7 +1730,8 @@ eOpcodeResult WINAPI ADD_SPRITE_BLIP_FOR_PICKUP(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_CONTROL(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag(CPools::ms_pPedPool->GetAt(Params[0].nVar)->IsPedInControl());
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	script->UpdateCompareFlag(ped->IsPedInControl());
 	return OR_CONTINUE;
 }
 
@@ -1855,9 +1746,8 @@ eOpcodeResult WINAPI HAS_MILITARY_CRANE_COLLECTED_ALL_CARS(CScript *script)
 eOpcodeResult WINAPI SET_CAR_STAYS_IN_CURRENT_LEVEL(CScript *script)
 {
 	script->Collect(2);
-	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
-		vehicle->originLevel = Params[1].nVar ? (char)CTheZones::GetLevelFromPosition(&vehicle->GetPos()) : 0;
-	}
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	vehicle->originLevel = Params[1].nVar ? (char)CTheZones::GetLevelFromPosition(&vehicle->GetPos()) : 0;
 	return OR_CONTINUE;
 }
 
@@ -1865,9 +1755,8 @@ eOpcodeResult WINAPI SET_CAR_STAYS_IN_CURRENT_LEVEL(CScript *script)
 eOpcodeResult WINAPI SET_CHAR_STAYS_IN_CURRENT_LEVEL(CScript *script)
 {
 	script->Collect(2);
-	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
-		ped->originLevel = Params[1].nVar ? (char)CTheZones::GetLevelFromPosition(&ped->GetPos()) : 0;
-	}
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	ped->originLevel = Params[1].nVar ? (char)CTheZones::GetLevelFromPosition(&ped->GetPos()) : 0;
 	return OR_CONTINUE;
 }
 
@@ -1909,7 +1798,8 @@ eOpcodeResult WINAPI REGISTER_KILL_FRENZY_PASSED(CScript *)
 eOpcodeResult WINAPI SET_CHAR_SAY(CScript *script)
 {
 	script->Collect(2);
-	CPools::ms_pPedPool->GetAt(Params[0].nVar)->Say((unsigned short)Params[1].nVar);
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	ped->Say(static_cast<unsigned short>(Params[1].nVar));
 	return OR_CONTINUE;
 }
 
@@ -1917,7 +1807,7 @@ eOpcodeResult WINAPI SET_CHAR_SAY(CScript *script)
 eOpcodeResult WINAPI OVERRIDE_HOSPITAL_LEVEL(CScript *script)
 {
 	script->Collect(1);
-	CRestart::OverrideHospitalLevel = (unsigned char)Params[0].nVar;
+	CRestart::OverrideHospitalLevel = static_cast<unsigned char>(Params[0].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1925,7 +1815,7 @@ eOpcodeResult WINAPI OVERRIDE_HOSPITAL_LEVEL(CScript *script)
 eOpcodeResult WINAPI OVERRIDE_POLICE_STATION_LEVEL(CScript *script)
 {
 	script->Collect(1);
-	CRestart::OverridePoliceStationLevel = (unsigned char)Params[0].nVar;
+	CRestart::OverridePoliceStationLevel = static_cast<unsigned char>(Params[0].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1941,7 +1831,8 @@ eOpcodeResult WINAPI FORCE_RAIN(CScript *script)
 eOpcodeResult WINAPI DOES_GARAGE_CONTAIN_CAR(CScript *script)
 {
 	script->Collect(2);
-	script->UpdateCompareFlag(CGarages::garages[Params[0].nVar].IsEntityEntirelyInside3D(CPools::ms_pVehiclePool->GetAt(Params[1].nVar), 0.0));
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[1].nVar);
+	script->UpdateCompareFlag(CGarages::garages[Params[0].nVar].IsEntityEntirelyInside3D(vehicle, 0.0));
 	return OR_CONTINUE;
 }
 
@@ -1967,9 +1858,8 @@ eOpcodeResult WINAPI GET_CHAR_IN_CAR_PASSENGER_SEAT(CScript *script)
 eOpcodeResult WINAPI SET_CHAR_IGNORE_LEVEL_TRANSITIONS(CScript *script)
 {
 	script->Collect(2);
-	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
-		ped->originLevel = Params[1].nVar ? -1 : (char)CTheZones::GetLevelFromPosition(&ped->GetPos());
-	}
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	ped->originLevel = Params[1].nVar ? -1 : (char)CTheZones::GetLevelFromPosition(&ped->GetPos());
 	return OR_CONTINUE;
 }
 
@@ -1993,9 +1883,8 @@ eOpcodeResult WINAPI IS_PLAYER_LIFTING_A_PHONE(CScript *script)
 eOpcodeResult WINAPI SET_CAR_IGNORE_LEVEL_TRANSITIONS(CScript *script)
 {
 	script->Collect(2);
-	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
-		vehicle->originLevel = Params[1].nVar ? -1 : (char)CTheZones::GetLevelFromPosition(&vehicle->GetPos());
-	}
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	vehicle->originLevel = Params[1].nVar ? -1 : (char)CTheZones::GetLevelFromPosition(&vehicle->GetPos());
 	return OR_CONTINUE;
 }
 
@@ -2003,11 +1892,10 @@ eOpcodeResult WINAPI SET_CAR_IGNORE_LEVEL_TRANSITIONS(CScript *script)
 eOpcodeResult WINAPI MAKE_CRAIGS_CAR_A_BIT_STRONGER(CScript *script)
 {
 	script->Collect(2);
-	if (CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar)) {
-		vehicle->field_501 &= 0xDF;
-		if (Params[1].nVar) {
-			vehicle->field_501 |= 0x20;
-		}
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	vehicle->field_501 &= 0xDF;
+	if (Params[1].nVar) {
+		vehicle->field_501 |= 0x20;
 	}
 	return OR_CONTINUE;
 }
@@ -2023,7 +1911,7 @@ eOpcodeResult WINAPI ENABLE_PLAYER_CONTROL_CAMERA(CScript *)
 eOpcodeResult WINAPI GET_NUMBER_OF_SEATS_IN_MODEL(CScript *script)
 {
 	script->Collect(1);
-	Params[0].nVar = GetNumberOfPassengerSeats(Params[0].nVar) + 1;
+	Params[0].nVar = GetMaximumNumberOfPassengersFromNumberOfDoors(Params[0].nVar) + 1;
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -2032,16 +1920,15 @@ eOpcodeResult WINAPI GET_NUMBER_OF_SEATS_IN_MODEL(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_ANY_BOAT(CScript *script)
 {
 	script->Collect(1);
-	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
-		if (ped->isInAnyVehicle) {
-			if (CVehicle *vehicle = ped->vehicle) {
-				unsigned long handling = vehicle->handlingData;
-				unsigned int flags = *(unsigned int *)(handling + 0xCC);
-				flags &= 0xF0000;
-				if (flags == 0x80000) {
-					script->UpdateCompareFlag(true);
-					return OR_CONTINUE;
-				}
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	if (ped->isInAnyVehicle) {
+		if (CVehicle *vehicle = ped->vehicle) {
+			unsigned long handling = vehicle->handlingData;
+			unsigned int flags = *(unsigned int *)(handling + 0xCC);
+			flags &= 0xF0000;
+			if (flags == 0x80000) {
+				script->UpdateCompareFlag(true);
+				return OR_CONTINUE;
 			}
 		}
 	}
@@ -2053,16 +1940,15 @@ eOpcodeResult WINAPI IS_CHAR_IN_ANY_BOAT(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_ANY_HELI(CScript *script)
 {
 	script->Collect(1);
-	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
-		if (ped->isInAnyVehicle) {
-			if (CVehicle *vehicle = ped->vehicle) {
-				unsigned long handling = vehicle->handlingData;
-				unsigned int flags = *(unsigned int *)(handling + 0xCC);
-				flags &= 0xF0000;
-				if (flags == 0x20000) {
-					script->UpdateCompareFlag(true);
-					return OR_CONTINUE;
-				}
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	if (ped->isInAnyVehicle) {
+		if (CVehicle *vehicle = ped->vehicle) {
+			unsigned long handling = vehicle->handlingData;
+			unsigned int flags = *(unsigned int *)(handling + 0xCC);
+			flags &= 0xF0000;
+			if (flags == 0x20000) {
+				script->UpdateCompareFlag(true);
+				return OR_CONTINUE;
 			}
 		}
 	}
@@ -2074,16 +1960,15 @@ eOpcodeResult WINAPI IS_CHAR_IN_ANY_HELI(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_ANY_PLANE(CScript *script)
 {
 	script->Collect(1);
-	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
-		if (ped->isInAnyVehicle) {
-			if (CVehicle *vehicle = ped->vehicle) {
-				unsigned long handling = vehicle->handlingData;
-				unsigned int flags = *(unsigned int *)(handling + 0xCC);
-				flags &= 0xF0000;
-				if (flags == 0x40000) {
-					script->UpdateCompareFlag(true);
-					return OR_CONTINUE;
-				}
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	if (ped->isInAnyVehicle) {
+		if (CVehicle *vehicle = ped->vehicle) {
+			unsigned long handling = vehicle->handlingData;
+			unsigned int flags = *(unsigned int *)(handling + 0xCC);
+			flags &= 0xF0000;
+			if (flags == 0x40000) {
+				script->UpdateCompareFlag(true);
+				return OR_CONTINUE;
 			}
 		}
 	}
@@ -2095,16 +1980,15 @@ eOpcodeResult WINAPI IS_CHAR_IN_ANY_PLANE(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_IN_FLYING_VEHICLE(CScript *script)
 {
 	script->Collect(1);
-	if (CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar)) {
-		if (ped->isInAnyVehicle) {
-			if (CVehicle *vehicle = ped->vehicle) {
-				unsigned long handling = vehicle->handlingData;
-				unsigned int flags = *(unsigned int *)(handling + 0xCC);
-				flags &= 0xF0000;
-				if (flags == 0x20000 || flags == 0x40000) {
-					script->UpdateCompareFlag(true);
-					return OR_CONTINUE;
-				}
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	if (ped->isInAnyVehicle) {
+		if (CVehicle *vehicle = ped->vehicle) {
+			unsigned long handling = vehicle->handlingData;
+			unsigned int flags = *(unsigned int *)(handling + 0xCC);
+			flags &= 0xF0000;
+			if (flags == 0x20000 || flags == 0x40000) {
+				script->UpdateCompareFlag(true);
+				return OR_CONTINUE;
 			}
 		}
 	}
@@ -2116,11 +2000,12 @@ eOpcodeResult WINAPI IS_CHAR_IN_FLYING_VEHICLE(CScript *script)
 eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_COORD_OLD(CScript *script)
 {
 	script->Collect(5);
-	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
+	CVector pos = { Params[0].fVar, Params[1].fVar, Params[2].fVar };
+	if (pos.z <= -100.0) {
+		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 	}
 	CRadar::GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
-	Params[0].nVar = CRadar::SetShortRangeCoordBlip(4, Params[0].fVar, Params[1].fVar, Params[2].fVar, Params[3].nVar, Params[4].nVar);
+	Params[0].nVar = CRadar::SetShortRangeCoordBlip(4, pos, Params[3].nVar, Params[4].nVar);
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -2129,11 +2014,12 @@ eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_COORD_OLD(CScript *script)
 eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_COORD(CScript *script)
 {
 	script->Collect(3);
-	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
+	CVector pos = { Params[0].fVar, Params[1].fVar, Params[2].fVar };
+	if (pos.z <= -100.0) {
+		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 	}
 	CRadar::GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
-	Params[0].nVar = CRadar::SetShortRangeCoordBlip(4, Params[0].fVar, Params[1].fVar, Params[2].fVar, 5, 3);
+	Params[0].nVar = CRadar::SetShortRangeCoordBlip(4, pos, 5, 3);
 	CRadar::ChangeBlipScale(Params[0].nVar, 3);
 	script->Store(1);
 	return OR_CONTINUE;
@@ -2142,7 +2028,7 @@ eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_COORD(CScript *script)
 /* 050F */
 eOpcodeResult WINAPI GET_MAX_WANTED_LEVEL(CScript *script)
 {
-	Params[0].nVar = *maxWantedLevel;
+	Params[0].nVar = CWanted::MaximumWantedLevel;
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -2182,7 +2068,7 @@ eOpcodeResult WINAPI GET_PLAYER_DRUNKENNESS(CScript *script)
 eOpcodeResult WINAPI ADD_LOAN_SHARK_VISITS(CScript *script)
 {
 	script->Collect(1);
-	CStats::LoanSharks += (float)Params[0].nVar;
+	CStats::LoanSharks += static_cast<float>(Params[0].nVar);
 	return OR_CONTINUE;
 }
 
@@ -2190,7 +2076,7 @@ eOpcodeResult WINAPI ADD_LOAN_SHARK_VISITS(CScript *script)
 eOpcodeResult WINAPI ADD_MOVIE_STUNTS(CScript *script)
 {
 	script->Collect(1);
-	CStats::MovieStunts += (float)Params[0].nVar;
+	CStats::MovieStunts += static_cast<float>(Params[0].nVar);
 	return OR_CONTINUE;
 }
 
@@ -2198,7 +2084,7 @@ eOpcodeResult WINAPI ADD_MOVIE_STUNTS(CScript *script)
 eOpcodeResult WINAPI ADD_GARBAGE_PICKUPS(CScript *script)
 {
 	script->Collect(1);
-	CStats::GarbagePickups += (float)Params[0].nVar;
+	CStats::GarbagePickups += static_cast<float>(Params[0].nVar);
 	return OR_CONTINUE;
 }
 
@@ -2206,8 +2092,8 @@ eOpcodeResult WINAPI ADD_GARBAGE_PICKUPS(CScript *script)
 eOpcodeResult WINAPI SET_TOP_SHOOTING_RANGE_SCORE(CScript *script)
 {
 	script->Collect(1);
-	if ((float)Params[0].nVar > CStats::TopShootingRangeScore) {
-		CStats::TopShootingRangeScore = (float)Params[0].nVar;
+	if (static_cast<float>(Params[0].nVar) > CStats::TopShootingRangeScore) {
+		CStats::TopShootingRangeScore = static_cast<float>(Params[0].nVar);
 	}
 	return OR_CONTINUE;
 }
@@ -2216,7 +2102,7 @@ eOpcodeResult WINAPI SET_TOP_SHOOTING_RANGE_SCORE(CScript *script)
 eOpcodeResult WINAPI ADD_SHOOTING_RANGE_RANK(CScript *script)
 {
 	script->Collect(1);
-	CStats::ShootingRangeRank += (float)Params[0].nVar;
+	CStats::ShootingRangeRank += static_cast<float>(Params[0].nVar);
 	return OR_CONTINUE;
 }
 
@@ -2226,15 +2112,11 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_VEHICLE(CScript *script)
 	script->Collect(2);
 	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
 	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[1].nVar);
-	if (ped && vehicle) {
-		CPhysical *source = ped;
-		if (ped->isInAnyVehicle && ped->vehicle) {
-			source = ped->vehicle;
-		}
-		script->UpdateCompareFlag(source->GetHasCollidedWith(vehicle));
-		return OR_CONTINUE;
+	CPhysical *source = ped;
+	if (ped->isInAnyVehicle && ped->vehicle) {
+		source = ped->vehicle;
 	}
-	script->UpdateCompareFlag(false);
+	script->UpdateCompareFlag(source->GetHasCollidedWith(vehicle));
 	return OR_CONTINUE;
 }
 
@@ -2242,11 +2124,12 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_VEHICLE(CScript *script)
 eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT(CScript *script)
 {
 	script->Collect(3);
-	if (Params[2].fVar <= -100.0) {
-		Params[2].fVar = CWorld::FindGroundZForCoord(Params[0].fVar, Params[1].fVar);
+	CVector pos = { Params[0].fVar, Params[1].fVar, Params[2].fVar };
+	if (pos.z <= -100.0) {
+		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 	}
 	CRadar::GetActualBlipArrayIndex(script->CollectNextWithoutIncreasingPC(script->m_dwIp));
-	Params[0].nVar = CRadar::SetShortRangeCoordBlip(5, Params[0].fVar, Params[1].fVar, Params[2].fVar, 2, 3);
+	Params[0].nVar = CRadar::SetShortRangeCoordBlip(5, pos, 2, 3);
 	CRadar::ChangeBlipScale(Params[0].nVar, 3);
 	script->Store(1);
 	return OR_CONTINUE;
@@ -2434,6 +2317,16 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 #pragma comment (lib, "..\\..\\III.VC.CLEO\\CLEO_SDK\\III.CLEO.lib")
 #include "..\\..\\III.VC.CLEO\\CLEO_SDK\\III.CLEO.h"
 
+enum gameVersion{ V1_0, V1_1, VSTEAM, VUNKOWN = -1 };
+
+class GtaGame
+{
+public:
+	gameVersion version;
+	GtaGame();
+};
+
+GtaGame game;
 tScriptVar *Params;
 
 uintptr_t(__thiscall *VehiclePoolGetStruct)(void *, int); // cpool_cvehicle_cautomobile::getat
