@@ -85,18 +85,13 @@ public:
 };
 
 auto RpAnimBlendClumpGetFirstAssociation = (DWORD(__cdecl *)(unsigned long))vcversion::AdjustOffset(0x00402E20);
-auto GetMaximumNumberOfPassengersFromNumberOfDoors = (DWORD(__cdecl *)(int))vcversion::AdjustOffset(0x00578A70);
 auto WindowHandler = (void(__cdecl *)(int, int))vcversion::AdjustOffset(0x00602EE0);
 auto phoneDisplayMessage = (BYTE *)vcversion::AdjustOffset(0x007030E4);
 auto currentPhone = (unsigned long *)vcversion::AdjustOffset(0x007030E8);
-auto gangPedModelOverride = vcversion::AdjustOffset(0x007D925C);
-auto textDraw = vcversion::AdjustOffset(0x007F0EA0);
 auto numberedText = (wchar_t *)vcversion::AdjustOffset(0x00821068);
 auto baseModelInfo = (unsigned long *)vcversion::AdjustOffset(0x0092D4C8);
 auto projectileObject = (unsigned long *)vcversion::AdjustOffset(0x0094B708);
-auto cfire = vcversion::AdjustOffset(0x0097F8A0);
 auto cpedtype = (uintptr_t)vcversion::AdjustOffset(0x00A0DA64);
-auto currentTextDraw = (WORD *)vcversion::AdjustOffset(0x00A10A48);
 
 bool CCranesHack::IsThisCarPickedUp(float positionX, float positionY, CVehicle *vehicle)
 {
@@ -504,6 +499,9 @@ bool CExplosionHack::TestForExplosionInArea(int explosionType, float x1, float x
 	return false;
 }
 
+static short CardStack[6 * 52];
+static short CardStackPosition;
+
 /* 00A2 */
 eOpcodeResult WINAPI IS_CHAR_STILL_ALIVE(CScript *script)
 {
@@ -712,7 +710,7 @@ eOpcodeResult WINAPI DONT_REMOVE_CAR(CScript *script)
 {
 	script->Collect(1);
 	CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
-	VCGlobals::TheMissionCleanup.RemoveEntityFromList(Params[0].nVar, 1);
+	CTheScripts::MissionCleanUp.RemoveEntityFromList(Params[0].nVar, 1);
 	return OR_CONTINUE;
 }
 
@@ -750,7 +748,7 @@ eOpcodeResult WINAPI PRINT_WITH_NUMBER_BIG_Q(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(3);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, 0, 0, 0, 0, 0, numberedText);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, -1, -1, -1, -1, -1, numberedText);
 	CMessages::AddBigMessageQ(numberedText, Params[1].nVar, static_cast<unsigned short>(Params[2].nVar - 1));
 	return OR_CONTINUE;
 }
@@ -789,6 +787,47 @@ eOpcodeResult WINAPI IS_CAR_ARMED_WITH_BOMB(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 016F */
+eOpcodeResult WINAPI DRAW_SHADOW(CScript *script)
+{
+	script->Collect(10);
+	unsigned char type = 0;
+	RwTexture *texture = 0;
+	CVector pos = { Params[1].fVar, Params[2].fVar, Params[3].fVar };
+	switch (Params[0].nVar) {
+	case 1:
+		type = 1;
+		texture = VCGlobals::gpShadowCarTex;
+		break;
+	case 2:
+		type = 1;
+		texture = VCGlobals::gpShadowPedTex;
+		break;
+	case 3:
+		type = 2;
+		texture = VCGlobals::gpShadowExplosionTex;
+		break;
+	case 4:
+		type = 1;
+		texture = VCGlobals::gpShadowHeliTex;
+		break;
+	case 5:
+		type = 2;
+		texture = VCGlobals::gpShadowHeadLightsTex;
+		break;
+	case 6:
+		type = 1;
+		texture = VCGlobals::gpBloodPoolTex;
+		break;
+	default:
+		return OR_CONTINUE;
+	}
+	CShadows::StoreShadowToBeRendered(type, texture, &pos,
+		-sin(Params[4].fVar) * Params[5].fVar, cos(Params[4].fVar) * Params[5].fVar, cos(Params[4].fVar) * Params[5].fVar, sin(Params[4].fVar) * Params[5].fVar,
+		static_cast<short>(Params[6].nVar), static_cast<unsigned char>(Params[7].nVar), static_cast<unsigned char>(Params[8].nVar), static_cast<unsigned char>(Params[9].nVar), 15.0, false, 1.0, 0, false);
+	return OR_CONTINUE;
+}
+
 /* 023A */
 eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 {
@@ -805,7 +844,7 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_OBJECT_ON_FOOT(CScript *script)
 	script->Collect(2);
 	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
 	CObject *object = CPools::ms_pObjectPool->GetAt(Params[1].nVar);
-	script->UpdateCompareFlag(ped && object && !ped->isInAnyVehicle && ped->GetHasCollidedWith(object));
+	script->UpdateCompareFlag(!ped->isInAnyVehicle && ped->GetHasCollidedWith(object));
 	return OR_CONTINUE;
 }
 
@@ -861,7 +900,7 @@ eOpcodeResult WINAPI SET_REPEATED_PHONE_MESSAGE(CScript *script)
 	script->Collect(1);
 	char gxt[8];
 	script->ReadShortString(gxt);
-	((CPhoneInfoHack *)&VCGlobals::ThePhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, VCGlobals::TheText.Get(gxt), 0, 0, 0, 0, 0);
+	((CPhoneInfoHack *)&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, VCGlobals::TheText.Get(gxt), 0, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -871,7 +910,7 @@ eOpcodeResult WINAPI SET_PHONE_MESSAGE(CScript *script)
 	script->Collect(1);
 	char gxt[8];
 	script->ReadShortString(gxt);
-	VCGlobals::ThePhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, VCGlobals::TheText.Get(gxt), 0, 0, 0, 0, 0);
+	VCGlobals::gPhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, VCGlobals::TheText.Get(gxt), 0, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -880,13 +919,23 @@ eOpcodeResult WINAPI HAS_PHONE_DISPLAYED_MESSAGE(CScript *script)
 {
 	script->Collect(1);
 	if (*phoneDisplayMessage == 0) {
-		unsigned int state = VCGlobals::ThePhoneInfo.phones[Params[0].nVar].state;
+		unsigned int state = VCGlobals::gPhoneInfo.phones[Params[0].nVar].state;
 		if (state == 6 || state == 7 || state == 8) {
 			script->UpdateCompareFlag(true);
 			return OR_CONTINUE;
 		}
 	}
 	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+/* 0250 */
+eOpcodeResult WINAPI DRAW_LIGHT(CScript *script)
+{
+	script->Collect(6);
+	CVector pos1 = { Params[0].fVar, Params[1].fVar, Params[2].fVar };
+	CVector pos2 = { 0, 0, 0 };
+	CPointLights::AddLight(0, pos1, pos2, 12.0, Params[3].nVar / 255.0f, Params[4].nVar / 255.0f, Params[5].nVar / 255.0f, 0, true);
 	return OR_CONTINUE;
 }
 
@@ -957,6 +1006,29 @@ eOpcodeResult WINAPI IS_CHAR_STOPPED(CScript *script)
 		}
 	}
 	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+/* 02A1 */
+eOpcodeResult WINAPI MESSAGE_WAIT(CScript *script)
+{
+	script->Collect(2);
+	script->m_dwWakeTime = Params[0].nVar + CTimer::m_snTimeInMilliseconds;
+	if (Params[1].nVar) {
+		script->m_bAwake = 1;
+	}
+	return OR_TERMINATE;
+}
+
+/* 02A2 */
+eOpcodeResult WINAPI ADD_PARTICLE_EFFECT(CScript *script)
+{
+	script->Collect(5);
+	CVector pos = { Params[1].fVar, Params[2].fVar, Params[3].fVar };
+	if (pos.z <= -100.0) {
+		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+	}
+	CParticleObject::AddObject(static_cast<unsigned short>(Params[0].nVar), pos, !!Params[4].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1097,12 +1169,22 @@ eOpcodeResult WINAPI CLEAR_NUMBER_OF_POWER_PILLS_CARRIED(CScript *)
 	return OR_CONTINUE;
 }
 
+/* 02CD */
+eOpcodeResult WINAPI GOSUB_FILE(CScript *script)
+{
+	script->Collect(2);
+	script->m_aGosubAddr[script->m_nCurrentGosub] = script->m_dwIp;
+	script->m_nCurrentGosub += 1;
+	script->m_dwIp = Params[0].nVar;
+	return OR_CONTINUE;
+}
+
 /* 02D6 */
 eOpcodeResult WINAPI IS_CHAR_SHOOTING_IN_AREA(CScript *script)
 {
 	script->Collect(6);
 	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
-	script->UpdateCompareFlag(ped && (ped->field_14E & 0x40 && ped->placeable.IsWithinArea(Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar)));
+	script->UpdateCompareFlag((ped->field_14E & 0x40) && ped->placeable.IsWithinArea(Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar));
 	if (Params[5].nVar) {
 		CTheScripts::HighlightImportantArea((unsigned long)&script->m_pNext + script->m_dwIp, Params[1].fVar, Params[2].fVar, Params[3].fVar, Params[4].fVar, -100.0);
 	}
@@ -1285,7 +1367,7 @@ eOpcodeResult WINAPI IS_FIRST_CAR_COLOUR(CScript *script)
 {
 	script->Collect(2);
 	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
-	script->UpdateCompareFlag(vehicle && (int)vehicle->firstColour == Params[1].nVar);
+	script->UpdateCompareFlag((int)vehicle->firstColour == Params[1].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1294,7 +1376,7 @@ eOpcodeResult WINAPI IS_SECOND_CAR_COLOUR(CScript *script)
 {
 	script->Collect(2);
 	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
-	script->UpdateCompareFlag(vehicle && (int)vehicle->secondColour == Params[1].nVar);
+	script->UpdateCompareFlag((int)vehicle->secondColour == Params[1].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1316,15 +1398,13 @@ eOpcodeResult WINAPI SET_CAR_BLOCK_CAR(CScript *script)
 	script->Collect(2);
 	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
 	CVehicle *target = CPools::ms_pVehiclePool->GetAt(Params[1].nVar);
-	if (vehicle && target) {
-		vehicle->targetEntity = target;
-		target->RegisterReference(&vehicle->targetEntity);
-		vehicle->targetBehavior = 0x11;
-		vehicle->field_1F9 &= 0xEF;
-		vehicle->field_1F9 |= 0x10;
-		if (vehicle->cruiseSpeed < 6) {
-			vehicle->cruiseSpeed = 6;
-		}
+	vehicle->targetEntity = target;
+	target->RegisterReference(&vehicle->targetEntity);
+	vehicle->targetBehavior = 0x11;
+	vehicle->field_1F9 &= 0xEF;
+	vehicle->field_1F9 |= 0x10;
+	if (vehicle->cruiseSpeed < 6) {
+		vehicle->cruiseSpeed = 6;
 	}
 	return OR_CONTINUE;
 }
@@ -1333,10 +1413,18 @@ eOpcodeResult WINAPI SET_CAR_BLOCK_CAR(CScript *script)
 eOpcodeResult WINAPI SET_TEXT_BACKGROUND_COLOUR(CScript *script)
 {
 	script->Collect(4);
-	*(BYTE *)(*currentTextDraw * 0xF4 + textDraw + 0x18) = (BYTE)Params[0].nVar;
-	*(BYTE *)(*currentTextDraw * 0xF4 + textDraw + 0x19) = (BYTE)Params[1].nVar;
-	*(BYTE *)(*currentTextDraw * 0xF4 + textDraw + 0x1A) = (BYTE)Params[2].nVar;
-	*(BYTE *)(*currentTextDraw * 0xF4 + textDraw + 0x1B) = (BYTE)Params[3].nVar;
+	CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].backgroundColorR = static_cast<unsigned char>(Params[0].nVar);
+	CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].backgroundColorG = static_cast<unsigned char>(Params[1].nVar);
+	CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].backgroundColorB = static_cast<unsigned char>(Params[2].nVar);
+	CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].backgroundColorA = static_cast<unsigned char>(Params[3].nVar);
+	return OR_CONTINUE;
+}
+
+/* 0349 */
+eOpcodeResult WINAPI SET_TEXT_FONT(CScript *script)
+{
+	script->Collect(1);
+	CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].font = static_cast<short>(Params[0].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1423,7 +1511,7 @@ eOpcodeResult WINAPI PRINT_WITH_3_NUMBERS_BIG(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(5);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, 0, 0, 0, numberedText);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, -1, -1, -1, numberedText);
 	CMessages::AddBigMessage(numberedText, Params[3].nVar, static_cast<unsigned short>(Params[4].nVar - 1));
 	return OR_CONTINUE;
 }
@@ -1434,7 +1522,7 @@ eOpcodeResult WINAPI PRINT_WITH_4_NUMBERS_BIG(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(6);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, 0, 0, numberedText);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, -1, -1, numberedText);
 	CMessages::AddBigMessage(numberedText, Params[4].nVar, static_cast<unsigned short>(Params[5].nVar - 1));
 	return OR_CONTINUE;
 }
@@ -1445,7 +1533,7 @@ eOpcodeResult WINAPI PRINT_WITH_5_NUMBERS_BIG(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(7);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, 0, numberedText);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, Params[3].nVar, Params[4].nVar, -1, numberedText);
 	CMessages::AddBigMessage(numberedText, Params[5].nVar, static_cast<unsigned short>(Params[6].nVar - 1));
 	return OR_CONTINUE;
 }
@@ -1471,7 +1559,7 @@ eOpcodeResult WINAPI SET_2_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[1] = VCGlobals::TheText.Get(gxt);
-	((CPhoneInfoHack *)&VCGlobals::ThePhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], 0, 0, 0, 0);
+	((CPhoneInfoHack *)&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1485,7 +1573,7 @@ eOpcodeResult WINAPI SET_2_PHONE_MESSAGES(CScript *script)
 	string[0] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[1] = VCGlobals::TheText.Get(gxt);
-	VCGlobals::ThePhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], 0, 0, 0, 0);
+	VCGlobals::gPhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1501,7 +1589,7 @@ eOpcodeResult WINAPI SET_3_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[1] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[2] = VCGlobals::TheText.Get(gxt);
-	((CPhoneInfoHack *)&VCGlobals::ThePhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], string[2], 0, 0, 0);
+	((CPhoneInfoHack *)&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], string[2], 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1517,7 +1605,7 @@ eOpcodeResult WINAPI SET_3_PHONE_MESSAGES(CScript *script)
 	string[1] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[2] = VCGlobals::TheText.Get(gxt);
-	VCGlobals::ThePhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], string[2], 0, 0, 0);
+	VCGlobals::gPhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], string[2], 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1535,7 +1623,7 @@ eOpcodeResult WINAPI SET_4_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[2] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[3] = VCGlobals::TheText.Get(gxt);
-	((CPhoneInfoHack *)&VCGlobals::ThePhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], string[2], string[3], 0, 0);
+	((CPhoneInfoHack *)&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], string[2], string[3], 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1553,7 +1641,7 @@ eOpcodeResult WINAPI SET_4_PHONE_MESSAGES(CScript *script)
 	string[2] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[3] = VCGlobals::TheText.Get(gxt);
-	VCGlobals::ThePhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], string[2], string[3], 0, 0);
+	VCGlobals::gPhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], string[2], string[3], 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1584,7 +1672,7 @@ eOpcodeResult WINAPI SET_5_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[3] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[4] = VCGlobals::TheText.Get(gxt);
-	((CPhoneInfoHack *)&VCGlobals::ThePhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], string[2], string[3], string[4], 0);
+	((CPhoneInfoHack *)&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], string[2], string[3], string[4], 0);
 	return OR_CONTINUE;
 }
 
@@ -1604,7 +1692,7 @@ eOpcodeResult WINAPI SET_5_PHONE_MESSAGES(CScript *script)
 	string[3] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[4] = VCGlobals::TheText.Get(gxt);
-	VCGlobals::ThePhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], string[2], string[3], string[4], 0);
+	VCGlobals::gPhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], string[2], string[3], string[4], 0);
 	return OR_CONTINUE;
 }
 
@@ -1626,7 +1714,7 @@ eOpcodeResult WINAPI SET_6_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[4] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[5] = VCGlobals::TheText.Get(gxt);
-	((CPhoneInfoHack *)&VCGlobals::ThePhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], string[2], string[3], string[4], string[5]);
+	((CPhoneInfoHack *)&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(Params[0].nVar, string[0], string[1], string[2], string[3], string[4], string[5]);
 	return OR_CONTINUE;
 }
 
@@ -1648,7 +1736,7 @@ eOpcodeResult WINAPI SET_6_PHONE_MESSAGES(CScript *script)
 	string[4] = VCGlobals::TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[5] = VCGlobals::TheText.Get(gxt);
-	VCGlobals::ThePhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], string[2], string[3], string[4], string[5]);
+	VCGlobals::gPhoneInfo.SetPhoneMessage_JustOnce(Params[0].nVar, string[0], string[1], string[2], string[3], string[4], string[5]);
 	return OR_CONTINUE;
 }
 
@@ -1684,7 +1772,7 @@ eOpcodeResult WINAPI CHANGE_GARAGE_TYPE_WITH_CAR_MODEL(CScript *script)
 eOpcodeResult WINAPI IS_PHONE_DISPLAYING_MESSAGE(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag((unsigned long)&VCGlobals::ThePhoneInfo.phones[Params[0].nVar] == *currentPhone);
+	script->UpdateCompareFlag((unsigned long)&VCGlobals::gPhoneInfo.phones[Params[0].nVar] == *currentPhone);
 	return OR_CONTINUE;
 }
 
@@ -1764,7 +1852,7 @@ eOpcodeResult WINAPI SET_CHAR_STAYS_IN_CURRENT_LEVEL(CScript *script)
 eOpcodeResult WINAPI SET_GANG_PED_MODEL_PREFERENCE(CScript *script)
 {
 	script->Collect(2);
-	*(BYTE *)(Params[0].nVar * 0x18 + gangPedModelOverride) = (BYTE)Params[1].nVar;
+	CGangs::Gang[Params[0].nVar].pedModelPreference = static_cast<char>(Params[1].nVar);
 	return OR_CONTINUE;
 }
 
@@ -1867,7 +1955,7 @@ eOpcodeResult WINAPI SET_CHAR_IGNORE_LEVEL_TRANSITIONS(CScript *script)
 eOpcodeResult WINAPI SET_SCRIPT_FIRE_AUDIO(CScript *script)
 {
 	script->Collect(2);
-	*(BYTE *)(Params[0].nVar * 0x30 + cfire + 7) = !!Params[1].nVar;
+	CFireManager::fires[Params[0].nVar].sfx = !!Params[1].nVar;
 	return OR_CONTINUE;
 }
 
@@ -1911,7 +1999,7 @@ eOpcodeResult WINAPI ENABLE_PLAYER_CONTROL_CAMERA(CScript *)
 eOpcodeResult WINAPI GET_NUMBER_OF_SEATS_IN_MODEL(CScript *script)
 {
 	script->Collect(1);
-	Params[0].nVar = GetMaximumNumberOfPassengersFromNumberOfDoors(Params[0].nVar) + 1;
+	Params[0].nVar = CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(Params[0].nVar) + 1;
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -2135,6 +2223,51 @@ eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 059D */
+eOpcodeResult WINAPI SHUFFLE_CARD_DECKS(CScript *script)
+{
+	script->Collect(1);
+	memset(CardStack, 0, sizeof(CardStack[0]) * 312);
+	short seqarr[312];
+	for (short i = 0; i < 312; i++) {
+		seqarr[i] = i;
+	}
+	if (Params[0].nVar) {
+		int index = Params[0].nVar * 52;
+		for (short card = 1; card < 53; card++) {
+			for (int deck = 0; deck < Params[0].nVar; deck++) {
+				int rand = VCGlobals::rand();
+				int seqindex = static_cast<int>(index * static_cast<float>(rand & 0xFFFF) / 0x8000);
+				int seqval = seqarr[seqindex];
+				CardStack[seqval] = card;
+				while (seqindex < index) {
+					if (seqindex + 1 < 312) {
+						seqarr[seqindex] = seqarr[seqindex + 1];
+					} else {
+						seqarr[seqindex] = 0;
+					}
+					seqindex++;
+				}
+				index--;
+			}
+		}
+	}
+	CardStackPosition = 0;
+	return OR_CONTINUE;
+}
+
+
+/* 059E */
+eOpcodeResult WINAPI FETCH_NEXT_CARD(CScript *script)
+{
+	if (!CardStack[CardStackPosition] || CardStackPosition > 6 * 52) {
+		CardStackPosition = 0;
+	}
+	Params[0].nVar = CardStack[CardStackPosition++];
+	script->Store(1);
+	return OR_CONTINUE;
+}
+
 BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 {
 	if (reason == DLL_PROCESS_ATTACH)
@@ -2185,6 +2318,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x0156, SET_PED_DENSITY);
 		Opcodes::RegisterOpcode(0x015E, IS_CAR_IN_AIR);
 		Opcodes::RegisterOpcode(0x0163, ADD_BLIP_FOR_OBJECT_OLD);
+		Opcodes::RegisterOpcode(0x016F, DRAW_SHADOW);
 		Opcodes::RegisterOpcode(0x0178, IS_PLAYER_TOUCHING_OBJECT);
 		Opcodes::RegisterOpcode(0x0179, IS_CHAR_TOUCHING_OBJECT);
 		Opcodes::RegisterOpcode(0x017B, SET_CHAR_AMMO);
@@ -2205,11 +2339,14 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x024B, SET_REPEATED_PHONE_MESSAGE);
 		Opcodes::RegisterOpcode(0x024C, SET_PHONE_MESSAGE);
 		Opcodes::RegisterOpcode(0x024D, HAS_PHONE_DISPLAYED_MESSAGE);
+		Opcodes::RegisterOpcode(0x0250, DRAW_LIGHT);
 		Opcodes::RegisterOpcode(0x0255, RESTART_CRITICAL_MISSION);
 		Opcodes::RegisterOpcode(0x0295, IS_TAXI);
 		Opcodes::RegisterOpcode(0x0299, ACTIVATE_GARAGE);
 		Opcodes::RegisterOpcode(0x029C, IS_BOAT);
 		Opcodes::RegisterOpcode(0x02A0, IS_CHAR_STOPPED);
+		Opcodes::RegisterOpcode(0x02A1, MESSAGE_WAIT);
+		Opcodes::RegisterOpcode(0x02A2, ADD_PARTICLE_EFFECT);
 		Opcodes::RegisterOpcode(0x02A4, ADD_SPRITE_BLIP_FOR_CAR);
 		Opcodes::RegisterOpcode(0x02A5, ADD_SPRITE_BLIP_FOR_CHAR);
 		Opcodes::RegisterOpcode(0x02A6, ADD_SPRITE_BLIP_FOR_OBJECT);
@@ -2223,6 +2360,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x02C7, START_PACMAN_SCRAMBLE);
 		Opcodes::RegisterOpcode(0x02C8, GET_NUMBER_OF_POWER_PILLS_CARRIED);
 		Opcodes::RegisterOpcode(0x02C9, CLEAR_NUMBER_OF_POWER_PILLS_CARRIED);
+		Opcodes::RegisterOpcode(0x02CD, GOSUB_FILE);
 		Opcodes::RegisterOpcode(0x02D6, IS_CHAR_SHOOTING_IN_AREA);
 		Opcodes::RegisterOpcode(0x02D9, CLEAR_NUMBER_OF_POWER_PILLS_EATEN);
 		Opcodes::RegisterOpcode(0x02DA, ADD_POWER_PILL);
@@ -2242,6 +2380,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x032D, SET_CAR_BLOCK_CAR);
 		Opcodes::RegisterOpcode(0x0338, SET_CAR_VISIBLE);
 		Opcodes::RegisterOpcode(0x0346, SET_TEXT_BACKGROUND_COLOUR);
+		Opcodes::RegisterOpcode(0x0349, SET_TEXT_FONT);
 		Opcodes::RegisterOpcode(0x0351, IS_NASTY_GAME);
 		Opcodes::RegisterOpcode(0x0356, IS_EXPLOSION_IN_AREA);
 		Opcodes::RegisterOpcode(0x0357, IS_EXPLOSION_IN_ZONE);
@@ -2309,6 +2448,8 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x0538, ADD_SHOOTING_RANGE_RANK);
 		Opcodes::RegisterOpcode(0x0547, IS_CHAR_TOUCHING_VEHICLE);
 		Opcodes::RegisterOpcode(0x056F, ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT);
+		Opcodes::RegisterOpcode(0x059D, SHUFFLE_CARD_DECKS);
+		Opcodes::RegisterOpcode(0x059E, FETCH_NEXT_CARD);
 	}
 	return TRUE;
 }

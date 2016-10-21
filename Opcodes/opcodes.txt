@@ -15,7 +15,7 @@
 0156: set_zone_ped_density 'DTOWN' 0 0
 015E:   car 0@ in_air
 0163: create_marker_above_object 0@ color 0 display 3 handle 1@
-016F: draw_shadow 3 at 13@ 14@ 15@ angle 0.0 size 1.0 intensity 150 colour 0 0 0
+016F: draw_shadow 0 at 0.0 0.0 0.0 angle 0.0 size 1.0 intensity 0 color 0 0 0
 0178:   player $PLAYER_CHAR touching_object 0@
 0179:   actor 0@ touching_object 1@
 017B: set_actor 0@ weapon 17 ammo_to 100
@@ -36,11 +36,14 @@
 024B: set_phone 0@ message_repeated 'ADMIRAL'
 024C: set_phone 0@ message 'ADMIRAL'
 024D:   phone 0@ has_displayed_message
+0250: create_light_at 0.0 0.0 0.0 RGB 0 0 0
 0255: set_critical_mission_restart_at 0.0 0.0 0.0 angle 0.0
 0295:   is 0@ taxi
 0299: activate_garage $655
 029C:   is 0@ boat
 02A0:   actor 0@ stopped
+02A1: message_wait 0 0
+02A2: create_particle 0 at 0.0 0.0 0.0 1
 02A4: create_marker_above_car 0@ icon 4 handle 1@
 02A5: create_marker_above_actor 0@ icon 4 handle 1@
 02A6: create_marker_above_object 0@ icon 4 handle 1@
@@ -54,6 +57,7 @@
 02C7: start_pacman_scramble 0.0 0.0 0.0 radius 10.0 count 10
 02C8: get_number_of_power_pills_carried 0@
 02C9: clear_number_of_power_pills_carried
+02CD: gosub_file @label @label
 02D6:   actor 0@ shooting_in_area 0.0 0.0 0.0 0.0 0
 02D9: clear_number_of_power_pills_eaten
 02DA: add_power_pill 0.0 0.0 0.0
@@ -73,7 +77,7 @@
 032D: car 0@ block 1@
 0338: set_car 0@ visible 0
 0346: set_text_draw_background_color 0 0 0 255
-0349: text_draw_style = 3
+0349: set_text_draw_font 2
 0351:   gore_enabled
 0356:   explosion_type 0 in_cube 0.0 0.0 0.0 0.0 0.0 0.0
 0357:   explosion_type 0 in_zone 'DTOWN'
@@ -141,134 +145,15 @@
 0538: add_shooting_range_rank 10
 0547:   actor 0@ touching_car 1@
 056F: create_asset_blip 0.0 0.0 0.0 store_to 0@
+059D: shuffle_card_decks 1
+059E: fetch_next_card 0@
 }
 { GTA3 only
 0116:   player $PLAYER_CHAR alive
 02BD: set_fbi_required 1
 02BE: set_army_required 1
-04C2: create_coordinate 0@ 1@ 2@ from_object 11@ offset -0.277 -16.662 3.152 ;0400 in VC
-04C3: create_coordinate 0@ 1@ 2@ from_car 10@ offset 0.0 -20.0 0.0 ;0407 in VC
-04C4: create_coordinate 0@ 1@ 2@ from_actor $PLAYER_ACTOR offset 0.0 1.2 0.0
-046F: store_player $PLAYER_CHAR currently_armed_weapon_to 13@
-04DD: 0@ = actor $PLAYER_ACTOR armour
-04C9:   player $PLAYER_CHAR driving_plane 
-04A8:   player $PLAYER_CHAR driving_boat
-04AA:   player $PLAYER_CHAR driving_heli
-047E:   player $PLAYER_CHAR driving_a_motorbike 
-0485: return_true
 050F: get_max_wanted_level_to 0@
 0511: show_text_box_1number 'HJSTATW' number 0
 0546:   player $PLAYER_CHAR touching_car 1@
 0547:   actor 0@ touching_car 1@
-059A: return_false
 }
-0601: is_button_pressed_on_pad 3 with_sensitivity 0xFF
-0602: emulate_button_press_on_pad 2 with_sensitivity 0xFF
-0603: is_camera_in_widescreen_mode
-0604: 0@ = weapon 13 model
-0605: 0@ = model #TEC9 weapon_id
-0606: set_memory_offset memory_pointer 0x400040 memory_to_point 0x500040 virtual_protect 1
-0607: 0@ = get_current_weather
-0608: show_text_position 50.0 50.0 text "Test string"
-0609: show_formatted_text_position 50.0 50.0 text "model id = %d; weapon id = %d; weather = %d" 6@ 7@ 8@
-0673: play_animation on actor $PLAYER_ACTOR animgroup 61 anim 512 blendfactor 30.0 // play dance animation from cj_dance
-0A8C: write_memory 0xC0BC15 size 1 value 1 virtual_protect 0
-0A8D: $result = read_memory 1@ size 4 virtual_protect 0
-0A8E: 4@ = 5@ + 6@ // int
-0A8F: $var = 0@ - 1 // int
-0A90: $var = 100 * 1@ // int
-0A91: $div = 1 / 5 // int
-0A92: create_custom_thread "ShowTextBox.s"
-0A93: end_custom_thread
-0A96: $ActorStruct = actor $PLAYER_ACTOR struct
-0A97: $CarStruct = car $MyCar struct
-0A98: $ObjectStruct = object 0@ struct
-0A99: chdir 0
-0A9A: $hFILE = openfile "settings.ini" mode 0x72  // IF and SET
-0A9B: closefile $hFILE
-0A9C: 0@ = file $hFILE size
-0A9D: readfile $hFILE size 2 to $150
-0A9E: writefile $hFILE size 128 from 0@
-0A9F: 0@ = current_thread_pointer
-0AA0: gosub_if_false @CREATE_NEW_ACTOR
-0AA1: return_if_false
-0AA2: $hLIB = load_library "CLEO\version.dll" // IF and SET
-0AA3: free_library $hLIB
-0AA4: $hPROC = get_proc_address "GetVersion" library $hLIB // IF and SET
-0AA5: call $hPROC num_params 1 pop 1 $param
-0AA6: call_method $Destroy struct $CarStruct num_params 0 pop 0
-0AA7: call_function 0x569660 num_params 2 pop 2 $COORD_Y $COORD_X $GROUND
-0AA8: call_function_method 0x4048E0 struct 0xB74494 num_params 1 pop 0 $MyCar 0@
-0AA9: is_game_version_original
-0AAA: 0@ = thread 'OTB' pointer
-0AAB: file_exists "CLEO\version.dll"
-0AB0: key_pressed 0x73
-0AB1: call_scm_func @GetSQR 1 10 $result
-0AB2: ret 1 0@
-0ABA: end_custom_thread_named 'BENZIN'
-0AC6: 0@ = label @label offset
-0AC7: 0@ = var 0@ offset
-0AC8: 0@ = allocate_memory_size 260
-0AC9: free_allocated_memory 0@
-0ACA: show_text_box 0@
-0ACB: show_styled_text 0@ time 1000 style 1
-0ACC: show_text_lowpriority 0x969110 time 100
-0ACD: show_text_highpriority 0x969110 time 100
-0ACE: show_formatted_text_box "This is %.4X opcode" 0x0ACE
-0ACF: show_formatted_styled_text "This is %.4X opcode" time 2000 style 1 0x0ACF
-0AD0: show_formatted_text_lowpriority "This is %.4X opcode" time 2000 0x0AD0
-0AD1: show_formatted_text_highpriority "This is %.4X opcode" time 2000 0x0AD1
-0AD3: 0@ = format "%d + %d = %d" 2 2 4
-0AD4: 4@ = scan_string 0@ format "%d + %d = %d" 5@ 6@ 7@ //IF and SET
-0AD5: file $hFile seek 0x10 from_origin 1 //IF and SET
-0AD6: end_of_file $hFile reached
-0AD7: read_string_from_file $hFile to 0@ size 15 // IF and SET
-0AD8: write_string_to_file $hFile from 0@ //IF and SET
-0AD9: write_formatted_text "CLEO version: %d.%d.%d.%d" in_file $hFile 4 0 0 1
-0ADA: 0@ = scan_file $hFile format "CLEO version: %d.%d.%d.%d" 0@ 1@ 2@ 3@ //IF and SET
-0ADB: 0@ = car_model #LANDSTAL name
-0ADC: test_cheat "BLOWUP"
-0ADD: spawn_car_with_model #RHINO like_a_cheat
-0ADE: 0@ = text_by_GXT_entry 0@
-0ADF: add_dynamic_GXT_entry "_TEST" text "Test string"
-0AE0: remove_dynamic_GXT_entry "_TEST"
-0AE1: $actor = random_actor_near_point 0@ 1@ 2@ in_radius 10.0 find_next 1 pass_deads 1
-0AE2: $car = random_vehicle_near_point 0@ 1@ 2@ in_radius 10.0 find_next 1 pass_wrecked 1
-0AE3: $object = random_object_near_point 0@ 1@ 2@ in_radius 10.0 find_next 1 //IF and SET
-0AE9: pop_float 0@
-0AEA: $actor = actor_struct $ped_struct handle
-0AEB: $car = car_struct $vehicle_struct handle
-0AEC: $object = object_struct $object_struct handle
-0AEE: 0@ = 2.0 exp 0.5 //all floats
-0AEF: 0@ = log 10.0 base 2.718281828459045 //all floats
-0AF0: 0@ = get_int_from_ini_file "cleo\config.ini" section "SectionName" key "intKey"
-0AF1: write_int 16 to_ini_file "cleo\config.ini" section "SectionName" key "intKey"
-0AF2: 0@ = get_float_from_ini_file "cleo\config.ini" section "SectionName" key "floatKey"
-0AF3: write_float 0.0 to_ini_file "cleo\config.ini" section "SectionName" key "floatKey"
-0AF4: 0@ = read_string_from_ini_file "cleo\config.ini" section "SectionName" key "stringKey"
-0AF5: write_string "new string value" to_ini_file "cleo\config.ini" section "SectionName" key "stringKey"
-0B00: delete_file "CLEO\log.txt"  // IF and SET
-0B01: delete_directory "CLEO\CLEO_SAVES" include_subdirs 0
-0B02: move_file "CLEO\1.txt" to "CLEO\2.txt" //IF and SET
-0B03: move_directory "CLEO\dir1" to "CLEO\dir2" //IF and SET
-0B04: copy_file "CLEO\1.txt" to "CLEO\2.txt" //IF and SET
-0B05: copy_directory "CLEO\dir1" to "CLEO\dir2" //IF and SET
-0B10: 0@ = 0@ AND 0xFF
-0B11: 0@ = 0@ OR 0x80
-0B12: 0@ = 1@ XOR 1
-0B13: 0@ = NOT 0@
-0B14: 0@ = 0@ MOD 5
-0B15: 0@ = 0@ SHR 8
-0B16: 0@ = 0@ SHL 8
-0B17: 0@ &= 1@
-0B18: 0@ |= 1@
-0B19: 0@ ^= 1@
-0B1A: ~0@
-0B1B: 0@ %= 1@
-0B1C: 0@ >>= 1@
-0B1D: 0@ <<= 1@
-0B20: read_clipboard_text_to 0@ size 64
-0B21: write_clipboard_data_from 0@ size 64
-0BA2: 15@ = memory_load_library 15@ // IF and SET
-0BA4: 10@ = memory_get_proc_address "?SetPointers@@YAXPAM000@Z" library 15@ // IF and SET
-0BA3: memory_free_library 15@

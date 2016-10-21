@@ -14,7 +14,7 @@ TEMP_VAR3  = 2@
 SPAWN_CHAR = 3@
 SPAWN_CAR  = 4@
 LINE       = 5@
-AIM_KEY    = 6@
+TEMP_VAR4  = 6@
 SPAWN_OBJ  = 7@
 SPAWN_PICK = 8@
 PAGE       = 9@
@@ -28,6 +28,8 @@ GANGTHREAT = 10@ // bit 6
 GANGPREF   = 10@ // bit 7
 SEATS      = 10@ // bits 8 to 11
 TEXTBG     = 10@ // bit 12
+PASSENGER  = 10@ // bit 13
+TEXTFONT   = 10@ // bit 14
 BLIP       = 11@
 PHONE_A    = 12@
 PHONE_B    = 13@
@@ -89,6 +91,7 @@ POSX += 4.0
 03F2: pedgroup 8 remove_threat 1
 PAGE = 0
 03F0: enable_text_draw 1
+059D: shuffle_card_decks 2
 
 while true
     wait 10
@@ -97,7 +100,6 @@ while true
     gosub @IS_CAR_STILL_ALIVE
     gosub @RETURN_TRUE
     gosub @RETURN_FALSE
-    gosub @GET_PAD_STATE
     gosub @ADD_AMMO_TO_PLAYER
     gosub @IS_PLAYER_STILL_ALIVE
     gosub @HAS_PLAYER_BEEN_ARRESTED
@@ -127,6 +129,8 @@ while true
     gosub @ACTIVATE_GARAGE
     gosub @IS_BOAT
     gosub @IS_CHAR_STOPPED
+    gosub @MESSAGE_WAIT
+    gosub @ADD_PARTICLE_EFFECT
     gosub @ADD_SPRITE_BLIP_FOR_CAR
     gosub @ADD_SPRITE_BLIP_FOR_CHAR
     gosub @ADD_SPRITE_BLIP_FOR_OBJECT
@@ -138,9 +142,9 @@ while true
     gosub @CLEAR_PACMAN
     gosub @START_PACMAN_SCRAMBLE
     gosub @CLEAR_NUMBER_OF_POWER_PILLS_CARRIED
+    gosub @IS_CHAR_SHOOTING_IN_AREA
     gosub @CLEAR_NUMBER_OF_POWER_PILLS_EATEN
     gosub @ADD_POWER_PILL
-    gosub @IS_CHAR_SHOOTING_IN_AREA
     gosub @IS_PROJECTILE_IN_AREA
     gosub @DROP_MINE
     gosub @DROP_NAUTICAL_MINE
@@ -150,6 +154,7 @@ while true
     gosub @IS_SECOND_CAR_COLOUR
     gosub @SET_CAR_VISIBLE
     gosub @SET_TEXT_BACKGROUND_COLOUR
+    gosub @SET_TEXT_FONT
     gosub @IS_NASTY_GAME
     gosub @IS_EXPLOSION_IN_AREA
     gosub @IS_EXPLOSION_IN_ZONE
@@ -185,6 +190,7 @@ while true
     gosub @FORCE_RAIN
     gosub @DOES_GARAGE_CONTAIN_CAR
     gosub @IS_THREAT_FOR_PED_TYPE
+    gosub @GET_CHAR_IN_CAR_PASSENGER_SEAT
     gosub @IS_PLAYER_LIFTING_A_PHONE
     gosub @SET_SCRIPT_FIRE_AUDIO
     gosub @GET_NUMBER_OF_SEATS_IN_MODEL
@@ -264,13 +270,22 @@ while true
             05FE: TEMP_VAR = TEMP_VAR SHR 8
             050F: get_max_wanted_level_to TEMP_VAR2
             052D: get_player $PLAYER_CHAR drunkenness_to TEMP_VAR3
+            00E2: get_player 0 key 6 state_to TEMP_VAR4
             // aim_key, maxwanted, drunk, seats, var, page
-            0308: text_6numbers 'HJSTATW' AIM_KEY TEMP_VAR2 TEMP_VAR3 TEMP_VAR 10@ PAGE time 10 flag 5
+            0308: text_6numbers 'HJSTATW' TEMP_VAR4 TEMP_VAR2 TEMP_VAR3 TEMP_VAR 10@ PAGE time 10 flag 5
         else
             02C5: get_number_of_power_pills_eaten TEMP_VAR
             02C8: get_number_of_power_pills_carried TEMP_VAR2
-            // pm_eaten, pm_carried, -1, -1, var, page
-            0308: text_6numbers 'HJSTATW' TEMP_VAR TEMP_VAR2 -1 -1 10@ PAGE time 10 flag 5
+            059E: fetch_next_card TEMP_VAR4
+            TEMP_VAR3 = 0
+            if and
+                8119:   not car SPAWN_CAR wrecked
+                00DB:   actor SPAWN_CHAR in_car SPAWN_CAR
+            then
+                0432: get_actor_in_car SPAWN_CAR passenger_seat 0 store_to TEMP_VAR3
+            end
+            // pm_eaten, pm_carried, passenger, card, var, page
+            0308: text_6numbers 'HJSTATW' TEMP_VAR TEMP_VAR2 TEMP_VAR3 TEMP_VAR4 10@ PAGE time 10 flag 5
         end
     end
     // manipulate spawned car
@@ -326,6 +341,12 @@ if
 then
     0345: set_text_draw_in_box 1
     0346: set_text_draw_background_color 255 0 0 128
+end
+05F9: TEMP_VAR = TEXTFONT AND 0x4000
+if
+    not TEMP_VAR == 0
+then
+    0349: set_text_draw_font 2
 end
 0343: set_text_linewidth 600.0
 033F: set_text_draw_letter_width_height 0.3 1.2
@@ -390,10 +411,6 @@ then
         0608: show_text_position 10.0 LINE text "00C6: Returned false"
     end
 end
-return
-
-:GET_PAD_STATE
-00E2: get_player 0 key 6 state_to AIM_KEY
 return
 
 :ADD_AMMO_TO_PLAYER
@@ -816,6 +833,28 @@ then
 end
 return
 
+:MESSAGE_WAIT
+if
+    0ADC: test_cheat "MESSAGEWAIT"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    00BC: text_highpriority 'ADMIRAL' 2500 ms 1
+    02A1: message_wait 2500 1
+    00BC: text_highpriority 'BENSON' 2500 ms 1
+    02A1: message_wait 2500 1
+end
+return
+
+:ADD_PARTICLE_EFFECT
+if
+    0ADC: test_cheat "PARTICLE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+    02A2: create_particle 12 at POSX POSY POSZ 1
+end
+return
+
 :ADD_SPRITE_BLIP_FOR_CAR
 if
     0ADC: test_cheat "CARSPRITE"
@@ -948,6 +987,21 @@ then
 end
 return
 
+:IS_CHAR_SHOOTING_IN_AREA
+if
+    PAGE == 0
+then
+    gosub @TEXT_STYLE
+    if
+        02D6:   actor $PLAYER_ACTOR shooting_in_area -838.88 1307.78 -833.59 1313.67 0
+    then
+        0608: show_text_position 10.0 LINE text "02D6: Player character is shooting in garage area"
+    else
+        0608: show_text_position 10.0 LINE text "02D6: Player character is not shooting in garage area"
+    end
+end
+return
+
 :CLEAR_NUMBER_OF_POWER_PILLS_EATEN
 if
     0ADC: test_cheat "CLEARRACE"
@@ -965,21 +1019,6 @@ then
     02C6: clear_pacman
     0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
     02DA: add_power_pill POSX POSY POSZ
-end
-return
-
-:IS_CHAR_SHOOTING_IN_AREA
-if
-    PAGE == 0
-then
-    gosub @TEXT_STYLE
-    if
-        02D6:   actor $PLAYER_ACTOR shooting_in_area -838.88 1307.78 -833.59 1313.67 0
-    then
-        0608: show_text_position 10.0 LINE text "02D6: Player character is shooting in garage area"
-    else
-        0608: show_text_position 10.0 LINE text "02D6: Player character is not shooting in garage area"
-    end
 end
 return
 
@@ -1119,6 +1158,22 @@ then
         05FA: TEXTBG = TEXTBG OR 0x1000
     else
         05F9: TEXTBG = TEXTBG AND 0xFFFFEFFF
+    end
+end
+return
+
+:SET_TEXT_FONT
+if
+    0ADC: test_cheat "FONT"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    05F9: TEMP_VAR = TEXTFONT AND 0x4000
+    if
+        TEMP_VAR == 0
+    then
+        05FA: TEXTFONT = TEXTFONT OR 0x4000
+    else
+        05F9: TEXTFONT = TEXTFONT AND 0xFFFFBFFF
     end
 end
 return
@@ -1642,6 +1697,29 @@ then
     else
         05F9: GANGTHREAT = GANGTHREAT AND 0xFFFFFFBF
         03F2: pedgroup 8 remove_threat 1
+    end
+end
+return
+
+:GET_CHAR_IN_CAR_PASSENGER_SEAT
+if
+    0ADC: test_cheat "PASSENGER"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    if and
+        8118:   not actor SPAWN_CHAR dead
+        8119:   not car SPAWN_CAR wrecked
+    then
+        05F9: TEMP_VAR = PASSENGER AND 0x2000
+        if
+            TEMP_VAR == 0
+        then
+            05FA: PASSENGER = PASSENGER OR 0x2000
+            01D4: actor SPAWN_CHAR go_to_car SPAWN_CAR and_enter_it_as_a_passenger
+        else
+            05F9: PASSENGER = PASSENGER AND 0xFFFFDFFF
+            03E2: actor SPAWN_CHAR leave_any_car
+        end
     end
 end
 return
