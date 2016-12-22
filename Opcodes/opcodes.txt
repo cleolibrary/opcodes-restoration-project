@@ -37,6 +37,8 @@
 024C: set_phone 0@ message 'ADMIRAL'
 024D:   phone 0@ has_displayed_message
 0250: create_light_at 0.0 0.0 0.0 RGB 0 0 0
+0251: store_weather
+0252: restore_weather
 0255: set_critical_mission_restart_at 0.0 0.0 0.0 angle 0.0
 0295:   is 0@ taxi
 0299: activate_garage $655
@@ -76,6 +78,7 @@
 031C:   car 0@ secondary_color 0
 032D: car 0@ block 1@
 0338: set_car 0@ visible 0
+0344: set_text_draw_linewidth 640.0 for_centered_text
 0346: set_text_draw_background_color 0 0 0 255
 0349: set_text_draw_font 2
 0351:   gore_enabled
@@ -127,7 +130,11 @@
 044E: set_car 0@ ignore_level_transitions 1
 044F: make_car 0@ a_bit_stronger 1
 0452: enable_player_control_camera
+047B:   sniper_bullet_at 0.0 0.0 radius 0.0 0.0 sphere 1
+047C:   sniper_bullet_at 0.0 0.0 0.0 radius 0.0 0.0 0.0 sphere 1
 047D: get_number_of_seats_in_model #ADMIRAL store_to 0@
+0491:   actor 0@ has_weapon 17
+04A0: get_object_distance_along_path 0 store_to 0@
 04A7:   actor 0@ in_any_boat
 04A9:   actor 0@ in_any_heli
 04AB:   actor 0@ in_any_plane

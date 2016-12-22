@@ -84,6 +84,15 @@ public:
 	static bool IsProjectileInRange(float x1, float y1, float z1, float x2, float y2, float z2, bool flag);
 };
 
+class CWeatherHack : public CWeather
+{
+public:
+	static short Stored_OldWeatherType;
+	static short Stored_NewWeatherType;
+	static float Stored_InterpolationValue;
+	static float Stored_Rain;
+};
+
 auto RpAnimBlendClumpGetFirstAssociation = (DWORD(__cdecl *)(unsigned long))vcversion::AdjustOffset(0x00402E20);
 auto WindowHandler = (void(__cdecl *)(int, int))vcversion::AdjustOffset(0x00602EE0);
 auto phoneDisplayMessage = (BYTE *)vcversion::AdjustOffset(0x007030E4);
@@ -498,6 +507,11 @@ bool CExplosionHack::TestForExplosionInArea(int explosionType, float x1, float x
 	}
 	return false;
 }
+
+short CWeatherHack::Stored_OldWeatherType;
+short CWeatherHack::Stored_NewWeatherType;
+float CWeatherHack::Stored_InterpolationValue;
+float CWeatherHack::Stored_Rain;
 
 static short CardStack[6 * 52];
 static short CardStackPosition;
@@ -936,6 +950,26 @@ eOpcodeResult WINAPI DRAW_LIGHT(CScript *script)
 	CVector pos1 = { Params[0].fVar, Params[1].fVar, Params[2].fVar };
 	CVector pos2 = { 0, 0, 0 };
 	CPointLights::AddLight(0, pos1, pos2, 12.0, Params[3].nVar / 255.0f, Params[4].nVar / 255.0f, Params[5].nVar / 255.0f, 0, true);
+	return OR_CONTINUE;
+}
+
+/* 0251 */
+eOpcodeResult WINAPI STORE_WEATHER(CScript *)
+{
+	CWeatherHack::Stored_InterpolationValue = CWeather::InterpolationValue;
+	CWeatherHack::Stored_OldWeatherType = CWeather::OldWeatherType;
+	CWeatherHack::Stored_NewWeatherType = CWeather::NewWeatherType;
+	CWeatherHack::Stored_Rain = CWeather::Rain;
+	return OR_CONTINUE;
+}
+
+/* 0252 */
+eOpcodeResult WINAPI RESTORE_WEATHER(CScript *)
+{
+	CWeather::InterpolationValue = CWeatherHack::Stored_InterpolationValue;
+	CWeather::OldWeatherType = CWeatherHack::Stored_OldWeatherType;
+	CWeather::NewWeatherType = CWeatherHack::Stored_NewWeatherType;
+	CWeather::Rain = CWeatherHack::Stored_Rain;
 	return OR_CONTINUE;
 }
 
@@ -1406,6 +1440,14 @@ eOpcodeResult WINAPI SET_CAR_BLOCK_CAR(CScript *script)
 	if (vehicle->cruiseSpeed < 6) {
 		vehicle->cruiseSpeed = 6;
 	}
+	return OR_CONTINUE;
+}
+
+/* 0344 */
+eOpcodeResult WINAPI SET_TEXT_CENTRE_SIZE(CScript *script)
+{
+	script->Collect(1);
+	CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].centreWidth = Params[0].fVar;
 	return OR_CONTINUE;
 }
 
@@ -1995,11 +2037,57 @@ eOpcodeResult WINAPI ENABLE_PLAYER_CONTROL_CAMERA(CScript *)
 	return OR_CONTINUE;
 }
 
+/* 047B */
+eOpcodeResult WINAPI LOCATE_SNIPER_BULLET_2D(CScript *script)
+{
+	script->Collect(5);
+	script->UpdateCompareFlag(CBulletInfo::TestForSniperBullet(Params[0].fVar - Params[2].fVar, Params[0].fVar + Params[2].fVar, Params[1].fVar - Params[3].fVar, Params[1].fVar + Params[3].fVar, -1000.0, 1000.0));
+	if (Params[4].nVar) {
+		CTheScripts::HighlightImportantArea((unsigned long)&script->m_pNext + script->m_dwIp, Params[0].fVar - Params[2].fVar, Params[1].fVar - Params[3].fVar, Params[0].fVar + Params[2].fVar, Params[1].fVar + Params[3].fVar, -100.0);
+	}
+	return OR_CONTINUE;
+}
+
+/* 047C */
+eOpcodeResult WINAPI LOCATE_SNIPER_BULLET_3D(CScript *script)
+{
+	script->Collect(7);
+	script->UpdateCompareFlag(CBulletInfo::TestForSniperBullet(Params[0].fVar - Params[3].fVar, Params[0].fVar + Params[3].fVar, Params[1].fVar - Params[4].fVar, Params[1].fVar + Params[4].fVar, Params[2].fVar - Params[5].fVar, Params[2].fVar + Params[5].fVar));
+	if (Params[6].nVar) {
+		CTheScripts::HighlightImportantArea((unsigned long)&script->m_pNext + script->m_dwIp, Params[0].fVar - Params[3].fVar, Params[1].fVar - Params[4].fVar, Params[0].fVar + Params[3].fVar, Params[1].fVar + Params[4].fVar, Params[2].fVar);
+	}
+	return OR_CONTINUE;
+}
+
 /* 047D */
 eOpcodeResult WINAPI GET_NUMBER_OF_SEATS_IN_MODEL(CScript *script)
 {
 	script->Collect(1);
 	Params[0].nVar = CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(Params[0].nVar) + 1;
+	script->Store(1);
+	return OR_CONTINUE;
+}
+
+/* 0491 */
+eOpcodeResult WINAPI HAS_CHAR_GOT_WEAPON(CScript *script)
+{
+	script->Collect(2);
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	for (int i = 0; i < 10; i++) {
+		if ((int)ped->weapons[i].type == Params[1].nVar) {
+			script->UpdateCompareFlag(true);
+			return OR_CONTINUE;
+		}
+	}
+	script->UpdateCompareFlag(false);
+	return OR_CONTINUE;
+}
+
+/* 04A0 */
+eOpcodeResult WINAPI GET_OBJECT_DISTANCE_ALONG_PATH(CScript *script)
+{
+	script->Collect(1);
+	Params[0].fVar = CScriptPaths::ScriptPath[Params[0].nVar].distanceAlongPath;
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -2340,6 +2428,8 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x024C, SET_PHONE_MESSAGE);
 		Opcodes::RegisterOpcode(0x024D, HAS_PHONE_DISPLAYED_MESSAGE);
 		Opcodes::RegisterOpcode(0x0250, DRAW_LIGHT);
+		Opcodes::RegisterOpcode(0x0251, STORE_WEATHER);
+		Opcodes::RegisterOpcode(0x0252, RESTORE_WEATHER);
 		Opcodes::RegisterOpcode(0x0255, RESTART_CRITICAL_MISSION);
 		Opcodes::RegisterOpcode(0x0295, IS_TAXI);
 		Opcodes::RegisterOpcode(0x0299, ACTIVATE_GARAGE);
@@ -2379,6 +2469,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x031C, IS_SECOND_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x032D, SET_CAR_BLOCK_CAR);
 		Opcodes::RegisterOpcode(0x0338, SET_CAR_VISIBLE);
+		Opcodes::RegisterOpcode(0x0344, SET_TEXT_CENTRE_SIZE);
 		Opcodes::RegisterOpcode(0x0346, SET_TEXT_BACKGROUND_COLOUR);
 		Opcodes::RegisterOpcode(0x0349, SET_TEXT_FONT);
 		Opcodes::RegisterOpcode(0x0351, IS_NASTY_GAME);
@@ -2430,7 +2521,11 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x044E, SET_CAR_IGNORE_LEVEL_TRANSITIONS);
 		Opcodes::RegisterOpcode(0x044F, MAKE_CRAIGS_CAR_A_BIT_STRONGER);
 		Opcodes::RegisterOpcode(0x0452, ENABLE_PLAYER_CONTROL_CAMERA);
+		Opcodes::RegisterOpcode(0x047B, LOCATE_SNIPER_BULLET_2D);
+		Opcodes::RegisterOpcode(0x047C, LOCATE_SNIPER_BULLET_3D);
 		Opcodes::RegisterOpcode(0x047D, GET_NUMBER_OF_SEATS_IN_MODEL);
+		Opcodes::RegisterOpcode(0x0491, HAS_CHAR_GOT_WEAPON);
+		Opcodes::RegisterOpcode(0x04A0, GET_OBJECT_DISTANCE_ALONG_PATH);
 		Opcodes::RegisterOpcode(0x04A7, IS_CHAR_IN_ANY_BOAT);
 		Opcodes::RegisterOpcode(0x04A9, IS_CHAR_IN_ANY_HELI);
 		Opcodes::RegisterOpcode(0x04AB, IS_CHAR_IN_ANY_PLANE);

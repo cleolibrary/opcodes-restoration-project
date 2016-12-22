@@ -37,6 +37,8 @@
 024C=2,set_phone %1d% message %2g%
 024D=1,  phone %1d% has_displayed_message
 0250=6,create_light_at %1d% %2d% %3d% RGB %4d% %5d% %6d%
+0251=0,store_weather
+0252=0,restore_weather
 0255=4,set_critical_mission_restart_at %1d% %2d% %3d% angle %4d%
 0295=1,  is %1d% taxi
 0299=1,activate_garage %1d%
@@ -76,6 +78,7 @@
 031C=2,  car %1d% secondary_color %2d%
 032D=2,car %1d% block %2d%
 0338=2,set_car %1d% visible %2h%
+0344=1,set_text_draw_linewidth %1d% for_centered_text
 0346=4,set_text_draw_background_color %1d% %2d% %3d% %4d%
 0349=1,set_text_draw_font %1d%
 0351=0,  gore_enabled
@@ -127,7 +130,11 @@
 044E=2,set_car %1d% ignore_level_transitions %2d%
 044F=2,make_car %1d% a_bit_stronger %2d%
 0452=0,enable_player_control_camera
+047B=5,  sniper_bullet_at %1d% %2d% radius %3d% %4d% sphere %5d%
+047C=7,  sniper_bullet_at %1d% %2d% %3d% radius %4d% %5d% %6d% sphere %7d%
 047D=2,get_number_of_seats_in_model %1d% store_to %2d%
+0491=2,  actor %1d% has_weapon %2d%
+04A0=2,get_object_distance_along_path %1d% store_to %2d%
 04A7=1,  actor %1d% in_any_boat
 04A9=1,  actor %1d% in_any_heli
 04AB=1,  actor %1d% in_any_plane

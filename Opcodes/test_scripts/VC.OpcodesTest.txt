@@ -124,6 +124,8 @@ while true
     gosub @SET_REPEATED_PHONE_MESSAGE
     gosub @SET_PHONE_MESSAGE
     gosub @HAS_PHONE_DISPLAYED_MESSAGE
+    gosub @STORE_WEATHER
+    gosub @RESTORE_WEATHER
     gosub @RESTART_CRITICAL_MISSION
     gosub @IS_TAXI
     gosub @ACTIVATE_GARAGE
@@ -194,6 +196,7 @@ while true
     gosub @IS_PLAYER_LIFTING_A_PHONE
     gosub @SET_SCRIPT_FIRE_AUDIO
     gosub @GET_NUMBER_OF_SEATS_IN_MODEL
+    gosub @HAS_CHAR_GOT_WEAPON
     gosub @IS_CHAR_IN_ANY_BOAT
     gosub @IS_CHAR_IN_ANY_HELI
     gosub @IS_CHAR_IN_ANY_PLANE
@@ -757,6 +760,24 @@ then
     else
         0608: show_text_position 10.0 LINE text "024D: Phone-A has not displayed message"
     end
+end
+return
+
+:STORE_WEATHER
+if
+    0ADC: test_cheat "WEATHERSTORE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0251: store_weather
+end
+return
+
+:RESTORE_WEATHER
+if
+    0ADC: test_cheat "WEATHERRESTORE"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0252: restore_weather
 end
 return
 
@@ -1760,6 +1781,21 @@ then
     047D: get_number_of_seats_in_model PLAYER_CAR store_to TEMP_VAR
     05FF: TEMP_VAR = TEMP_VAR SHL 8
     05FA: SEATS = SEATS OR TEMP_VAR
+end
+return
+
+:HAS_CHAR_GOT_WEAPON
+if
+    PAGE == 1
+then
+    gosub @TEXT_STYLE
+    if
+        0491:   actor $PLAYER_ACTOR has_weapon 17
+    then
+        0608: show_text_position 10.0 LINE text "0491: Player character has weapon 17"
+    else
+        0608: show_text_position 10.0 LINE text "0491: Player character does not have weapon 17"
+    end
 end
 return
 
