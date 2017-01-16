@@ -1013,6 +1013,19 @@ eOpcodeResult WINAPI ACTIVATE_GARAGE(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 029A */
+eOpcodeResult WINAPI SWITCH_TAXI_TIMER(CScript *script)
+{
+	script->Collect(1);
+	if (Params[0].nVar) {
+		CWorld::Players[CWorld::PlayerInFocus].timeTaxiTimer = CTimer::m_snTimeInMilliseconds;
+		CWorld::Players[CWorld::PlayerInFocus].isTaxiTimerOn = true;
+	} else {
+		CWorld::Players[CWorld::PlayerInFocus].isTaxiTimerOn = false;
+	}
+	return OR_CONTINUE;
+}
+
 /* 029C */
 eOpcodeResult WINAPI IS_BOAT(CScript *script)
 {
@@ -1210,6 +1223,18 @@ eOpcodeResult WINAPI GOSUB_FILE(CScript *script)
 	script->m_aGosubAddr[script->m_nCurrentGosub] = script->m_dwIp;
 	script->m_nCurrentGosub += 1;
 	script->m_dwIp = Params[0].nVar;
+	return OR_CONTINUE;
+}
+
+/* 02D2 */
+eOpcodeResult WINAPI SET_COMEDY_CONTROLS(CScript *script)
+{
+	script->Collect(2);
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	vehicle->field_1FA &= 0xEF;
+	if (Params[1].nVar) {
+		vehicle->field_1FA |= 0x10;
+	}
 	return OR_CONTINUE;
 }
 
@@ -1917,6 +1942,21 @@ eOpcodeResult WINAPI IS_CAR_DOOR_CLOSED(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 041A */
+eOpcodeResult WINAPI GET_AMMO_IN_CHAR_WEAPON(CScript *script)
+{
+	script->Collect(2);
+	CPed *ped = CPools::ms_pPedPool->GetAt(Params[0].nVar);
+	Params[0].nVar = 0;
+	for (int i = 0; i < 10; i++) {
+		if ((int)ped->weapons[i].type == Params[1].nVar) {
+			Params[0].nVar = ped->weapons[i].ammo;
+		}
+	}
+	script->Store(1);
+	return OR_CONTINUE;
+}
+
 /* 041B */
 eOpcodeResult WINAPI REGISTER_KILL_FRENZY_PASSED(CScript *)
 {
@@ -2201,6 +2241,34 @@ eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_COORD(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 04D4 */
+eOpcodeResult WINAPI GET_NTH_CLOSEST_CHAR_NODE(CScript *script)
+{
+	script->Collect(4);
+	CVector pos1 = { Params[0].fVar, Params[1].fVar, Params[2].fVar };
+	CVector pos2 = { 0, 0, 0 };
+	if (pos1.z <= -100.0) {
+		pos1.z = CWorld::FindGroundZForCoord(pos1.x, pos1.y);
+	}
+	int node = VCGlobals::ThePaths.FindNthNodeClosestToCoors(pos1, 1, 999999.9, true, true, Params[3].nVar - 1, false);
+	VCGlobals::ThePaths.FindNodeCoorsForScript(pos2, node);
+	Params[0].fVar = pos2.x;
+	Params[1].fVar = pos2.y;
+	Params[2].fVar = pos2.z;
+	script->Store(3);
+	return OR_CONTINUE;
+}
+
+/* 0505 */
+eOpcodeResult WINAPI GET_NEAREST_TYRE_TO_POINT(CScript *script)
+{
+	script->Collect(3);
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	Params[0].nVar = vehicle->FindTyreNearestPoint(Params[1].fVar, Params[2].fVar);
+	script->Store(1);
+	return OR_CONTINUE;
+}
+
 /* 050F */
 eOpcodeResult WINAPI GET_MAX_WANTED_LEVEL(CScript *script)
 {
@@ -2228,6 +2296,28 @@ eOpcodeResult WINAPI PRINT_HELP_FOREVER_WITH_NUMBER(CScript *script)
 	script->Collect(1);
 	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, 0, 0, 0, 0, 0, numberedText);
 	CHud::SetHelpMessage(numberedText, false, true);
+	return OR_CONTINUE;
+}
+
+/* 051F */
+eOpcodeResult WINAPI DISPLAY_TEXT_WITH_3_NUMBERS(CScript *script)
+{
+	char gxt[8];
+	script->Collect(2);
+	script->ReadShortString(gxt);
+	CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].positionX = Params[0].fVar;
+	CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].positionY = Params[1].fVar;
+	script->Collect(3);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), Params[0].nVar, Params[1].nVar, Params[2].nVar, -1, -1, -1, CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].text);
+	CTheScripts::NumberOfIntroTextLinesThisFrame++;
+	return OR_CONTINUE;
+}
+
+/* 052A */
+eOpcodeResult WINAPI ADD_MONEY_SPENT_ON_AUTO_PAINTING(CScript *script)
+{
+	script->Collect(1);
+	CStats::AutoPaintingBudget += static_cast<float>(Params[0].nVar);
 	return OR_CONTINUE;
 }
 
@@ -2308,6 +2398,14 @@ eOpcodeResult WINAPI ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT(CScript *script)
 	Params[0].nVar = CRadar::SetShortRangeCoordBlip(5, pos, 2, 3);
 	CRadar::ChangeBlipScale(Params[0].nVar, 3);
 	script->Store(1);
+	return OR_CONTINUE;
+}
+
+/* 0577 */
+eOpcodeResult WINAPI SET_FADE_AND_JUMPCUT_AFTER_RC_EXPLOSION(CScript *script)
+{
+	script->Collect(1);
+	CWorld::Players[CWorld::PlayerInFocus].fadeJumpCutRcExplode = !!Params[0].nVar;
 	return OR_CONTINUE;
 }
 
@@ -2433,6 +2531,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x0255, RESTART_CRITICAL_MISSION);
 		Opcodes::RegisterOpcode(0x0295, IS_TAXI);
 		Opcodes::RegisterOpcode(0x0299, ACTIVATE_GARAGE);
+		Opcodes::RegisterOpcode(0x029A, SWITCH_TAXI_TIMER);
 		Opcodes::RegisterOpcode(0x029C, IS_BOAT);
 		Opcodes::RegisterOpcode(0x02A0, IS_CHAR_STOPPED);
 		Opcodes::RegisterOpcode(0x02A1, MESSAGE_WAIT);
@@ -2451,6 +2550,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x02C8, GET_NUMBER_OF_POWER_PILLS_CARRIED);
 		Opcodes::RegisterOpcode(0x02C9, CLEAR_NUMBER_OF_POWER_PILLS_CARRIED);
 		Opcodes::RegisterOpcode(0x02CD, GOSUB_FILE);
+		Opcodes::RegisterOpcode(0x02D2, SET_COMEDY_CONTROLS);
 		Opcodes::RegisterOpcode(0x02D6, IS_CHAR_SHOOTING_IN_AREA);
 		Opcodes::RegisterOpcode(0x02D9, CLEAR_NUMBER_OF_POWER_PILLS_EATEN);
 		Opcodes::RegisterOpcode(0x02DA, ADD_POWER_PILL);
@@ -2507,6 +2607,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x0410, SET_GANG_PED_MODEL_PREFERENCE);
 		Opcodes::RegisterOpcode(0x0413, SET_GET_OUT_OF_JAIL_FREE);
 		Opcodes::RegisterOpcode(0x0415, IS_CAR_DOOR_CLOSED);
+		Opcodes::RegisterOpcode(0x041A, GET_AMMO_IN_CHAR_WEAPON);
 		Opcodes::RegisterOpcode(0x041B, REGISTER_KILL_FRENZY_PASSED);
 		Opcodes::RegisterOpcode(0x041C, SET_CHAR_SAY);
 		Opcodes::RegisterOpcode(0x041F, OVERRIDE_HOSPITAL_LEVEL);
@@ -2532,9 +2633,13 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x04C8, IS_CHAR_IN_FLYING_VEHICLE);
 		Opcodes::RegisterOpcode(0x04CC, ADD_SHORT_RANGE_BLIP_FOR_COORD_OLD);
 		Opcodes::RegisterOpcode(0x04CD, ADD_SHORT_RANGE_BLIP_FOR_COORD);
+		Opcodes::RegisterOpcode(0x04D4, GET_NTH_CLOSEST_CHAR_NODE);
+		Opcodes::RegisterOpcode(0x0505, GET_NEAREST_TYRE_TO_POINT);
 		Opcodes::RegisterOpcode(0x050F, GET_MAX_WANTED_LEVEL);
 		Opcodes::RegisterOpcode(0x0511, PRINT_HELP_WITH_NUMBER);
 		Opcodes::RegisterOpcode(0x0513, PRINT_HELP_FOREVER_WITH_NUMBER);
+		Opcodes::RegisterOpcode(0x051F, DISPLAY_TEXT_WITH_3_NUMBERS);
+		Opcodes::RegisterOpcode(0x052A, ADD_MONEY_SPENT_ON_AUTO_PAINTING);
 		Opcodes::RegisterOpcode(0x052D, GET_PLAYER_DRUNKENNESS);
 		Opcodes::RegisterOpcode(0x0530, ADD_LOAN_SHARK_VISITS);
 		Opcodes::RegisterOpcode(0x0532, ADD_MOVIE_STUNTS);
@@ -2543,6 +2648,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x0538, ADD_SHOOTING_RANGE_RANK);
 		Opcodes::RegisterOpcode(0x0547, IS_CHAR_TOUCHING_VEHICLE);
 		Opcodes::RegisterOpcode(0x056F, ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT);
+		Opcodes::RegisterOpcode(0x0577, SET_FADE_AND_JUMPCUT_AFTER_RC_EXPLOSION);
 		Opcodes::RegisterOpcode(0x059D, SHUFFLE_CARD_DECKS);
 		Opcodes::RegisterOpcode(0x059E, FETCH_NEXT_CARD);
 	}

@@ -42,7 +42,7 @@ while true
     wait 0
     if and
         00E1:   player 0 pressed_button 4 // action
-        80E0:   not player $PLAYER_CHAR in_any_car
+        80E0:   not player 0 in_any_car
         $ONMISSION == 0
     then
         $ONMISSION = 1
@@ -59,8 +59,8 @@ while true
     end
 end
 
-0109: player $PLAYER_CHAR money += 10000
-0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+0109: player 0 money += 10000
+0054: store_player 0 position_to POSX POSY POSZ
 0247: request_model #COLT45
 0247: request_model #MALE01
 0247: request_model #DINGHY
@@ -76,7 +76,7 @@ POSX += 4.0
 029B: SPAWN_OBJ = init_object #ELECTRICGATE at POSX POSY POSZ
 0249: release_model #COLT45
 0249: release_model #DINGHY
-01B1: give_player $PLAYER_CHAR weapon 17 ammo 10
+01B1: give_player 0 weapon 17 ammo 10
 024A: PHONE_A = get_phone_at -1482.8 -825.259
 024C: set_phone PHONE_A message 'ADMIRAL'
 024A: PHONE_B = get_phone_at -1483.32 -824.733
@@ -144,6 +144,7 @@ while true
     gosub @CLEAR_PACMAN
     gosub @START_PACMAN_SCRAMBLE
     gosub @CLEAR_NUMBER_OF_POWER_PILLS_CARRIED
+    gosub @SET_COMEDY_CONTROLS
     gosub @IS_CHAR_SHOOTING_IN_AREA
     gosub @CLEAR_NUMBER_OF_POWER_PILLS_EATEN
     gosub @ADD_POWER_PILL
@@ -203,6 +204,7 @@ while true
     gosub @IS_CHAR_IN_FLYING_VEHICLE
     gosub @GET_MAX_WANTED_LEVEL
     gosub @PRINT_HELP
+    gosub @ADD_MONEY_SPENT_ON_AUTO_PAINTING
     gosub @GET_PLAYER_DRUNKENNESS
     gosub @ADD_LOAN_SHARK_VISITS
     gosub @ADD_MOVIE_STUNTS
@@ -213,7 +215,7 @@ while true
 
     if and
         00E1:   player 0 pressed_button 4 // action
-        80E0:   not player $PLAYER_CHAR in_any_car
+        80E0:   not player 0 in_any_car
     then
         01C2: mark_actor_as_no_longer_needed SPAWN_CHAR
         01C3: mark_car_as_no_longer_needed SPAWN_CAR
@@ -264,7 +266,7 @@ while true
         end
     end
     if
-        8447:   not player $PLAYER_CHAR lifting_a_phone
+        8447:   not player 0 lifting_a_phone
     then
         if
             PAGE == 0
@@ -272,7 +274,7 @@ while true
             05F9: TEMP_VAR = SEATS AND 0x00000F00
             05FE: TEMP_VAR = TEMP_VAR SHR 8
             050F: get_max_wanted_level_to TEMP_VAR2
-            052D: get_player $PLAYER_CHAR drunkenness_to TEMP_VAR3
+            052D: get_player 0 drunkenness_to TEMP_VAR3
             00E2: get_player 0 key 6 state_to TEMP_VAR4
             // aim_key, maxwanted, drunk, seats, var, page
             0308: text_6numbers 'HJSTATW' TEMP_VAR4 TEMP_VAR2 TEMP_VAR3 TEMP_VAR 10@ PAGE time 10 flag 5
@@ -296,7 +298,7 @@ while true
         0ADC: test_cheat "PUTCAR"
     then
         018C: play_sound 1 at 0.0 0.0 0.0
-        0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+        0054: store_player 0 position_to POSX POSY POSZ
         00AB: put_car SPAWN_CAR at POSX POSY POSZ
     end
     if
@@ -305,7 +307,7 @@ while true
         018C: play_sound 1 at 0.0 0.0 0.0
         01C3: mark_car_as_no_longer_needed SPAWN_CAR
         00A6: destroy_car SPAWN_CAR
-        0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+        0054: store_player 0 position_to POSX POSY POSZ
         0247: request_model #CADDY
         038B: load_requested_models
         00A5: SPAWN_CAR = create_car #CADDY at POSX POSY POSZ
@@ -317,7 +319,7 @@ while true
         018C: play_sound 1 at 0.0 0.0 0.0
         01C3: mark_car_as_no_longer_needed SPAWN_CAR
         00A6: destroy_car SPAWN_CAR
-        0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+        0054: store_player 0 position_to POSX POSY POSZ
         0247: request_model #DINGHY
         038B: load_requested_models
         00A5: SPAWN_CAR = create_car #DINGHY at POSX POSY POSZ
@@ -329,7 +331,7 @@ while true
         018C: play_sound 1 at 0.0 0.0 0.0
         01C3: mark_car_as_no_longer_needed SPAWN_CAR
         00A6: destroy_car SPAWN_CAR
-        0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+        0054: store_player 0 position_to POSX POSY POSZ
         0247: request_model #HUNTER
         038B: load_requested_models
         00A5: SPAWN_CAR = create_car #HUNTER at POSX POSY POSZ
@@ -421,7 +423,7 @@ if
     0ADC: test_cheat "ADDAMMO"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
-    0113: add_ammo_to_player $PLAYER_CHAR weapon 17 ammo 10
+    0113: add_ammo_to_player 0 weapon 17 ammo 10
 end
 return
 
@@ -431,7 +433,7 @@ if
 then
     gosub @TEXT_STYLE
     if
-        0116:   player $PLAYER_CHAR alive
+        0116:   player 0 alive
     then
         0608: show_text_position 10.0 LINE text "0116: Player is alive"
     else
@@ -446,7 +448,7 @@ if
 then
     gosub @TEXT_STYLE
     if
-        0130:   player $PLAYER_CHAR busted
+        0130:   player 0 busted
     then
         0608: show_text_position 10.0 LINE text "0130: Player has been arrested"
     else
@@ -457,13 +459,13 @@ return
 
 :CHANGE_CAR_LOCK
 if
-    00E0:   player $PLAYER_CHAR in_any_car
+    00E0:   player 0 in_any_car
 then
     if
         0ADC: test_cheat "LOCK"
     then
         018C: play_sound 1 at 0.0 0.0 0.0
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        03C1: PLAYER_CAR = player 0 car_no_save
         0135: change_car PLAYER_CAR lock 2
     end
 end
@@ -474,7 +476,7 @@ if
     0ADC: test_cheat "SHAKE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
-    0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+    0054: store_player 0 position_to POSX POSY POSZ
     POSX += 100.0
     0136: shake_camera 5000 with_point POSX POSY POSZ
 end
@@ -485,8 +487,15 @@ if
     PAGE == 0
 then
     gosub @TEXT_STYLE
+    01BB: store_object SPAWN_OBJ position_to TEMP_VAR TEMP_VAR2 TEMP_VAR3
+    0087: TEMP_VAR3 = TEMP_VAR
+    0087: TEMP_VAR4 = TEMP_VAR2
+    TEMP_VAR += 8.0
+    TEMP_VAR2 -= 2.0
+    TEMP_VAR3 += 12.0
+    TEMP_VAR4 += 2.0
     if
-        013B:   car SPAWN_CAR dead_in_rectangle 238.4 -1282.2 242.4 -1278.2 1
+        013B:   car SPAWN_CAR dead_in_rectangle TEMP_VAR TEMP_VAR2 TEMP_VAR3 TEMP_VAR4 1
     then
         0608: show_text_position 10.0 LINE text "013B: Spawned vehicle is dead in marker"
     else
@@ -501,11 +510,11 @@ if
 then
     gosub @TEXT_STYLE
     if
-        013C:   car SPAWN_CAR dead_in_cube 242.4 -1282.2 8.5 246.4 -1278.2 11.5 1
+        013C:   car SPAWN_CAR dead_in_cube -838.88 1307.78 10.04 -833.59 1313.67 15.04 0
     then
-        0608: show_text_position 10.0 LINE text "013C: Spawned vehicle is dead in marker"
+        0608: show_text_position 10.0 LINE text "013C: Spawned vehicle is dead in garage area"
     else
-        0608: show_text_position 10.0 LINE text "013C: Spawned vehicle is not dead in marker"
+        0608: show_text_position 10.0 LINE text "013C: Spawned vehicle is not dead in garage area"
     end
 end
 return
@@ -516,9 +525,9 @@ if
 then
     gosub @TEXT_STYLE
     if
-        00E0:   player $PLAYER_CHAR in_any_car
+        00E0:   player 0 in_any_car
     then
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        03C1: PLAYER_CAR = player 0 car_no_save
         if
             015E:   car PLAYER_CAR in_air
         then
@@ -546,7 +555,7 @@ if
 then
     gosub @TEXT_STYLE
     if
-        0178:   player $PLAYER_CHAR touching_object SPAWN_OBJ
+        0178:   player 0 touching_object SPAWN_OBJ
     then
         0608: show_text_position 10.0 LINE text "0178: Player is touching spawned object"
     else
@@ -640,9 +649,9 @@ if
 then
     gosub @TEXT_STYLE
     if
-        00E0:   player $PLAYER_CHAR in_any_car
+        00E0:   player 0 in_any_car
     then
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        03C1: PLAYER_CAR = player 0 car_no_save
         if
             0220:   car PLAYER_CAR has_car_bomb
         then
@@ -660,9 +669,9 @@ if
 then
     gosub @TEXT_STYLE
     if
-        00E0:   player $PLAYER_CHAR in_any_car
+        00E0:   player 0 in_any_car
     then
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        03C1: PLAYER_CAR = player 0 car_no_save
         if
             0228:   car PLAYER_CAR bomb_status == 4
         then
@@ -680,7 +689,7 @@ if
 then
     gosub @TEXT_STYLE
     if
-        023A:   player $PLAYER_CHAR touching_object SPAWN_OBJ on_foot
+        023A:   player 0 touching_object SPAWN_OBJ on_foot
     then
         0608: show_text_position 10.0 LINE text "023A: Player is touching spawned object on foot"
     else
@@ -706,13 +715,13 @@ return
 
 :ARM_CAR_WITH_BOMB
 if
-    00E0:   player $PLAYER_CHAR in_any_car
+    00E0:   player 0 in_any_car
 then
     if
         0ADC: test_cheat "ARMBOMB"
     then
         018C: play_sound 1 at 0.0 0.0 0.0
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        03C1: PLAYER_CAR = player 0 car_no_save
         0242: set_car PLAYER_CAR bomb_status_to 1
     end
 end
@@ -796,9 +805,9 @@ if
 then
     gosub @TEXT_STYLE
     if
-        00E0:   player $PLAYER_CHAR in_any_car
+        00E0:   player 0 in_any_car
     then
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        03C1: PLAYER_CAR = player 0 car_no_save
         if
             0295:   is PLAYER_CAR taxi
         then
@@ -825,9 +834,9 @@ if
 then
     gosub @TEXT_STYLE
     if
-        00E0:   player $PLAYER_CHAR in_any_car
+        00E0:   player 0 in_any_car
     then
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        03C1: PLAYER_CAR = player 0 car_no_save
         if
             029C:   is PLAYER_CAR boat
         then
@@ -871,7 +880,7 @@ if
     0ADC: test_cheat "PARTICLE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
-    0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+    0054: store_player 0 position_to POSX POSY POSZ
     02A2: create_particle 12 at POSX POSY POSZ 1
 end
 return
@@ -994,7 +1003,7 @@ if
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     02C6: clear_pacman
-    0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+    0054: store_player 0 position_to POSX POSY POSZ
     02C7: start_pacman_scramble POSX POSY POSZ radius 10.0 count 10
 end
 return
@@ -1008,17 +1017,38 @@ then
 end
 return
 
+:SET_COMEDY_CONTROLS
+if
+    00E0:   player 0 in_any_car
+then
+    if
+        0ADC: test_cheat "COMEDY"
+    then
+        018C: play_sound 1 at 0.0 0.0 0.0
+        03C1: PLAYER_CAR = player 0 car_no_save
+        02D2: set_car PLAYER_CAR comedy_controls 1
+    end
+end
+return
+
 :IS_CHAR_SHOOTING_IN_AREA
 if
     PAGE == 0
 then
     gosub @TEXT_STYLE
+    01BB: store_object SPAWN_OBJ position_to TEMP_VAR TEMP_VAR2 TEMP_VAR3
+    0087: TEMP_VAR3 = TEMP_VAR
+    0087: TEMP_VAR4 = TEMP_VAR2
+    TEMP_VAR += 12.0
+    TEMP_VAR2 -= 2.0
+    TEMP_VAR3 += 16.0
+    TEMP_VAR4 += 2.0
     if
-        02D6:   actor $PLAYER_ACTOR shooting_in_area -838.88 1307.78 -833.59 1313.67 0
+        02D6:   actor $PLAYER_ACTOR shooting_in_area TEMP_VAR TEMP_VAR2 TEMP_VAR3 TEMP_VAR4 1
     then
-        0608: show_text_position 10.0 LINE text "02D6: Player character is shooting in garage area"
+        0608: show_text_position 10.0 LINE text "02D6: Player character is shooting in marker"
     else
-        0608: show_text_position 10.0 LINE text "02D6: Player character is not shooting in garage area"
+        0608: show_text_position 10.0 LINE text "02D6: Player character is not shooting in marker"
     end
 end
 return
@@ -1038,7 +1068,7 @@ if
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     02C6: clear_pacman
-    0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+    0054: store_player 0 position_to POSX POSY POSZ
     02DA: add_power_pill POSX POSY POSZ
 end
 return
@@ -1063,7 +1093,7 @@ if
     0ADC: test_cheat "MINEA"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
-    0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+    0054: store_player 0 position_to POSX POSY POSZ
     02F0: create_explosive_barrel_at POSX POSY -100.0
 end
 return
@@ -1073,7 +1103,7 @@ if
     0ADC: test_cheat "MINEB"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
-    0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+    0054: store_player 0 position_to POSX POSY POSZ
     02F1: create_explosive_barrel_at POSX POSY -100.0
 end
 return
@@ -1119,9 +1149,9 @@ if
 then
     gosub @TEXT_STYLE
     if
-        00E0:   player $PLAYER_CHAR in_any_car
+        00E0:   player 0 in_any_car
     then
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        03C1: PLAYER_CAR = player 0 car_no_save
         if
             031B:   car PLAYER_CAR primary_color 6
         then
@@ -1139,9 +1169,9 @@ if
 then
     gosub @TEXT_STYLE
     if
-        00E0:   player $PLAYER_CHAR in_any_car
+        00E0:   player 0 in_any_car
     then
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        03C1: PLAYER_CAR = player 0 car_no_save
         if
             031C:   car PLAYER_CAR secondary_color 75
         then
@@ -1155,13 +1185,13 @@ return
 
 :SET_CAR_VISIBLE
 if
-    00E0:   player $PLAYER_CHAR in_any_car
+    00E0:   player 0 in_any_car
 then
     if
         0ADC: test_cheat "INVISIBLE"
     then
         018C: play_sound 1 at 0.0 0.0 0.0
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        03C1: PLAYER_CAR = player 0 car_no_save
         0338: set_car PLAYER_CAR visible 0
     end
 end
@@ -1500,9 +1530,9 @@ if
 then
     gosub @TEXT_STYLE
     if
-        00E0:   player $PLAYER_CHAR in_any_car
+        00E0:   player 0 in_any_car
     then
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        03C1: PLAYER_CAR = player 0 car_no_save
         if
             03C9:   car PLAYER_CAR visibly_damaged
         then
@@ -1587,7 +1617,7 @@ if
     0ADC: test_cheat "JAILFREE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
-    0413: set_player $PLAYER_CHAR get_out_of_jail_free 1
+    0413: set_player 0 get_out_of_jail_free 1
 end
 return
 
@@ -1597,9 +1627,9 @@ if
 then
     gosub @TEXT_STYLE
     if
-        00E0:   player $PLAYER_CHAR in_any_car
+        00E0:   player 0 in_any_car
     then
-        03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+        03C1: PLAYER_CAR = player 0 car_no_save
         if
             0415:   car PLAYER_CAR door 0 closed
         then
@@ -1751,7 +1781,7 @@ if
 then
     gosub @TEXT_STYLE
     if
-        0447:   player $PLAYER_CHAR lifting_a_phone
+        0447:   player 0 lifting_a_phone
     then
         0608: show_text_position 10.0 LINE text "0447: Player is lifting phone"
     else
@@ -1774,9 +1804,9 @@ return
 :GET_NUMBER_OF_SEATS_IN_MODEL
 05F9: SEATS = SEATS AND 0xFFFFF0FF
 if
-    00E0:   player $PLAYER_CHAR in_any_car
+    00E0:   player 0 in_any_car
 then
-    03C1: PLAYER_CAR = player $PLAYER_CHAR car_no_save
+    03C1: PLAYER_CAR = player 0 car_no_save
     0441: PLAYER_CAR = car PLAYER_CAR model
     047D: get_number_of_seats_in_model PLAYER_CAR store_to TEMP_VAR
     05FF: TEMP_VAR = TEMP_VAR SHL 8
@@ -1895,8 +1925,17 @@ then
 end
 return
 
+:ADD_MONEY_SPENT_ON_AUTO_PAINTING
+if
+    0ADC: test_cheat "PAINT"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    052A: add_money_spent_on_auto_painting 10
+end
+return
+
 :GET_PLAYER_DRUNKENNESS
-052D: get_player $PLAYER_CHAR drunkenness_to TEMP_VAR
+052D: get_player 0 drunkenness_to TEMP_VAR
 if
     0ADC: test_cheat "DRUNK"
 then
@@ -1904,9 +1943,9 @@ then
     if
         TEMP_VAR == 0
     then
-        052C: set_player $PLAYER_CHAR drunk_visuals 255
+        052C: set_player 0 drunk_visuals 255
     else
-        052C: set_player $PLAYER_CHAR drunk_visuals 0
+        052C: set_player 0 drunk_visuals 0
     end
 end
 return
