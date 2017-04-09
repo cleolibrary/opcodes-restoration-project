@@ -8,7 +8,7 @@
 *************************************************************************/
 
 #include "stdafx.h"
-#include <math.h>
+#include <cmath>
 #include <new>
 
 #define CLEO_VERSION_MAIN    2
@@ -24,11 +24,16 @@
 
 #pragma comment (lib, "..\\Release (Without WPO)\\vcclasses.lib")
 #pragma comment (lib, "..\\Release (Without WPO)\\vcversion.lib")
+#include "..\\..\\gtalc-dinput8\\dinput8\\include\\SilentCall.h"
 #include "..\\..\\gtalc-dinput8\\vcclasses\\include\\vcclasses.h"
 #include "..\\..\\gtalc-dinput8\\vcclasses\\include\\Globals.h"
 #include "..\\..\\gtalc-dinput8\\vcversion\\include\\vcversion.h"
 
 tScriptVar *Params;
+
+static void(__cdecl *CallInit)(void);
+static void(__cdecl *CallUpdate)(void);
+static void(__cdecl *CallRender)(void);
 
 class CCranesHack : public CCranes
 {
@@ -98,17 +103,15 @@ auto WindowHandler = (void(__cdecl *)(int, int))vcversion::AdjustOffset(0x00602E
 auto phoneDisplayMessage = (BYTE *)vcversion::AdjustOffset(0x007030E4);
 auto currentPhone = (unsigned long *)vcversion::AdjustOffset(0x007030E8);
 auto numberedText = (wchar_t *)vcversion::AdjustOffset(0x00821068);
-auto baseModelInfo = (unsigned long *)vcversion::AdjustOffset(0x0092D4C8);
-auto projectileObject = (unsigned long *)vcversion::AdjustOffset(0x0094B708);
 auto cpedtype = (uintptr_t)vcversion::AdjustOffset(0x00A0DA64);
 
 bool CCranesHack::IsThisCarPickedUp(float positionX, float positionY, CVehicle *vehicle)
 {
 	if (CCranes::NumCranes > 0) {
 		for (int i = 0; i < CCranes::NumCranes; i++) {
-			if (cranes[i].object) {
-				float distance = sqrt(pow(positionX - cranes[i].object->GetX(), 2) + pow(positionY - cranes[i].object->GetY(), 2));
-				if (distance < 100.0 && cranes[i].vehicle == vehicle && (cranes[i].status == 2 || cranes[i].status == 4)) {
+			if (aCranes[i].object) {
+				float distance = sqrt(pow(positionX - aCranes[i].object->GetX(), 2) + pow(positionY - aCranes[i].object->GetY(), 2));
+				if (distance < 100.0 && aCranes[i].vehicle == vehicle && (aCranes[i].status == 2 || aCranes[i].status == 4)) {
 					return true;
 				}
 			}
@@ -123,8 +126,8 @@ void CCranesHack::DeActivateCrane(float positionX, float positionY)
 	float minDistance = 100.0;
 	if (CCranes::NumCranes > 0) {
 		for (int i = 0; i < CCranes::NumCranes; i++) {
-			if (cranes[i].object) {
-				float distance = sqrt(pow(positionX - cranes[i].object->GetX(), 2) + pow(positionY - cranes[i].object->GetY(), 2));
+			if (aCranes[i].object) {
+				float distance = sqrt(pow(positionX - aCranes[i].object->GetX(), 2) + pow(positionY - aCranes[i].object->GetY(), 2));
 				if (distance < minDistance) {
 					index = i;
 					minDistance = distance;
@@ -133,8 +136,8 @@ void CCranesHack::DeActivateCrane(float positionX, float positionY)
 		}
 	}
 	if (index == -1) return;
-	cranes[index].activity = 2;
-	cranes[index].status = 0;
+	aCranes[index].activity = 2;
+	aCranes[index].status = 0;
 }
 
 void CCranesHack::ActivateCrane(float pickupX1, float pickupX2, float pickupY1, float pickupY2, float dropoffX, float dropoffY, float dropoffZ, float dropoffHeading, bool isCrusher, bool isMilitary, float positionX, float positionY)
@@ -144,8 +147,8 @@ void CCranesHack::ActivateCrane(float pickupX1, float pickupX2, float pickupY1, 
 	minDistance = 100.0;
 	if (CCranes::NumCranes > 0) {
 		for (int i = 0; i < CCranes::NumCranes; i++) {
-			if (cranes[i].object) {
-				float distance = sqrt(pow(positionX - cranes[i].object->GetX(), 2) + pow(positionY - cranes[i].object->GetY(), 2));
+			if (aCranes[i].object) {
+				float distance = sqrt(pow(positionX - aCranes[i].object->GetX(), 2) + pow(positionY - aCranes[i].object->GetY(), 2));
 				if (distance < minDistance) {
 					index = i;
 					minDistance = distance;
@@ -154,38 +157,38 @@ void CCranesHack::ActivateCrane(float pickupX1, float pickupX2, float pickupY1, 
 		}
 	}
 	if (index == -1) return;
-	cranes[index].pickupX1 = pickupX1;
-	cranes[index].pickupX2 = pickupX2;
-	cranes[index].pickupY1 = pickupY1;
-	cranes[index].pickupY2 = pickupY2;
-	cranes[index].dropoffX = dropoffX;
-	cranes[index].dropoffY = dropoffY;
-	cranes[index].dropoffZ = dropoffZ;
-	cranes[index].activity = 1;
-	cranes[index].vehicle = 0;
-	cranes[index].countCollected = 0;
-	cranes[index].dropoffHeading = dropoffHeading;
-	cranes[index].isCrusher = isCrusher;
-	cranes[index].isMilitary = isMilitary;
-	cranes[index].timer = 0;
-	cranes[index].status = 0;
+	aCranes[index].pickupX1 = pickupX1;
+	aCranes[index].pickupX2 = pickupX2;
+	aCranes[index].pickupY1 = pickupY1;
+	aCranes[index].pickupY2 = pickupY2;
+	aCranes[index].dropoffX = dropoffX;
+	aCranes[index].dropoffY = dropoffY;
+	aCranes[index].dropoffZ = dropoffZ;
+	aCranes[index].activity = 1;
+	aCranes[index].vehicle = 0;
+	aCranes[index].countCollected = 0;
+	aCranes[index].dropoffHeading = dropoffHeading;
+	aCranes[index].isCrusher = isCrusher;
+	aCranes[index].isMilitary = isMilitary;
+	aCranes[index].timer = 0;
+	aCranes[index].status = 0;
 	pickupCenterX = (pickupX1 + pickupX2) / 2;
 	pickupCenterY = (pickupY1 + pickupY2) / 2;
-	craneObjectX = cranes[index].object->GetX();
-	craneObjectY = cranes[index].object->GetY();
+	craneObjectX = aCranes[index].object->GetX();
+	craneObjectY = aCranes[index].object->GetY();
 	/*if (isCrusher) {
-		cranes[index].armPickupHeight = -0.95099998f;
+		aCranes[index].armPickupHeight = -0.95099998f;
 	} else if (isMilitary) {
-		cranes[index].armPickupHeight = 10.7862f;
+		aCranes[index].armPickupHeight = 10.7862f;
 	} else {
-		cranes[index].armPickupHeight = CWorld::FindGroundZForCoord(pickupCenterX, pickupCenterY);
+		aCranes[index].armPickupHeight = CWorld::FindGroundZForCoord(pickupCenterX, pickupCenterY);
 	}*/
-	cranes[index].armPickupHeight = CWorld::FindGroundZForCoord(pickupCenterX, pickupCenterY);
-	cranes[index].armPickupRotation = CGeneral::GetATanOfXY(pickupCenterX - craneObjectX, pickupCenterY - craneObjectY);
-	cranes[index].armPickupDistance = sqrt(pow(pickupCenterX - craneObjectX, 2) + pow(pickupCenterY - craneObjectY, 2));
-	cranes[index].armDropoffRotation = CGeneral::GetATanOfXY(dropoffX - craneObjectX, dropoffY - craneObjectY);
-	cranes[index].armDropoffDistance = sqrt(pow(dropoffX - craneObjectX, 2) + pow(dropoffY - craneObjectY, 2));
-	cranes[index].armDropoffHeight = dropoffZ;
+	aCranes[index].armPickupHeight = CWorld::FindGroundZForCoord(pickupCenterX, pickupCenterY);
+	aCranes[index].armPickupRotation = CGeneral::GetATanOfXY(pickupCenterX - craneObjectX, pickupCenterY - craneObjectY);
+	aCranes[index].armPickupDistance = sqrt(pow(pickupCenterX - craneObjectX, 2) + pow(pickupCenterY - craneObjectY, 2));
+	aCranes[index].armDropoffRotation = CGeneral::GetATanOfXY(dropoffX - craneObjectX, dropoffY - craneObjectY);
+	aCranes[index].armDropoffDistance = sqrt(pow(dropoffX - craneObjectX, 2) + pow(dropoffY - craneObjectY, 2));
+	aCranes[index].armDropoffHeight = dropoffZ;
 }
 
 int CPacManPickupsHack::PillsEatenInRace;
@@ -247,11 +250,10 @@ void CPacManPickupsHack::Init(void)
 	PillsEatenInRace = 0;
 
 	// get optional data for pickups
-	// create pacman.dat and populate it with two custom models and up to 255 coordinate points
+	// create pacman.dat and populate it with two custom models and up to 255 coordinate points on each line
 	scrambleModel = 502;
 	raceModel = 503;
-	int filename = CFileMgr::OpenFile("pacman.dat", "r");
-	if (filename) {
+	if (int filename = CFileMgr::OpenFile("pacman.dat", "r")) {
 		char buffer[200];
 		if (CFileMgr::ReadLine(filename, buffer, 200)) VCGlobals::sscanf(buffer, "%d", &scrambleModel);
 		if (CFileMgr::ReadLine(filename, buffer, 200)) VCGlobals::sscanf(buffer, "%d", &raceModel);
@@ -262,6 +264,7 @@ void CPacManPickupsHack::Init(void)
 		aRacePoints1[i].x = aRacePoints1[i].y = aRacePoints1[i].z = 0;
 		CFileMgr::CloseFile(filename);
 	}
+	CallInit();
 }
 
 void CPacManPickupsHack::Update(void)
@@ -273,6 +276,7 @@ void CPacManPickupsHack::Update(void)
 			}
 		}
 	}
+	CallUpdate();
 }
 
 void CPacManPickupsHack::GeneratePMPickUps(CVector center, float radius, short count)
@@ -301,7 +305,7 @@ void CPacManPickupsHack::GeneratePMPickUps(CVector center, float radius, short c
 				pos.y = center.y + randY * radius / 128;
 				pos.z = 1000.0;
 				t = CWorld::ProcessVerticalLine(pos, -1000.0, colpoint, pentity, true, false, false, false, true, false, 0);
-			} while (!t || (pentity->status & 7) != 1 || !(*reinterpret_cast<unsigned short *>(baseModelInfo[pentity->modelIndex] + 0x42) & 4));
+			} while (!t || (pentity->status & 7) != 1 || !(*reinterpret_cast<unsigned short *>(CModelInfo::ms_modelInfoPtrs[pentity->modelIndex] + 0x42) & 4));
 
 			aPMPickups[i].state = 1;
 			aPMPickups[i].position.x = colpoint.point.x;
@@ -389,6 +393,7 @@ void CPacManPickupsHack::Render(void)
 			}
 		}
 	}
+	CallRender();
 }
 
 void CPacManPickupHack::Update(void)
@@ -401,9 +406,9 @@ void CPacManPickupHack::Update(void)
 	}
 	if (state == 1) {
 		vehicle->powerPillsCarried++;
-		vehicle->forceX *= 0.65f;
-		vehicle->forceY *= 0.65f;
-		vehicle->forceZ *= 0.65f;
+		vehicle->moveSpeed.x *= 0.65f;
+		vehicle->moveSpeed.y *= 0.65f;
+		vehicle->moveSpeed.z *= 0.65f;
 		float multiplier = (250.0f + vehicle->mass) / vehicle->mass;
 		vehicle->mass *= multiplier;
 		vehicle->turnResistance *= multiplier;
@@ -437,26 +442,24 @@ void CPacManPickupsHack::CleanUpPacManStuff(void)
 	}
 }
 
-bool CProjectileInfoHack::IsProjectileInRange(float x1, float y1, float z1, float x2, float y2, float z2, bool flag)
+bool CProjectileInfoHack::IsProjectileInRange(float x1, float y1, float z1, float x2, float y2, float z2, bool destroy)
 {
-	unsigned long *address = projectileObject;
 	for (int i = 0; i < 0x20; i++) {
-		CObject *object = *(CObject **)&address[i];
+		CObject *object = ms_apProjectile[i];
 		if (object) {
-			if (projectiles[i].doesProjectileExist && projectiles[i].weaponType >= 12 && projectiles[i].weaponType <= 16) {
-				if (object->GetX() >= x1 && object->GetX() <= x2) {
-					if (object->GetY() >= y1 && object->GetY() <= y2) {
-						if (object->GetZ() >= z1 && object->GetZ() <= z2) {
-							if (flag) {
-								projectiles[i].doesProjectileExist = 0;
-								auto Destroy = (void(__thiscall *)(CObject *, int))*(unsigned long *)(object->vtbl + 8);
-								CWorld::Remove(object);
-								Destroy(object, 1);
-							}
-							return true;
-						}
-					}
+			if (VCGlobals::gaProjectileInfo[i].doesProjectileExist &&
+				VCGlobals::gaProjectileInfo[i].weaponType >= 12 &&
+				VCGlobals::gaProjectileInfo[i].weaponType <= 16 &&
+				object->GetX() >= x1 && object->GetX() <= x2 &&
+				object->GetY() >= y1 && object->GetY() <= y2 &&
+				object->GetZ() >= z1 && object->GetZ() <= z2) {
+				if (destroy) {
+					VCGlobals::gaProjectileInfo[i].doesProjectileExist = 0;
+					auto Destroy = (void(__thiscall *)(CObject *, int))*(unsigned long *)(object->vtbl + 8);
+					CWorld::Remove(object);
+					Destroy(object, 1);
 				}
+				return true;
 			}
 		}
 	}
@@ -1005,7 +1008,7 @@ eOpcodeResult WINAPI IS_TAXI(CScript *script)
 eOpcodeResult WINAPI ACTIVATE_GARAGE(CScript *script)
 {
 	script->Collect(1);
-	CGarage *garage = &CGarages::garages[Params[0].nVar];
+	CGarage *garage = &CGarages::aGarages[Params[0].nVar];
 	if (garage->type == 11 && garage->state == 0) {
 		garage->state = 3;
 	}
@@ -1119,7 +1122,7 @@ eOpcodeResult WINAPI ADD_SPRITE_BLIP_FOR_OBJECT(CScript *script)
 eOpcodeResult WINAPI DEACTIVATE_GARAGE(CScript *script)
 {
 	script->Collect(1);
-	CGarages::garages[Params[0].nVar].isInactive = 1;
+	CGarages::aGarages[Params[0].nVar].isInactive = 1;
 	return OR_CONTINUE;
 }
 
@@ -1498,7 +1501,7 @@ eOpcodeResult WINAPI SET_TEXT_FONT(CScript *script)
 /* 0351 */
 eOpcodeResult WINAPI IS_NASTY_GAME(CScript *script)
 {
-	script->UpdateCompareFlag(!!CGame::nastyGame);
+	script->UpdateCompareFlag(CGame::nastyGame);
 	return OR_CONTINUE;
 }
 
@@ -2002,7 +2005,7 @@ eOpcodeResult WINAPI DOES_GARAGE_CONTAIN_CAR(CScript *script)
 {
 	script->Collect(2);
 	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[1].nVar);
-	script->UpdateCompareFlag(CGarages::garages[Params[0].nVar].IsEntityEntirelyInside3D(vehicle, 0.0));
+	script->UpdateCompareFlag(CGarages::aGarages[Params[0].nVar].IsEntityEntirelyInside3D(vehicle, 0.0));
 	return OR_CONTINUE;
 }
 
@@ -2368,7 +2371,7 @@ eOpcodeResult WINAPI SET_TOP_SHOOTING_RANGE_SCORE(CScript *script)
 eOpcodeResult WINAPI ADD_SHOOTING_RANGE_RANK(CScript *script)
 {
 	script->Collect(1);
-	CStats::ShootingRangeRank += static_cast<float>(Params[0].nVar);
+	CStats::ShootingRank += static_cast<float>(Params[0].nVar);
 	return OR_CONTINUE;
 }
 
@@ -2468,24 +2471,27 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		unsigned long address;
 		// CGame::Initialise
 		address = vcversion::AdjustOffset(0x004A4ED8);
-		VirtualProtect((void *)(address + 1), 4, PAGE_EXECUTE_READWRITE, &flOldProtect);
-		*(unsigned long *)(address + 1) = (unsigned long)&CPacManPickupsHack::Init - address - 5;
-		VirtualProtect((void *)(address + 1), 4, flOldProtect, &flOldProtect);
+		VirtualProtect(reinterpret_cast<void *>(address), 5, PAGE_EXECUTE_READWRITE, &flOldProtect);
+		ReadCall(address, CallInit);
+		InjectHook(address, &CPacManPickupsHack::Init);
+		VirtualProtect(reinterpret_cast<void *>(address), 5, flOldProtect, &flOldProtect);
 		// CGame::ReInitGameObjectVariables
 		address = vcversion::AdjustOffset(0x004A4967);
-		VirtualProtect((void *)(address + 1), 4, PAGE_EXECUTE_READWRITE, &flOldProtect);
-		*(unsigned long *)(address + 1) = (unsigned long)&CPacManPickupsHack::Init - address - 5;
-		VirtualProtect((void *)(address + 1), 4, flOldProtect, &flOldProtect);
+		VirtualProtect(reinterpret_cast<void *>(address), 5, PAGE_EXECUTE_READWRITE, &flOldProtect);
+		InjectHook(address, &CPacManPickupsHack::Init);
+		VirtualProtect(reinterpret_cast<void *>(address), 5, flOldProtect, &flOldProtect);
 		// CGame::Process
 		address = vcversion::AdjustOffset(0x004A45D7);
-		VirtualProtect((void *)(address + 1), 4, PAGE_EXECUTE_READWRITE, &flOldProtect);
-		*(unsigned long *)(address + 1) = (unsigned long)&CPacManPickupsHack::Update - address - 5;
-		VirtualProtect((void *)(address + 1), 4, flOldProtect, &flOldProtect);
+		VirtualProtect(reinterpret_cast<void *>(address), 5, PAGE_EXECUTE_READWRITE, &flOldProtect);
+		ReadCall(address, CallUpdate);
+		InjectHook(address, &CPacManPickupsHack::Update);
+		VirtualProtect(reinterpret_cast<void *>(address), 5, flOldProtect, &flOldProtect);
 		// RenderEffects
 		address = vcversion::AdjustOffset(0x004A6547);
-		VirtualProtect((void *)(address + 1), 4, PAGE_EXECUTE_READWRITE, &flOldProtect);
-		*(unsigned long *)(address + 1) = (unsigned long)&CPacManPickupsHack::Render - address - 5;
-		VirtualProtect((void *)(address + 1), 4, flOldProtect, &flOldProtect);
+		VirtualProtect(reinterpret_cast<void *>(address), 5, PAGE_EXECUTE_READWRITE, &flOldProtect);
+		ReadCall(address, CallRender);
+		InjectHook(address, &CPacManPickupsHack::Render);
+		VirtualProtect(reinterpret_cast<void *>(address), 5, flOldProtect, &flOldProtect);
 
 		Params = CLEO_GetParamsAddress();
 		Opcodes::RegisterOpcode(0x00A2, IS_CHAR_STILL_ALIVE);
