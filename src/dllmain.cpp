@@ -1,7 +1,7 @@
 /*************************************************************************
     Opcodes Restoration Project
 
-    Plugin for CLEO v2.0.0.4 and above for Grand Theft Auto III and Grand
+    Plugin for CLEO v2.0.0.5 and above for Grand Theft Auto III and Grand
     Theft Auto: Vice City that aims to restore functionality to many
     unsupported opcodes
     http://www.gtamodding.com/wiki/Opcodes_Restoration_Project
@@ -9,25 +9,24 @@
 
 #include "stdafx.h"
 #include <cmath>
-#include <new>
 
 #define CLEO_VERSION_MAIN    2
 #define CLEO_VERSION_MAJOR   0
 #define CLEO_VERSION_MINOR   0
-#define CLEO_VERSION_BINARY  4
+#define CLEO_VERSION_BINARY  5
 
 #define CLEO_VERSION ((CLEO_VERSION_MAIN << 16)|(CLEO_VERSION_MAJOR << 12)|(CLEO_VERSION_MINOR << 8)|(CLEO_VERSION_BINARY))
 
 #if _VC
-#pragma comment (lib, "..\\..\\III.VC.CLEO\\CLEO_SDK\\VC.CLEO.lib")
-#include "..\\..\\III.VC.CLEO\\CLEO_SDK\\VC.CLEO.h"
+#pragma comment (lib, "VC.CLEO.lib")
+#include "VC.CLEO.h"
 
-#pragma comment (lib, "..\\Release (Without WPO)\\vcclasses.lib")
-#pragma comment (lib, "..\\Release (Without WPO)\\vcversion.lib")
-#include "..\\..\\gtalc-dinput8\\dinput8\\include\\SilentCall.h"
-#include "..\\..\\gtalc-dinput8\\vcclasses\\include\\vcclasses.h"
-#include "..\\..\\gtalc-dinput8\\vcclasses\\include\\Globals.h"
-#include "..\\..\\gtalc-dinput8\\vcversion\\include\\vcversion.h"
+#pragma comment (lib, "vcclasses.lib")
+#pragma comment (lib, "vcversion.lib")
+#include "SilentCall.h"
+#include "vcclasses.h"
+#include "Globals.h"
+#include "vcversion.h"
 
 tScriptVar *Params;
 
@@ -98,12 +97,12 @@ public:
 	static float Stored_Rain;
 };
 
-auto RpAnimBlendClumpGetFirstAssociation = (DWORD(__cdecl *)(unsigned long))vcversion::AdjustOffset(0x00402E20);
-auto WindowHandler = (void(__cdecl *)(int, int))vcversion::AdjustOffset(0x00602EE0);
-auto phoneDisplayMessage = (BYTE *)vcversion::AdjustOffset(0x007030E4);
-auto currentPhone = (unsigned long *)vcversion::AdjustOffset(0x007030E8);
-auto numberedText = (wchar_t *)vcversion::AdjustOffset(0x00821068);
-auto cpedtype = (uintptr_t)vcversion::AdjustOffset(0x00A0DA64);
+static auto RpAnimBlendClumpGetFirstAssociation = (DWORD(__cdecl *)(unsigned long))vcversion::AdjustOffset(0x00402E20);
+static auto WindowHandler = (void(__cdecl *)(int, int))vcversion::AdjustOffset(0x00602EE0);
+static auto phoneDisplayMessage = (BYTE *)vcversion::AdjustOffset(0x007030E4);
+static auto currentPhone = (unsigned long *)vcversion::AdjustOffset(0x007030E8);
+static auto numberedText = (wchar_t *)vcversion::AdjustOffset(0x00821068);
+static auto cpedtype = (uintptr_t)vcversion::AdjustOffset(0x00A0DA64);
 
 bool CCranesHack::IsThisCarPickedUp(float positionX, float positionY, CVehicle *vehicle)
 {
@@ -194,8 +193,8 @@ void CCranesHack::ActivateCrane(float pickupX1, float pickupX2, float pickupY1, 
 int CPacManPickupsHack::PillsEatenInRace;
 bool CPacManPickupsHack::bPMActive;
 CPacManPickupHack CPacManPickupsHack::aPMPickups[MAX_PACMAN_PICKUP];
-unsigned short scrambleModel;
-unsigned short raceModel;
+static unsigned short scrambleModel;
+static unsigned short raceModel;
 
 CVector aRacePoints1[MAX_PACMAN_PICKUP] =
 {
@@ -312,8 +311,7 @@ void CPacManPickupsHack::GeneratePMPickUps(CVector center, float radius, short c
 			aPMPickups[i].position.y = colpoint.point.y;
 			aPMPickups[i].position.z = colpoint.point.z + 0.7f;
 
-			void *place = CObject::operator new(0x194);
-			CObject *object = ::new (place)CObject(scrambleModel, true);
+			CObject *object = new CObject(scrambleModel, true);
 			if (object) {
 				object->field_16C = 2;
 				object->GetMatrix().SetRotate(0.0, 0.0, -1.5707964f);
@@ -346,8 +344,7 @@ void CPacManPickupsHack::GeneratePMPickUpsForRace(void)
 			aPMPickups[i].position.x = aRacePoints1[i].x;
 			aPMPickups[i].position.y = aRacePoints1[i].y;
 			aPMPickups[i].position.z = aRacePoints1[i].z;
-			void *place = CObject::operator new(0x194);
-			CObject *object = ::new (place)CObject(raceModel, true);
+			CObject *object = new CObject(raceModel, true);
 			if (object) {
 				object->field_16C = 2;
 				object->GetMatrix().SetRotate(0.0, 0.0, -1.5707964f);
@@ -669,7 +666,7 @@ eOpcodeResult WINAPI SET_PED_DENSITY(CScript *script)
 eOpcodeResult WINAPI IS_CAR_IN_AIR(CScript *script)
 {
 	script->Collect(1);
-	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	CAutomobile *vehicle = static_cast<CAutomobile *>(CPools::ms_pVehiclePool->GetAt(Params[0].nVar));
 	script->UpdateCompareFlag(vehicle->numberOfWheelsOnGround == 0);
 	return OR_CONTINUE;
 }
@@ -2065,7 +2062,7 @@ eOpcodeResult WINAPI SET_CAR_IGNORE_LEVEL_TRANSITIONS(CScript *script)
 eOpcodeResult WINAPI MAKE_CRAIGS_CAR_A_BIT_STRONGER(CScript *script)
 {
 	script->Collect(2);
-	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(Params[0].nVar);
+	CAutomobile *vehicle = static_cast<CAutomobile *>(CPools::ms_pVehiclePool->GetAt(Params[0].nVar));
 	vehicle->field_501 &= 0xDF;
 	if (Params[1].nVar) {
 		vehicle->field_501 |= 0x20;
@@ -2662,8 +2659,8 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 }
 
 #else if _III
-#pragma comment (lib, "..\\..\\III.VC.CLEO\\CLEO_SDK\\III.CLEO.lib")
-#include "..\\..\\III.VC.CLEO\\CLEO_SDK\\III.CLEO.h"
+#pragma comment (lib, "III.CLEO.lib")
+#include "III.CLEO.h"
 
 enum gameVersion{ V1_0, V1_1, VSTEAM, VUNKOWN = -1 };
 
