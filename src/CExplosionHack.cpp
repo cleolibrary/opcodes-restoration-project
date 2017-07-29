@@ -1,5 +1,4 @@
 #include "CExplosionHack.h"
-#include "vcclasses.h"
 
 bool CExplosionHack::TestForExplosionInArea(int explosionType, float x1, float x2, float y1, float y2, float z1, float z2)
 {
@@ -20,16 +19,11 @@ bool CExplosionHack::TestForExplosionInArea(int explosionType, float x1, float x
 		z1 = temp;
 	}
 	for (int i = 0; i < 0x30; i++) {
-		if (explosions[i].counter) {
-			if (explosions[i].type == explosionType) {
-				if (explosions[i].position.x >= x1 && explosions[i].position.x <= x2) {
-					if (explosions[i].position.y >= y1 && explosions[i].position.y <= y2) {
-						if (explosions[i].position.z >= z1 && explosions[i].position.z <= z2) {
-							return true;
-						}
-					}
-				}
-			}
+		if (explosions[i].counter && explosions[i].type == explosionType &&
+			explosions[i].position.x >= x1 && explosions[i].position.x <= x2 &&
+			explosions[i].position.y >= y1 && explosions[i].position.y <= y2 &&
+			explosions[i].position.z >= z1 && explosions[i].position.z <= z2) {
+			return true;
 		}
 	}
 	return false;

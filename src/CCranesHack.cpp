@@ -1,6 +1,5 @@
 #include "CCranesHack.h"
 #include <cmath>
-#include "vcclasses.h"
 
 bool CCranesHack::IsThisCarPickedUp(float positionX, float positionY, CVehicle *vehicle)
 {

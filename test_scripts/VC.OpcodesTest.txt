@@ -98,6 +98,7 @@ while true
     LINE = 0
     gosub @IS_CHAR_STILL_ALIVE
     gosub @IS_CAR_STILL_ALIVE
+    gosub @PRINT_SOON
     gosub @RETURN_TRUE
     gosub @RETURN_FALSE
     gosub @ADD_AMMO_TO_PLAYER
@@ -304,40 +305,44 @@ while true
     if
         0ADC: test_cheat "CADDY"
     then
-        018C: play_sound 1 at 0.0 0.0 0.0
-        01C3: mark_car_as_no_longer_needed SPAWN_CAR
-        00A6: destroy_car SPAWN_CAR
+        TEMP_VAR4 = #CADDY
         0054: store_player 0 position_to POSX POSY POSZ
-        0247: request_model #CADDY
-        038B: load_requested_models
-        00A5: SPAWN_CAR = create_car #CADDY at POSX POSY POSZ
-        0249: release_model #CADDY
+        gosub @SPAWN_VEHICLE
+        0055: put_player 0 at POSX POSY POSZ
     end
     if
         0ADC: test_cheat "DINGHY"
     then
-        018C: play_sound 1 at 0.0 0.0 0.0
-        01C3: mark_car_as_no_longer_needed SPAWN_CAR
-        00A6: destroy_car SPAWN_CAR
+        TEMP_VAR4 = #DINGHY
         0054: store_player 0 position_to POSX POSY POSZ
-        0247: request_model #DINGHY
-        038B: load_requested_models
-        00A5: SPAWN_CAR = create_car #DINGHY at POSX POSY POSZ
-        0249: release_model #DINGHY
+        gosub @SPAWN_VEHICLE
+        0055: put_player 0 at POSX POSY POSZ
     end
     if
         0ADC: test_cheat "HUNTER"
     then
-        018C: play_sound 1 at 0.0 0.0 0.0
-        01C3: mark_car_as_no_longer_needed SPAWN_CAR
-        00A6: destroy_car SPAWN_CAR
+        TEMP_VAR4 = #HUNTER
         0054: store_player 0 position_to POSX POSY POSZ
-        0247: request_model #HUNTER
-        038B: load_requested_models
-        00A5: SPAWN_CAR = create_car #HUNTER at POSX POSY POSZ
-        0249: release_model #HUNTER
+        gosub @SPAWN_VEHICLE
+        POSZ += 3.0
+        0055: put_player 0 at POSX POSY POSZ
     end
 end
+
+:SPAWN_VEHICLE
+018C: play_sound 1 at 0.0 0.0 0.0
+if
+    00DC:   player 0 in_car SPAWN_CAR
+then
+    012A: put_player 0 at POSX POSY POSZ and_remove_from_car
+end
+01C3: mark_car_as_no_longer_needed SPAWN_CAR
+00A6: destroy_car SPAWN_CAR
+0247: request_model TEMP_VAR4
+038B: load_requested_models
+00A5: SPAWN_CAR = create_car TEMP_VAR4 at POSX POSY POSZ
+0249: release_model TEMP_VAR4
+return
 
 :TEXT_STYLE
 05F9: TEMP_VAR = TEXTBG AND 0x1000
@@ -385,6 +390,22 @@ then
     else
         0608: show_text_position 10.0 LINE text "00AC: Spawned boat is dead"
     end
+end
+return
+
+:PRINT_SOON
+if
+    0ADC: test_cheat "PRINTSOON"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    00BE: text_clear_all
+    00BD: text_mediumpriority 'ADMIRAL' time 500 1
+    01E6: text_1number_mediumpriority 'HJSTATW' 1 time 500 1
+    02FE: text_2numbers_mediumpriority 'HJSTATW' 1 2 time 500 1
+    0301: text_3numbers_mediumpriority 'HJSTATW' 1 2 3 time 500 1
+    0304: text_4numbers_mediumpriority 'HJSTATW' 1 2 3 4 time 500 1
+    0307: text_5numbers_mediumpriority 'HJSTATW' 1 2 3 4 5 time 500 1
+    030A: text_6numbers_mediumpriority 'HJSTATW' 1 2 3 4 5 6 time 500 1
 end
 return
 
@@ -868,9 +889,9 @@ if
     0ADC: test_cheat "MESSAGEWAIT"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
-    00BC: text_highpriority 'ADMIRAL' 2500 ms 1
+    00BC: text_highpriority 'ADMIRAL' time 2500 1
     02A1: message_wait 2500 1
-    00BC: text_highpriority 'BENSON' 2500 ms 1
+    00BC: text_highpriority 'BENSON' time 2500 1
     02A1: message_wait 2500 1
 end
 return
@@ -1123,22 +1144,22 @@ if
     0ADC: test_cheat "PRINTNUM"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
-    02FC: text_2numbers 'HJSTATW' 1 2 500 ms 1
+    02FC: text_2numbers 'HJSTATW' 1 2 time 500 1
     wait 500
     018C: play_sound 1 at 0.0 0.0 0.0
-    0300: text_3numbers_highpriority 'HJSTATW' 1 2 3 500 ms 1
+    0300: text_3numbers_highpriority 'HJSTATW' 1 2 3 time 500 1
     wait 500
     018C: play_sound 1 at 0.0 0.0 0.0
-    0303: text_4numbers_highpriority 'HJSTATW' 1 2 3 4 500 ms 1
+    0303: text_4numbers_highpriority 'HJSTATW' 1 2 3 4 time 500 1
     wait 500
     018C: play_sound 1 at 0.0 0.0 0.0
-    0305: text_5numbers 'HJSTATW' 1 2 3 4 5 500 ms 1
+    0305: text_5numbers 'HJSTATW' 1 2 3 4 5 time 500 1
     wait 500
     018C: play_sound 1 at 0.0 0.0 0.0
-    0306: text_5numbers_highpriority 'HJSTATW' 1 2 3 4 5 500 ms 1
+    0306: text_5numbers_highpriority 'HJSTATW' 1 2 3 4 5 time 500 1
     wait 500
     018C: play_sound 1 at 0.0 0.0 0.0
-    0309: text_6numbers_highpriority 'HJSTATW' 1 2 3 4 5 6 500 ms 1
+    0309: text_6numbers_highpriority 'HJSTATW' 1 2 3 4 5 6 time 500 1
     wait 500
 end
 return

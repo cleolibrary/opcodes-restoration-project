@@ -1,6 +1,7 @@
 { VC only
 00A2:   actor 0@ alive
 00AC:   car 0@ alive
+00BD: text_mediumpriority 'ADMIRAL' time 1000 1
 00C5:   true
 00C6:   false
 00E2: get_player 0 key 14 state_to 0@
@@ -20,6 +21,7 @@
 0179:   actor 0@ touching_object 1@
 017B: set_actor 0@ weapon 17 ammo_to 100
 01C6: remove_car_from_mission_cleanup_list 0@
+01E6: text_1number_mediumpriority 'ADMIRAL' 0 time 1000 1
 01EE: activate_crane 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 01EF: deactivate_crane 0.0 0.0
 0218: text_1number_styled 'HJSTATW' 0 time 1000 style 6
@@ -70,12 +72,17 @@
 02F0: create_explosive_barrel_at 0.0 0.0 0.0
 02F1: create_explosive_barrel_at 0.0 0.0 0.0
 02FB: create_crusher_crane 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-02FC: text_2numbers 'ADMIRAL' 0 0 1000 ms 1
-0300: text_3numbers_highpriority 'ADMIRAL' 0 0 0 1000 ms 1
-0303: text_4numbers_highpriority 'ADMIRAL' 0 0 0 0 1000 ms 1
-0305: text_5numbers 'ADMIRAL' 0 0 0 0 0 1000 ms 1
-0306: text_5numbers_highpriority 'ADMIRAL' 0 0 0 0 0 1000 ms 1
-0309: text_6numbers_highpriority 'ADMIRAL' 0 0 0 0 0 0 1000 ms 1
+02FC: text_2numbers_lowpriority 'ADMIRAL' 0 0 time 1000 1
+02FE: text_2numbers_mediumpriority 'ADMIRAL' 0 0 time 1000 1
+0300: text_3numbers_highpriority 'ADMIRAL' 0 0 0 time 1000 1
+0301: text_3numbers_mediumpriority 'ADMIRAL' 0 0 0 time 1000 1
+0303: text_4numbers_highpriority 'ADMIRAL' 0 0 0 0 time 1000 1
+0304: text_4numbers_mediumpriority 'ADMIRAL' 0 0 0 0 time 1000 1
+0305: text_5numbers_lowpriority 'ADMIRAL' 0 0 0 0 0 time 1000 1
+0306: text_5numbers_highpriority 'ADMIRAL' 0 0 0 0 0 time 1000 1
+0307: text_5numbers_mediumpriority 'ADMIRAL' 0 0 0 0 0 time 1000 1
+0309: text_6numbers_highpriority 'ADMIRAL' 0 0 0 0 0 0 time 1000 1
+030A: text_6numbers_mediumpriority 'ADMIRAL' 0 0 0 0 0 0 time 1000 1
 031B:   car 0@ primary_color 0
 031C:   car 0@ secondary_color 0
 032D: car 0@ block 1@
@@ -92,6 +99,7 @@
 036F: text_4numbers_styled 'HJSTATW' 0 0 0 0 time 1000 style 6
 0370: text_5numbers_styled 'HJSTATW' 0 0 0 0 0 time 1000 style 6
 0371: text_6numbers_styled 'HJSTATW' 0 0 0 0 0 0 time 1000 style 6
+0375: text_1string_lowpriority 'ADMIRAL' 'AMBULAN' time 1000 1
 0378: set_phone 0@ 2messages_repeated 'ADMIRAL' 'AMBULAN'
 0379: set_phone 0@ 2messages 'ADMIRAL' 'AMBULAN'
 037A: set_phone 0@ 3messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL'
@@ -99,6 +107,7 @@
 037C: set_phone 0@ 4messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE'
 037D: set_phone 0@ 4messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE'
 037F: give_player_detonator
+0385: text_1string_mediumpriority 'ADMIRAL' 'AMBULAN' time 1000 1
 0386: set_phone 0@ 5messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
 0387: set_phone 0@ 5messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
 0388: set_phone 0@ 6messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'

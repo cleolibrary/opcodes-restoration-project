@@ -21,6 +21,7 @@
 #include "VC.CLEO.h"
 #include "CCranesHack.h"
 #include "CExplosionHack.h"
+#include "CMessagesHack.h"
 #include "CPacManPickupsHack.h"
 #include "CPhoneInfoHack.h"
 #include "CProjectileInfoHack.h"
@@ -39,8 +40,7 @@ void(__cdecl *CallRender)(void);
 static auto RpAnimBlendClumpGetFirstAssociation = (DWORD(__cdecl *)(unsigned long))vcversion::AdjustOffset(0x00402E20);
 static auto WindowHandler = (void(__cdecl *)(int, int))vcversion::AdjustOffset(0x00602EE0);
 static auto phoneDisplayMessage = (BYTE *)vcversion::AdjustOffset(0x007030E4);
-static auto currentPhone = (unsigned long *)vcversion::AdjustOffset(0x007030E8);
-static auto numberedText = (wchar_t *)vcversion::AdjustOffset(0x00821068);
+static auto currentPhone = (CPhoneInfo::CPhone **)vcversion::AdjustOffset(0x007030E8);
 static auto cpedtype = (uintptr_t)vcversion::AdjustOffset(0x00A0DA64);
 
 static short CardStack[6 * 52];
@@ -61,6 +61,16 @@ eOpcodeResult WINAPI IS_CAR_STILL_ALIVE(CScript *script)
 	script->Collect(1);
 	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(ScriptParams[0].int32);
 	script->UpdateCompareFlag((vehicle && (vehicle->status >> 3) != 5) && (vehicle->type == 1 || !(vehicle->field_11A & 0x10)));
+	return OR_CONTINUE;
+}
+
+/* 00BD */
+eOpcodeResult WINAPI PRINT_SOON(CScript *script)
+{
+	char gxt[8];
+	script->ReadShortString(gxt);
+	script->Collect(2);
+	CMessagesHack::AddMessageSoon(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, ScriptParams[1].uint16);
 	return OR_CONTINUE;
 }
 
@@ -258,6 +268,16 @@ eOpcodeResult WINAPI DONT_REMOVE_CAR(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 01E6 */
+eOpcodeResult WINAPI PRINT_WITH_NUMBER_SOON(CScript *script)
+{
+	char gxt[8];
+	script->ReadShortString(gxt);
+	script->Collect(3);
+	CMessagesHack::AddMessageSoonWithNumber(VCGlobals::TheText.Get(gxt), ScriptParams[1].uint32, ScriptParams[2].uint16, ScriptParams[0].int32, -1, -1, -1, -1, -1);
+	return OR_CONTINUE;
+}
+
 /* 01EE */
 eOpcodeResult WINAPI ACTIVATE_CRANE(CScript *script)
 {
@@ -292,8 +312,8 @@ eOpcodeResult WINAPI PRINT_WITH_NUMBER_BIG_Q(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(3);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, -1, -1, -1, -1, -1, numberedText);
-	CMessages::AddBigMessageQ(numberedText, ScriptParams[1].uint32, static_cast<unsigned short>(ScriptParams[2].int32 - 1));
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, -1, -1, -1, -1, -1, VCGlobals::gUString);
+	CMessages::AddBigMessageQ(VCGlobals::gUString, ScriptParams[1].uint32, static_cast<unsigned short>(ScriptParams[2].int32 - 1));
 	return OR_CONTINUE;
 }
 
@@ -368,7 +388,7 @@ eOpcodeResult WINAPI DRAW_SHADOW(CScript *script)
 	}
 	CShadows::StoreShadowToBeRendered(type, texture, &pos,
 		-sin(ScriptParams[4].float32) * ScriptParams[5].float32, cos(ScriptParams[4].float32) * ScriptParams[5].float32, cos(ScriptParams[4].float32) * ScriptParams[5].float32, sin(ScriptParams[4].float32) * ScriptParams[5].float32,
-		static_cast<short>(ScriptParams[6].int32), static_cast<unsigned char>(ScriptParams[7].int32), static_cast<unsigned char>(ScriptParams[8].int32), static_cast<unsigned char>(ScriptParams[9].int32), 15.0, false, 1.0, 0, false);
+		ScriptParams[6].int16, ScriptParams[7].uint8, ScriptParams[8].uint8, ScriptParams[9].uint8, 15.0, false, 1.0, 0, false);
 	return OR_CONTINUE;
 }
 
@@ -721,7 +741,7 @@ eOpcodeResult WINAPI START_PACMAN_SCRAMBLE(CScript *script)
 	if (pos.z <= -100.0) {
 		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 	}
-	CPacManPickupsHack::GeneratePMPickUps(pos, ScriptParams[3].float32, (short)ScriptParams[4].int32);
+	CPacManPickupsHack::GeneratePMPickUps(pos, ScriptParams[3].float32, ScriptParams[4].int16);
 	return OR_CONTINUE;
 }
 
@@ -901,6 +921,16 @@ eOpcodeResult WINAPI PRINT_WITH_2_NUMBERS(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 02FE */
+eOpcodeResult WINAPI PRINT_WITH_2_NUMBERS_SOON(CScript *script)
+{
+	char gxt[8];
+	script->ReadShortString(gxt);
+	script->Collect(4);
+	CMessagesHack::AddMessageSoonWithNumber(VCGlobals::TheText.Get(gxt), ScriptParams[2].uint32, ScriptParams[3].uint16, ScriptParams[0].int32, ScriptParams[1].int32, -1, -1, -1, -1);
+	return OR_CONTINUE;
+}
+
 /* 0300 */
 eOpcodeResult WINAPI PRINT_WITH_3_NUMBERS_NOW(CScript *script)
 {
@@ -911,6 +941,16 @@ eOpcodeResult WINAPI PRINT_WITH_3_NUMBERS_NOW(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 0301 */
+eOpcodeResult WINAPI PRINT_WITH_3_NUMBERS_SOON(CScript *script)
+{
+	char gxt[8];
+	script->ReadShortString(gxt);
+	script->Collect(5);
+	CMessagesHack::AddMessageSoonWithNumber(VCGlobals::TheText.Get(gxt), ScriptParams[3].uint32, ScriptParams[4].uint16, ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, -1, -1, -1);
+	return OR_CONTINUE;
+}
+
 /* 0303 */
 eOpcodeResult WINAPI PRINT_WITH_4_NUMBERS_NOW(CScript *script)
 {
@@ -918,6 +958,16 @@ eOpcodeResult WINAPI PRINT_WITH_4_NUMBERS_NOW(CScript *script)
 	script->ReadShortString(gxt);
 	script->Collect(6);
 	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), ScriptParams[4].uint32, ScriptParams[5].uint16, ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, ScriptParams[3].int32, -1, -1);
+	return OR_CONTINUE;
+}
+
+/* 0304 */
+eOpcodeResult WINAPI PRINT_WITH_4_NUMBERS_SOON(CScript *script)
+{
+	char gxt[8];
+	script->ReadShortString(gxt);
+	script->Collect(6);
+	CMessagesHack::AddMessageSoonWithNumber(VCGlobals::TheText.Get(gxt), ScriptParams[4].uint32, ScriptParams[5].uint16, ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, ScriptParams[3].int32, -1, -1);
 	return OR_CONTINUE;
 }
 
@@ -941,6 +991,16 @@ eOpcodeResult WINAPI PRINT_WITH_5_NUMBERS_NOW(CScript *script)
 	return OR_CONTINUE;
 }
 
+/* 0307 */
+eOpcodeResult WINAPI PRINT_WITH_5_NUMBERS_SOON(CScript *script)
+{
+	char gxt[8];
+	script->ReadShortString(gxt);
+	script->Collect(7);
+	CMessagesHack::AddMessageSoonWithNumber(VCGlobals::TheText.Get(gxt), ScriptParams[5].uint32, ScriptParams[6].uint16, ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, ScriptParams[3].int32, ScriptParams[4].int32, -1);
+	return OR_CONTINUE;
+}
+
 /* 0309 */
 eOpcodeResult WINAPI PRINT_WITH_6_NUMBERS_NOW(CScript *script)
 {
@@ -948,6 +1008,16 @@ eOpcodeResult WINAPI PRINT_WITH_6_NUMBERS_NOW(CScript *script)
 	script->ReadShortString(gxt);
 	script->Collect(8);
 	CMessages::AddMessageJumpQWithNumber(VCGlobals::TheText.Get(gxt), ScriptParams[6].uint32, ScriptParams[7].uint16, ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, ScriptParams[3].int32, ScriptParams[4].int32, ScriptParams[5].int32);
+	return OR_CONTINUE;
+}
+
+/* 030A */
+eOpcodeResult WINAPI PRINT_WITH_6_NUMBERS_SOON(CScript *script)
+{
+	char gxt[8];
+	script->ReadShortString(gxt);
+	script->Collect(8);
+	CMessagesHack::AddMessageSoonWithNumber(VCGlobals::TheText.Get(gxt), ScriptParams[6].uint32, ScriptParams[7].uint16, ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, ScriptParams[3].int32, ScriptParams[4].int32, ScriptParams[5].int32);
 	return OR_CONTINUE;
 }
 
@@ -1108,8 +1178,8 @@ eOpcodeResult WINAPI PRINT_WITH_3_NUMBERS_BIG(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(5);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, -1, -1, -1, numberedText);
-	CMessages::AddBigMessage(numberedText, ScriptParams[3].uint32, static_cast<unsigned short>(ScriptParams[4].int32 - 1));
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, -1, -1, -1, VCGlobals::gUString);
+	CMessages::AddBigMessage(VCGlobals::gUString, ScriptParams[3].uint32, static_cast<unsigned short>(ScriptParams[4].int32 - 1));
 	return OR_CONTINUE;
 }
 
@@ -1119,8 +1189,8 @@ eOpcodeResult WINAPI PRINT_WITH_4_NUMBERS_BIG(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(6);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, ScriptParams[3].int32, -1, -1, numberedText);
-	CMessages::AddBigMessage(numberedText, ScriptParams[4].uint32, static_cast<unsigned short>(ScriptParams[5].int32 - 1));
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, ScriptParams[3].int32, -1, -1, VCGlobals::gUString);
+	CMessages::AddBigMessage(VCGlobals::gUString, ScriptParams[4].uint32, static_cast<unsigned short>(ScriptParams[5].int32 - 1));
 	return OR_CONTINUE;
 }
 
@@ -1130,8 +1200,8 @@ eOpcodeResult WINAPI PRINT_WITH_5_NUMBERS_BIG(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(7);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, ScriptParams[3].int32, ScriptParams[4].int32, -1, numberedText);
-	CMessages::AddBigMessage(numberedText, ScriptParams[5].uint32, static_cast<unsigned short>(ScriptParams[6].int32 - 1));
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, ScriptParams[3].int32, ScriptParams[4].int32, -1, VCGlobals::gUString);
+	CMessages::AddBigMessage(VCGlobals::gUString, ScriptParams[5].uint32, static_cast<unsigned short>(ScriptParams[6].int32 - 1));
 	return OR_CONTINUE;
 }
 
@@ -1141,8 +1211,22 @@ eOpcodeResult WINAPI PRINT_WITH_6_NUMBERS_BIG(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(8);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, ScriptParams[3].int32, ScriptParams[4].int32, ScriptParams[5].int32, numberedText);
-	CMessages::AddBigMessage(numberedText, ScriptParams[6].uint32, static_cast<unsigned short>(ScriptParams[7].int32 - 1));
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, ScriptParams[1].int32, ScriptParams[2].int32, ScriptParams[3].int32, ScriptParams[4].int32, ScriptParams[5].int32, VCGlobals::gUString);
+	CMessages::AddBigMessage(VCGlobals::gUString, ScriptParams[6].uint32, static_cast<unsigned short>(ScriptParams[7].int32 - 1));
+	return OR_CONTINUE;
+}
+
+/* 0375 */
+eOpcodeResult WINAPI PRINT_STRING_IN_STRING(CScript *script)
+{
+	char gxt[8];
+	wchar_t *string[2];
+	script->ReadShortString(gxt);
+	string[0] = VCGlobals::TheText.Get(gxt);
+	script->ReadShortString(gxt);
+	string[1] = VCGlobals::TheText.Get(gxt);
+	script->Collect(2);
+	CMessagesHack::AddMessageWithString(string[0], ScriptParams[0].uint32, ScriptParams[1].uint16, string[1]);
 	return OR_CONTINUE;
 }
 
@@ -1250,6 +1334,20 @@ eOpcodeResult WINAPI GIVE_PLAYER_DETONATOR(CScript *)
 	VCGlobals::FindPlayerPed()->GiveWeapon(34, 1, 1);
 	int slot = *(int *)(CWeaponInfo::GetWeaponInfo(34) + 0x60);
 	VCGlobals::FindPlayerPed()->weapons[slot].state = 0;
+	return OR_CONTINUE;
+}
+
+/* 0385 */
+eOpcodeResult WINAPI PRINT_STRING_IN_STRING_SOON(CScript *script)
+{
+	char gxt[8];
+	wchar_t *string[2];
+	script->ReadShortString(gxt);
+	string[0] = VCGlobals::TheText.Get(gxt);
+	script->ReadShortString(gxt);
+	string[1] = VCGlobals::TheText.Get(gxt);
+	script->Collect(2);
+	CMessagesHack::AddMessageSoonWithString(string[0], ScriptParams[0].uint32, ScriptParams[1].uint16, string[1]);
 	return OR_CONTINUE;
 }
 
@@ -1369,7 +1467,7 @@ eOpcodeResult WINAPI CHANGE_GARAGE_TYPE_WITH_CAR_MODEL(CScript *script)
 eOpcodeResult WINAPI IS_PHONE_DISPLAYING_MESSAGE(CScript *script)
 {
 	script->Collect(1);
-	script->UpdateCompareFlag((unsigned long)&VCGlobals::gPhoneInfo.phones[ScriptParams[0].int32] == *currentPhone);
+	script->UpdateCompareFlag(&VCGlobals::gPhoneInfo.phones[ScriptParams[0].int32] == *currentPhone);
 	return OR_CONTINUE;
 }
 
@@ -1479,8 +1577,9 @@ eOpcodeResult WINAPI GET_AMMO_IN_CHAR_WEAPON(CScript *script)
 	CPed *ped = CPools::ms_pPedPool->GetAt(ScriptParams[0].int32);
 	ScriptParams[0].int32 = 0;
 	for (int i = 0; i < 10; i++) {
-		if (ped->weapons[i].type == ScriptParams[1].uint32) {
-			ScriptParams[0].uint32 = ped->weapons[i].ammo;
+		if (ped->weapons[i].type == ScriptParams[1].int32) {
+			ScriptParams[0].int32 = ped->weapons[i].ammo;
+			break;
 		}
 	}
 	script->Store(1);
@@ -1813,8 +1912,8 @@ eOpcodeResult WINAPI PRINT_HELP_WITH_NUMBER(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(1);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, 0, 0, 0, 0, 0, numberedText);
-	CHud::SetHelpMessage(numberedText, false, false);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, 0, 0, 0, 0, 0, VCGlobals::gUString);
+	CHud::SetHelpMessage(VCGlobals::gUString, false, false);
 	return OR_CONTINUE;
 }
 
@@ -1824,8 +1923,8 @@ eOpcodeResult WINAPI PRINT_HELP_FOREVER_WITH_NUMBER(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(1);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, 0, 0, 0, 0, 0, numberedText);
-	CHud::SetHelpMessage(numberedText, false, true);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, 0, 0, 0, 0, 0, VCGlobals::gUString);
+	CHud::SetHelpMessage(VCGlobals::gUString, false, true);
 	return OR_CONTINUE;
 }
 
@@ -1855,7 +1954,7 @@ eOpcodeResult WINAPI ADD_MONEY_SPENT_ON_AUTO_PAINTING(CScript *script)
 eOpcodeResult WINAPI GET_PLAYER_DRUNKENNESS(CScript *script)
 {
 	script->Collect(1);
-	ScriptParams[0].int32 = (int)CWorld::Players[ScriptParams[0].int32].playerEntity->drunkenness;
+	ScriptParams[0].uint8 = CWorld::Players[ScriptParams[0].int32].playerEntity->drunkenness;
 	script->Store(1);
 	return OR_CONTINUE;
 }
@@ -2022,6 +2121,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 
 		Opcodes::RegisterOpcode(0x0A2, IS_CHAR_STILL_ALIVE);
 		Opcodes::RegisterOpcode(0x0AC, IS_CAR_STILL_ALIVE);
+		Opcodes::RegisterOpcode(0x0BD, PRINT_SOON);
 		Opcodes::RegisterOpcode(0x0C5, RETURN_TRUE);
 		Opcodes::RegisterOpcode(0x0C6, RETURN_FALSE);
 		Opcodes::RegisterOpcode(0x0E2, GET_PAD_STATE);
@@ -2041,6 +2141,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x179, IS_CHAR_TOUCHING_OBJECT);
 		Opcodes::RegisterOpcode(0x17B, SET_CHAR_AMMO);
 		Opcodes::RegisterOpcode(0x1C6, DONT_REMOVE_CAR);
+		Opcodes::RegisterOpcode(0x1E6, PRINT_WITH_NUMBER_SOON);
 		Opcodes::RegisterOpcode(0x1EE, ACTIVATE_CRANE);
 		Opcodes::RegisterOpcode(0x1EF, DEACTIVATE_CRANE);
 		Opcodes::RegisterOpcode(0x218, PRINT_WITH_NUMBER_BIG_Q);
@@ -2092,11 +2193,16 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x2F1, DROP_NAUTICAL_MINE);
 		Opcodes::RegisterOpcode(0x2FB, ACTIVATE_CRUSHER_CRANE);
 		Opcodes::RegisterOpcode(0x2FC, PRINT_WITH_2_NUMBERS);
+		Opcodes::RegisterOpcode(0x2FE, PRINT_WITH_2_NUMBERS_SOON);
 		Opcodes::RegisterOpcode(0x300, PRINT_WITH_3_NUMBERS_NOW);
+		Opcodes::RegisterOpcode(0x301, PRINT_WITH_3_NUMBERS_SOON);
 		Opcodes::RegisterOpcode(0x303, PRINT_WITH_4_NUMBERS_NOW);
+		Opcodes::RegisterOpcode(0x304, PRINT_WITH_4_NUMBERS_SOON);
 		Opcodes::RegisterOpcode(0x305, PRINT_WITH_5_NUMBERS);
 		Opcodes::RegisterOpcode(0x306, PRINT_WITH_5_NUMBERS_NOW);
+		Opcodes::RegisterOpcode(0x307, PRINT_WITH_5_NUMBERS_SOON);
 		Opcodes::RegisterOpcode(0x309, PRINT_WITH_6_NUMBERS_NOW);
+		Opcodes::RegisterOpcode(0x30A, PRINT_WITH_6_NUMBERS_SOON);
 		Opcodes::RegisterOpcode(0x31B, IS_FIRST_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x31C, IS_SECOND_CAR_COLOUR);
 		Opcodes::RegisterOpcode(0x32D, SET_CAR_BLOCK_CAR);
@@ -2113,6 +2219,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x36F, PRINT_WITH_4_NUMBERS_BIG);
 		Opcodes::RegisterOpcode(0x370, PRINT_WITH_5_NUMBERS_BIG);
 		Opcodes::RegisterOpcode(0x371, PRINT_WITH_6_NUMBERS_BIG);
+		Opcodes::RegisterOpcode(0x375, PRINT_STRING_IN_STRING);
 		Opcodes::RegisterOpcode(0x378, SET_2_REPEATED_PHONE_MESSAGES);
 		Opcodes::RegisterOpcode(0x379, SET_2_PHONE_MESSAGES);
 		Opcodes::RegisterOpcode(0x37A, SET_3_REPEATED_PHONE_MESSAGES);
@@ -2120,6 +2227,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x37C, SET_4_REPEATED_PHONE_MESSAGES);
 		Opcodes::RegisterOpcode(0x37D, SET_4_PHONE_MESSAGES);
 		Opcodes::RegisterOpcode(0x37F, GIVE_PLAYER_DETONATOR);
+		Opcodes::RegisterOpcode(0x385, PRINT_STRING_IN_STRING_SOON);
 		Opcodes::RegisterOpcode(0x386, SET_5_REPEATED_PHONE_MESSAGES);
 		Opcodes::RegisterOpcode(0x387, SET_5_PHONE_MESSAGES);
 		Opcodes::RegisterOpcode(0x388, SET_6_REPEATED_PHONE_MESSAGES);

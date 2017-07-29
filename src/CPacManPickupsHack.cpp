@@ -1,7 +1,6 @@
 #include "CPacManPickupsHack.h"
 #include <cmath>
 #include "Globals.h"
-#include "vcclasses.h"
 #include "vcversion.h"
 
 extern void(__cdecl *CallInit)(void);
