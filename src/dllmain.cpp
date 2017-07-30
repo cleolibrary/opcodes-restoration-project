@@ -32,6 +32,7 @@
 
 using ::VCGlobals::ScriptParams;
 using ::VCGlobals::ScriptParameter;
+using ::VCGlobals::FindPlayerPed;
 
 void(__cdecl *CallInit)(void);
 void(__cdecl *CallUpdate)(void);
@@ -45,7 +46,17 @@ static auto cpedtype = (uintptr_t)vcversion::AdjustOffset(0x00A0DA64);
 
 static short CardStack[6 * 52];
 static short CardStackPosition;
+#elif _III
+#include "III.CLEO.h"
+#include "iiiclasses.h"
+#include "Globals.h"
 
+using ::IIIGlobals::ScriptParams;
+using ::IIIGlobals::ScriptParameter;
+using ::IIIGlobals::FindPlayerPed;
+#endif
+
+#if _VC
 /* 00A2 */
 eOpcodeResult WINAPI IS_CHAR_STILL_ALIVE(CScript *script)
 {
@@ -104,6 +115,7 @@ eOpcodeResult WINAPI ADD_AMMO_TO_PLAYER(CScript *script)
 	CWorld::Players[ScriptParams[0].int32].playerEntity->GrantAmmo(ScriptParams[1].int32, ScriptParams[2].uint32);
 	return OR_CONTINUE;
 }
+#endif
 
 /* 0116 */
 eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script)
@@ -113,6 +125,7 @@ eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script)
 	return OR_CONTINUE;
 }
 
+#if _VC
 /* 0130 */
 eOpcodeResult WINAPI HAS_PLAYER_BEEN_ARRESTED(CScript *script)
 {
@@ -454,7 +467,7 @@ eOpcodeResult WINAPI ARM_CAR_WITH_BOMB(CScript *script)
 	script->Collect(2);
 	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(ScriptParams[0].int32);
 	vehicle->bombState = (vehicle->bombState & 0xF8) | (static_cast<unsigned char>(ScriptParams[1].int32) & 7);
-	vehicle->bombOwner = VCGlobals::FindPlayerPed();
+	vehicle->bombOwner = FindPlayerPed();
 	return OR_CONTINUE;
 }
 
@@ -677,19 +690,20 @@ eOpcodeResult WINAPI DEACTIVATE_GARAGE(CScript *script)
 eOpcodeResult WINAPI SET_SWAT_REQUIRED(CScript *script)
 {
 	script->Collect(1);
-	CPlayerPed *player = VCGlobals::FindPlayerPed();
+	CPlayerPed *player = FindPlayerPed();
 	player->wanted->activity &= 0xFB;
 	if (ScriptParams[0].int32) {
 		player->wanted->activity |= 4;
 	}
 	return OR_CONTINUE;
 }
+#endif
 
 /* 02BD */
 eOpcodeResult WINAPI SET_FBI_REQUIRED(CScript *script)
 {
 	script->Collect(1);
-	CPlayerPed *player = VCGlobals::FindPlayerPed();
+	CPlayerPed *player = FindPlayerPed();
 	player->wanted->activity &= 0xF7;
 	if (ScriptParams[0].int32) {
 		player->wanted->activity |= 8;
@@ -701,7 +715,7 @@ eOpcodeResult WINAPI SET_FBI_REQUIRED(CScript *script)
 eOpcodeResult WINAPI SET_ARMY_REQUIRED(CScript *script)
 {
 	script->Collect(1);
-	CPlayerPed *player = VCGlobals::FindPlayerPed();
+	CPlayerPed *player = FindPlayerPed();
 	player->wanted->activity &= 0xEF;
 	if (ScriptParams[0].int32) {
 		player->wanted->activity |= 16;
@@ -709,6 +723,7 @@ eOpcodeResult WINAPI SET_ARMY_REQUIRED(CScript *script)
 	return OR_CONTINUE;
 }
 
+#if _VC
 /* 02C3 */
 eOpcodeResult WINAPI START_PACMAN_RACE(CScript *script)
 {
@@ -1331,9 +1346,9 @@ eOpcodeResult WINAPI GIVE_PLAYER_DETONATOR(CScript *)
 {
 	CStreaming::RequestModel(291, 1);
 	CStreaming::LoadAllRequestedModels(false);
-	VCGlobals::FindPlayerPed()->GiveWeapon(34, 1, 1);
+	FindPlayerPed()->GiveWeapon(34, 1, 1);
 	int slot = *(int *)(CWeaponInfo::GetWeaponInfo(34) + 0x60);
-	VCGlobals::FindPlayerPed()->weapons[slot].state = 0;
+	FindPlayerPed()->weapons[slot].state = 0;
 	return OR_CONTINUE;
 }
 
@@ -1897,6 +1912,7 @@ eOpcodeResult WINAPI GET_NEAREST_TYRE_TO_POINT(CScript *script)
 	script->Store(1);
 	return OR_CONTINUE;
 }
+#endif
 
 /* 050F */
 eOpcodeResult WINAPI GET_MAX_WANTED_LEVEL(CScript *script)
@@ -1906,13 +1922,14 @@ eOpcodeResult WINAPI GET_MAX_WANTED_LEVEL(CScript *script)
 	return OR_CONTINUE;
 }
 
+#if _VC
 /* 0511 */
 eOpcodeResult WINAPI PRINT_HELP_WITH_NUMBER(CScript *script)
 {
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(1);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, 0, 0, 0, 0, 0, VCGlobals::gUString);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, -1, -1, -1, -1, -1, VCGlobals::gUString);
 	CHud::SetHelpMessage(VCGlobals::gUString, false, false);
 	return OR_CONTINUE;
 }
@@ -1923,7 +1940,7 @@ eOpcodeResult WINAPI PRINT_HELP_FOREVER_WITH_NUMBER(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(1);
-	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, 0, 0, 0, 0, 0, VCGlobals::gUString);
+	CMessages::InsertNumberInString(VCGlobals::TheText.Get(gxt), ScriptParams[0].int32, -1, -1, -1, -1, -1, VCGlobals::gUString);
 	CHud::SetHelpMessage(VCGlobals::gUString, false, true);
 	return OR_CONTINUE;
 }
@@ -2085,10 +2102,8 @@ eOpcodeResult WINAPI FETCH_NEXT_CARD(CScript *script)
 
 BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 {
-	if (reason == DLL_PROCESS_ATTACH)
-	{
-		if (CLEO_GetVersion() < CLEO_VERSION)
-		{
+	if (reason == DLL_PROCESS_ATTACH) {
+		if (CLEO_GetVersion() < CLEO_VERSION) {
 			MessageBox(HWND_DESKTOP, TEXT("An incorrect version of CLEO was loaded."), TEXT("VC.Opcodes.cleo"), MB_ICONERROR);
 			return FALSE;
 		}
@@ -2295,108 +2310,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 	return TRUE;
 }
 
-#else if _III
-#include "III.CLEO.h"
-
-enum gameVersion{ V1_0, V1_1, VSTEAM, VUNKOWN = -1 };
-
-class GtaGame
-{
-public:
-	gameVersion version;
-	GtaGame();
-};
-
-GtaGame game;
-tScriptVar *Params;
-
-uintptr_t(__thiscall *VehiclePoolGetStruct)(void *, int); // cpool_cvehicle_cautomobile::getat
-uintptr_t(__thiscall *PedPoolGetStruct)(void *, int); // cpool_cped_cplayerped::getat
-BYTE(__thiscall *GetHasCollidedWith)(DWORD, uintptr_t); // cphysical::gethascollidedwith
-DWORD(__cdecl *FindPlayerPed)(void); // findplayerped
-void(__cdecl *SetHelpMessage)(wchar_t *, bool); // chud::sethelpmessage
-void(__cdecl *InsertNumberInString)(wchar_t *, int, int, int, int, int, int, wchar_t *); // cmessages::insertnumberinstring
-wchar_t *(__thiscall *GetText)(uintptr_t, char *); // ctext::get
-DWORD *maxWantedLevel = NULL;
-wchar_t *numberedText = NULL;
-void **pedPool = NULL;
-uintptr_t *playerPedPool = NULL;
-uintptr_t *playerPedState = NULL;
-uintptr_t ctext = NULL;
-void **carPool = NULL;
-
-GtaGame::GtaGame()
-{
-	version = VUNKOWN;
-	switch ((*(unsigned int *)0x61C11C)) { // get version signature
-	case 0x598B80:
-		version = V1_0;
-		VehiclePoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x43EAF0;
-		PedPoolGetStruct = (uintptr_t(__thiscall *)(void *, int))0x43EB30;
-		GetHasCollidedWith = (BYTE(__thiscall *)(DWORD, uintptr_t))0x497240;
-		FindPlayerPed = (DWORD(__cdecl *)(void))0x4A1150;
-		SetHelpMessage = (void(__cdecl *)(wchar_t *, bool))0x5051E0;
-		InsertNumberInString = (void(__cdecl *)(wchar_t *, int, int, int, int, int, int, wchar_t *))0x52A1A0;
-		GetText = (wchar_t *(__thiscall *)(uintptr_t, char *))0x52C5A0;
-		maxWantedLevel = (DWORD *)0x5F7714;
-		numberedText = (wchar_t *)0x74B018;
-		pedPool = (void **)0x8F2C60;
-		playerPedPool = (uintptr_t *)0x9412F0;
-		playerPedState = (uintptr_t *)0x9413C8;
-		ctext = 0x941520;
-		carPool = (void **)0x9430DC;
-	case 0x598E40:
-		version = V1_1;
-	case 0x646E6957:
-		version = VSTEAM;
-	}
-}
-
-/* 0116 */
-eOpcodeResult WINAPI IS_PLAYER_STILL_ALIVE(CScript *script)
-{
-	script->Collect(1);
-	script->UpdateCompareFlag(playerPedState[0x4F * Params[0].nVar] != 1);
-	return OR_CONTINUE;
-}
-
-/* 02BD */
-eOpcodeResult WINAPI SET_FBI_REQUIRED(CScript *script)
-{
-	script->Collect(1);
-	DWORD player = FindPlayerPed();
-	DWORD police = *(DWORD *)(player + 0x53C);
-	BYTE fbi = *(BYTE *)(police + 0x16);
-	fbi &= 0xF7;
-	if (Params[0].nVar) {
-		fbi |= 8;
-	}
-	*(BYTE *)(police + 0x16) = fbi;
-	return OR_CONTINUE;
-}
-
-/* 02BE */
-eOpcodeResult WINAPI SET_ARMY_REQUIRED(CScript *script)
-{
-	script->Collect(1);
-	DWORD player = FindPlayerPed();
-	DWORD police = *(DWORD *)(player + 0x53C);
-	BYTE army = *(BYTE *)(police + 0x16);
-	army &= 0xEF;
-	if (Params[0].nVar) {
-		army |= 16;
-	}
-	*(BYTE *)(police + 0x16) = army;
-	return OR_CONTINUE;
-}
-
-/* 050F */
-eOpcodeResult WINAPI GET_MAX_WANTED_LEVEL(CScript *script)
-{
-	Params[0].nVar = *maxWantedLevel;
-	script->Store(1);
-	return OR_CONTINUE;
-}
+#elif _III
 
 /* 0511 */
 eOpcodeResult WINAPI PRINT_HELP_WITH_NUMBER(CScript *script)
@@ -2404,8 +2318,8 @@ eOpcodeResult WINAPI PRINT_HELP_WITH_NUMBER(CScript *script)
 	char gxt[8];
 	script->ReadShortString(gxt);
 	script->Collect(1);
-	InsertNumberInString(GetText(ctext, gxt), Params[0].nVar, 0, 0, 0, 0, 0, numberedText);
-	SetHelpMessage(numberedText, false);
+	CMessages::InsertNumberInString(IIIGlobals::TheText.Get(gxt), ScriptParams[0].int32, -1, -1, -1, -1, -1, IIIGlobals::gUString);
+	CHud::SetHelpMessage(IIIGlobals::gUString, false);
 	return OR_CONTINUE;
 }
 
@@ -2413,15 +2327,13 @@ eOpcodeResult WINAPI PRINT_HELP_WITH_NUMBER(CScript *script)
 eOpcodeResult WINAPI IS_PLAYER_TOUCHING_VEHICLE(CScript *script)
 {
 	script->Collect(2);
-	DWORD source = playerPedPool[0x4F * Params[0].nVar];
-	uintptr_t target = VehiclePoolGetStruct(*carPool, Params[1].nVar);
-	if (*(BYTE *)(source + 0x314)) {
-		uintptr_t car = *(uintptr_t *)(source + 0x310);
-		if (car != NULL) {
-			source = car;
-		}
+	CPlayerPed *player = CWorld::Players[ScriptParams[0].int32].playerEntity;
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(ScriptParams[1].int32);
+	CPhysical *source = player;
+	if (player->isInAnyVehicle && player->vehicle) {
+		source = player->vehicle;
 	}
-	script->UpdateCompareFlag(GetHasCollidedWith(source, target) != 0);
+	script->UpdateCompareFlag(source->GetHasCollidedWith(vehicle));
 	return OR_CONTINUE;
 }
 
@@ -2429,29 +2341,24 @@ eOpcodeResult WINAPI IS_PLAYER_TOUCHING_VEHICLE(CScript *script)
 eOpcodeResult WINAPI IS_CHAR_TOUCHING_VEHICLE(CScript *script)
 {
 	script->Collect(2);
-	uintptr_t source = PedPoolGetStruct(*pedPool, Params[0].nVar);
-	uintptr_t target = VehiclePoolGetStruct(*carPool, Params[1].nVar);
-	if (*(BYTE *)(source + 0x314)) {
-		uintptr_t car = *(uintptr_t *)(source + 0x310);
-		if (car != NULL) {
-			source = car;
-		}
+	CPed *ped = CPools::ms_pPedPool->GetAt(ScriptParams[0].int32);
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(ScriptParams[1].int32);
+	CPhysical *source = ped;
+	if (ped->isInAnyVehicle && ped->vehicle) {
+		source = ped->vehicle;
 	}
-	script->UpdateCompareFlag(GetHasCollidedWith(source, target) != 0);
+	script->UpdateCompareFlag(source->GetHasCollidedWith(vehicle));
 	return OR_CONTINUE;
 }
 
 BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 {
-	if (reason == DLL_PROCESS_ATTACH)
-	{
-		if (CLEO_GetVersion() < CLEO_VERSION)
-		{
+	if (reason == DLL_PROCESS_ATTACH) {
+		if (CLEO_GetVersion() < CLEO_VERSION) {
 			MessageBox(HWND_DESKTOP, TEXT("An incorrect version of CLEO was loaded."), TEXT("III.Opcodes.cleo"), MB_ICONERROR);
 			return FALSE;
 		}
 
-		Params = CLEO_GetParamsAddress();
 		Opcodes::RegisterOpcode(0x116, IS_PLAYER_STILL_ALIVE);
 		Opcodes::RegisterOpcode(0x2BD, SET_FBI_REQUIRED);
 		Opcodes::RegisterOpcode(0x2BE, SET_ARMY_REQUIRED);

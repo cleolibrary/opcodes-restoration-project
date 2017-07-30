@@ -11,11 +11,6 @@ workspace "opcodes-restoration-project"
     floatingpoint "Fast"
     vectorextensions "IA32"
 
-    includedirs {
-        "external/gtalc-dinput8/vcclasses/include",
-        "external/gtalc-dinput8/vcversion/include",
-        "external/gtalc-dinput8/dinput8/include"
-    }
     libdirs { "bin" }
 
     filter "configurations:Debug"
@@ -29,8 +24,8 @@ workspace "opcodes-restoration-project"
 project "III.Opcodes"
     defines { "_III" }
     exceptionhandling "Off"
-    files { "src/dllmain.cpp" }
-    includedirs { "external/III.VC.CLEO/source/CLEO_SDK" }
+    files { "iiiclasses/*", "src/dllmain.cpp" }
+    includedirs { "external/III.VC.CLEO/source/CLEO_SDK", "iiiclasses" }
     kind "SharedLib"
     links { "III.CLEO" }
     targetdir "bin/CLEO/CLEO_PLUGINS"
@@ -40,7 +35,12 @@ project "VC.Opcodes"
     defines { "_VC" }
     exceptionhandling "Off"
     files { "src/*.h", "src/*.cpp" }
-    includedirs { "external/III.VC.CLEO/source/CLEO_SDK" }
+    includedirs {
+        "external/gtalc-dinput8/vcclasses/include",
+        "external/gtalc-dinput8/vcversion/include",
+        "external/gtalc-dinput8/dinput8/include",
+        "external/III.VC.CLEO/source/CLEO_SDK"
+    }
     kind "SharedLib"
     links { "vcclasses", "vcversion", "VC.CLEO" }
     targetdir "bin/CLEO/CLEO_PLUGINS"
@@ -74,6 +74,10 @@ project "vcclasses"
         "external/gtalc-dinput8/vcclasses/include/*.h",
         "external/gtalc-dinput8/vcclasses/src/*.cpp"
     }
+    includedirs {
+        "external/gtalc-dinput8/vcclasses/include",
+        "external/gtalc-dinput8/vcversion/include"
+    }
     kind "StaticLib"
     links { "vcversion" }
     targetdir "bin"
@@ -83,5 +87,6 @@ project "vcversion"
         "external/gtalc-dinput8/vcversion/include/*.h",
         "external/gtalc-dinput8/vcversion/src/*.cpp"
     }
+    includedirs { "external/gtalc-dinput8/vcversion/include" }
     kind "StaticLib"
     targetdir "bin"
