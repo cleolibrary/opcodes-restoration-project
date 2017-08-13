@@ -1,6 +1,10 @@
 #pragma once
 
+#if _VC
 #include "vcclasses.h"
+#elif _III
+#include "iiiclasses.h"
+#endif
 
 class CMessagesHack : public CMessages
 {

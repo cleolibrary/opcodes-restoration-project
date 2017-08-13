@@ -24,7 +24,7 @@ workspace "opcodes-restoration-project"
 project "III.Opcodes"
     defines { "_III" }
     exceptionhandling "Off"
-    files { "iiiclasses/*", "src/dllmain.cpp" }
+    files { "iiiclasses/*", "src/CMessagesHack.*", "src/dllmain.cpp" }
     includedirs { "external/III.VC.CLEO/source/CLEO_SDK", "iiiclasses" }
     kind "SharedLib"
     links { "III.CLEO" }

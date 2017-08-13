@@ -154,6 +154,7 @@
 04CC: create_blip_without_sphere 0.0 0.0 0.0 color 0 display 3 store_to 0@
 04CD: create_blip_without_sphere 0.0 0.0 0.0 store_to 0@
 04D4: get_nth_closest_char_node 0.0 0.0 0.0 1 store_to 0@ 1@ 2@
+04DC:   photograph_has_been_taken
 0505: get_nearest_tyre_to_point 0.0 0.0 0.0 store_to 0@
 050F: get_max_wanted_level_to 0@
 0511: show_text_box_1number 'HJSTATW' number 0
@@ -176,6 +177,12 @@
 0116:   player $PLAYER_CHAR alive
 02BD: set_fbi_required 1
 02BE: set_army_required 1
+0301: text_3numbers_mediumpriority 'AMBULAN' 0 0 0 time 1000 1
+0304: text_4numbers_mediumpriority 'AMBULAN' 0 0 0 0 time 1000 1
+0307: text_5numbers_mediumpriority 'AMBULAN' 0 0 0 0 0 time 1000 1
+030A: text_6numbers_mediumpriority 'AMBULAN' 0 0 0 0 0 0 time 1000 1
+0385: text_1string_mediumpriority 'AMBULAN' 'BANSHEE' time 1000 1
+048F: actor 0@ remove_weapons
 050F: get_max_wanted_level_to 0@
 0511: show_text_box_1number 'HJSTATW' number 0
 0546:   player $PLAYER_CHAR touching_car 1@

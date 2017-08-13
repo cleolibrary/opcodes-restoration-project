@@ -44,6 +44,8 @@ public:
 	class CWanted  *wanted;        // 0x53C
 	unsigned char  space3[0x0B0];
 	// 0x5F0
+
+	void ClearWeapons(void);
 };
 
 static_assert(sizeof(CPed) == 0x5F0, "Size of CPed is not 0x5F0 bytes.");
@@ -89,10 +91,32 @@ public:
 //# CMessages
 //########################################################################
 
+struct BriefMessage
+{
+	wchar_t *message;
+	unsigned short flag;
+	unsigned char pad[2];
+	unsigned int duration;
+	unsigned int timeMessageAdded;
+	int tokenNumber1;
+	int tokenNumber2;
+	int tokenNumber3;
+	int tokenNumber4;
+	int tokenNumber5;
+	int tokenNumber6;
+	wchar_t *tokenString;
+};
+
+static_assert(sizeof(BriefMessage) == 0x2C, "Size of BriefMessage is not 0x2C bytes.");
+
 class CMessages
 {
 public:
+	static void AddToPreviousBriefArray(wchar_t *, int, int, int, int, int, int, wchar_t *);
 	static void InsertNumberInString(wchar_t *, int, int, int, int, int, int, wchar_t *);
+	static void AddMessageSoonWithNumber(wchar_t *, unsigned int, unsigned short, int, int, int, int, int, int);
+
+	static BriefMessage *BriefMessages;
 };
 
 //########################################################################
@@ -140,6 +164,16 @@ class CText
 {
 public:
 	wchar_t *Get(const char *);
+};
+
+//########################################################################
+//# CTimer
+//########################################################################
+
+class CTimer
+{
+public:
+	static unsigned int &m_snTimeInMilliseconds;
 };
 
 //########################################################################

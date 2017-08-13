@@ -16,7 +16,7 @@ while true
     wait 0
     if and
         00E1:   player 0 pressed_button 6 // aim
-        80E0:   not player $PLAYER_CHAR in_any_car
+        80E0:   not player 0 in_any_car
         $ONMISSION == 0
     then
         $ONMISSION = 1
@@ -33,8 +33,8 @@ while true
     end
 end
 
-0109: player $PLAYER_CHAR money += 10000
-0054: store_player $PLAYER_CHAR position_to POSX POSY POSZ
+0109: player 0 money += 10000
+0054: store_player 0 position_to POSX POSY POSZ
 0247: request_model #KURUMA
 038B: load_requested_models
 POSX += 4.0
@@ -49,9 +49,11 @@ while true
     wait 10
     03F0: enable_text_draw 0
     LINE = 0
+    gosub @PRINT_SOON
     gosub @IS_PLAYER_STILL_ALIVE
     gosub @SET_FBI_REQUIRED
     gosub @SET_ARMY_REQUIRED
+    gosub @REMOVE_ALL_CHAR_WEAPONS
     gosub @GET_MAX_WANTED_LEVEL
     gosub @PRINT_HELP_WITH_NUMBER
     gosub @IS_PLAYER_TOUCHING_VEHICLE
@@ -59,7 +61,7 @@ while true
 
     if and
         00E1:   player 0 pressed_button 6 // aim
-        80E0:   not player $PLAYER_CHAR in_any_car
+        80E0:   not player 0 in_any_car
     then
         01C3: mark_car_as_no_longer_needed SPAWN_CAR
         $ONMISSION = 0
@@ -75,10 +77,23 @@ end
 LINE += 11.0
 return
 
+:PRINT_SOON
+if
+    0ADC: test_cheat "PRINTSOON"
+then
+    018C: play_sound 94 at 0.0 0.0 0.0
+    00BE: text_clear_all
+    0301: text_3numbers_mediumpriority 'HJSTATW' 1 2 3 time 500 1
+    0304: text_4numbers_mediumpriority 'HJSTATW' 1 2 3 4 time 500 1
+    0307: text_5numbers_mediumpriority 'HJSTATW' 1 2 3 4 5 time 500 1
+    030A: text_6numbers_mediumpriority 'HJSTATW' 1 2 3 4 5 6 time 500 1
+end
+return
+
 :IS_PLAYER_STILL_ALIVE
 gosub @TEXT_STYLE
 if
-    0116:   player $PLAYER_CHAR alive
+    0116:   player 0 alive
 then
     0608: show_text_position 10.0 LINE text "0116: Player is alive"
 else
@@ -120,6 +135,15 @@ then
 end
 return
 
+:REMOVE_ALL_CHAR_WEAPONS
+if
+    0ADC: test_cheat "CLEARWEAPONS"
+then
+    018C: play_sound 94 at 0.0 0.0 0.0
+    048F: actor $PLAYER_ACTOR remove_weapons
+end
+return
+
 :GET_MAX_WANTED_LEVEL
 050F: get_max_wanted_level_to MAXWANTED
 return
@@ -136,7 +160,7 @@ return
 :IS_PLAYER_TOUCHING_VEHICLE
 gosub @TEXT_STYLE
 if
-    0546:   player $PLAYER_CHAR touching_car SPAWN_CAR
+    0546:   player 0 touching_car SPAWN_CAR
 then
     0608: show_text_position 10.0 LINE text "0546: Player is touching spawned car"
 else

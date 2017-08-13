@@ -74,8 +74,8 @@
 02fb=10,create_crusher_crane %1d% %2d% %3d% %4d% %5d% %6d% %7d% %8d% %9d% %10d% 
 02fc=5,text_2numbers_lowpriority %1g% %2d% %3d% time %4d% %5d% 
 02fe=5,text_2numbers_mediumpriority %1g% %2d% %3d% time %4d% %5d% 
-0300=6,text_3numbers_highpriority %1g% %2d% %3d% %4d% time %5d% %6h% 
-0301=6,text_3numbers_mediumpriority %1g% %2d% %3d% %4d% time %5d% %6h% 
+0300=6,text_3numbers_highpriority %1g% %2d% %3d% %4d% time %5d% %6d% 
+0301=6,text_3numbers_mediumpriority %1g% %2d% %3d% %4d% time %5d% %6d% 
 0303=7,text_4numbers_highpriority %1g% %2d% %3d% %4d% %5d% time %6d% %7d% 
 0304=7,text_4numbers_mediumpriority %1g% %2d% %3d% %4d% %5d% time %6d% %7d% 
 0305=8,text_5numbers_lowpriority %1g% %2d% %3d% %4d% %5d% %6d% time %7d% %8d% 
@@ -154,6 +154,7 @@
 04cc=6,create_blip_without_sphere %1d% %2d% %3d% color %4d% display %5d% store_to %6d% 
 04cd=4,create_blip_without_sphere %1d% %2d% %3d% store_to %4d% 
 04d4=7,get_nth_closest_char_node %1d% %2d% %3d% %4d% store_to %5d% %6d% %7d% 
+04dc=0,  photograph_has_been_taken
 0505=4,get_nearest_tyre_to_point %1d% %2d% %3d% store_to %4d% 
 050f=1,get_max_wanted_level_to %1d% 
 0511=2,show_text_box_1number %1s% number %2d% 
@@ -176,6 +177,12 @@
 0116=1,  player %1d% alive
 02bd=1,set_fbi_required %1d% 
 02be=1,set_army_required %1d% 
+0301=6,text_3numbers_mediumpriority %1g% %2d% %3d% %4d% time %5d% %6d% 
+0304=7,text_4numbers_mediumpriority %1g% %2d% %3d% %4d% %5d% time %6d% %7d% 
+0307=8,text_5numbers_mediumpriority %1g% %2d% %3d% %4d% %5d% %6d% time %7d% %8d% 
+030a=9,text_6numbers_mediumpriority %1g% %2d% %3d% %4d% %5d% %6d% %7d% time %8d% %9d% 
+0385=4,text_1string_mediumpriority %1g% %2g% time %3d% %4d% 
+048f=1,actor %1d% remove_weapons
 050f=1,get_max_wanted_level_to %1d% 
 0511=2,show_text_box_1number %1s% number %2d% 
 0546=2,  player %1d% touching_car %2d% 
