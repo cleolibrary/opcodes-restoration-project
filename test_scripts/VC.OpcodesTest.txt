@@ -213,6 +213,7 @@ while true
     gosub @SET_TOP_SHOOTING_RANGE_SCORE
     gosub @ADD_SHOOTING_RANGE_RANK
     gosub @IS_CHAR_TOUCHING_VEHICLE
+    gosub @REMOVE_WEAPON_FROM_CHAR
 
     if and
         00E1:   player 0 pressed_button 4 // action
@@ -296,14 +297,14 @@ while true
     end
     // manipulate spawned car
     if
-        0ADC: test_cheat "PUTCAR"
+        0ADC:   test_cheat "PUTCAR"
     then
         018C: play_sound 1 at 0.0 0.0 0.0
         0054: store_player 0 position_to POSX POSY POSZ
         00AB: put_car SPAWN_CAR at POSX POSY POSZ
     end
     if
-        0ADC: test_cheat "CADDY"
+        0ADC:   test_cheat "CADDY"
     then
         TEMP_VAR4 = #CADDY
         0054: store_player 0 position_to POSX POSY POSZ
@@ -311,7 +312,7 @@ while true
         0055: put_player 0 at POSX POSY POSZ
     end
     if
-        0ADC: test_cheat "DINGHY"
+        0ADC:   test_cheat "DINGHY"
     then
         TEMP_VAR4 = #DINGHY
         0054: store_player 0 position_to POSX POSY POSZ
@@ -319,7 +320,7 @@ while true
         0055: put_player 0 at POSX POSY POSZ
     end
     if
-        0ADC: test_cheat "HUNTER"
+        0ADC:   test_cheat "HUNTER"
     then
         TEMP_VAR4 = #HUNTER
         0054: store_player 0 position_to POSX POSY POSZ
@@ -395,7 +396,7 @@ return
 
 :PRINT_SOON
 if
-    0ADC: test_cheat "PRINTSOON"
+    0ADC:   test_cheat "PRINTSOON"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     00BE: text_clear_all
@@ -441,7 +442,7 @@ return
 
 :ADD_AMMO_TO_PLAYER
 if
-    0ADC: test_cheat "ADDAMMO"
+    0ADC:   test_cheat "ADDAMMO"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0113: add_ammo_to_player 0 weapon 17 ammo 10
@@ -483,7 +484,7 @@ if
     00E0:   player 0 in_any_car
 then
     if
-        0ADC: test_cheat "LOCK"
+        0ADC:   test_cheat "LOCK"
     then
         018C: play_sound 1 at 0.0 0.0 0.0
         03C1: PLAYER_CAR = player 0 car_no_save
@@ -494,7 +495,7 @@ return
 
 :SHAKE_CAM_WITH_POINT
 if
-    0ADC: test_cheat "SHAKE"
+    0ADC:   test_cheat "SHAKE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0054: store_player 0 position_to POSX POSY POSZ
@@ -562,7 +563,7 @@ return
 
 :ADD_BLIP_FOR_OBJECT_OLD
 if
-    0ADC: test_cheat "OBJBLIP"
+    0ADC:   test_cheat "OBJBLIP"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0164: disable_marker BLIP
@@ -602,7 +603,7 @@ return
 
 :SET_CHAR_AMMO
 if
-    0ADC: test_cheat "SETAMMO"
+    0ADC:   test_cheat "SETAMMO"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     017B: set_actor $PLAYER_ACTOR weapon 17 ammo_to 100
@@ -611,7 +612,7 @@ return
 
 :ACTIVATE_CRANE
 if
-    0ADC: test_cheat "CRANEA"
+    0ADC:   test_cheat "CRANEA"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     01EF: deactivate_crane -964.0 -1490.0
@@ -621,7 +622,7 @@ return
 
 :DEACTIVATE_CRANE
 if
-    0ADC: test_cheat "CRANED"
+    0ADC:   test_cheat "CRANED"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     01EF: deactivate_crane -964.0 -1490.0
@@ -630,7 +631,7 @@ return
 
 :SET_FREE_BOMBS
 if
-    0ADC: test_cheat "FREEBOMBS"
+    0ADC:   test_cheat "FREEBOMBS"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     05F9: TEMP_VAR = FREEBOMB AND 1
@@ -648,7 +649,7 @@ return
 
 :SET_ALL_TAXI_LIGHTS
 if
-    0ADC: test_cheat "TAXI"
+    0ADC:   test_cheat "TAXI"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     05F9: TEMP_VAR = SETTAXI AND 2
@@ -739,7 +740,7 @@ if
     00E0:   player 0 in_any_car
 then
     if
-        0ADC: test_cheat "ARMBOMB"
+        0ADC:   test_cheat "ARMBOMB"
     then
         018C: play_sound 1 at 0.0 0.0 0.0
         03C1: PLAYER_CAR = player 0 car_no_save
@@ -750,13 +751,13 @@ return
 
 :SET_REPEATED_PHONE_MESSAGE
 if
-    0ADC: test_cheat "PHONEA1X"
+    0ADC:   test_cheat "PHONEA1X"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     024B: set_phone PHONE_A message_repeated 'ADMIRAL'
 end
 if
-    0ADC: test_cheat "PHONEB1X"
+    0ADC:   test_cheat "PHONEB1X"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     024B: set_phone PHONE_B message_repeated 'BENSON'
@@ -765,13 +766,13 @@ return
 
 :SET_PHONE_MESSAGE
 if
-    0ADC: test_cheat "PHONEA1Y"
+    0ADC:   test_cheat "PHONEA1Y"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     024C: set_phone PHONE_A message 'ADMIRAL'
 end
 if
-    0ADC: test_cheat "PHONEB1Y"
+    0ADC:   test_cheat "PHONEB1Y"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     024C: set_phone PHONE_B message 'BENSON'
@@ -795,7 +796,7 @@ return
 
 :STORE_WEATHER
 if
-    0ADC: test_cheat "WEATHERSTORE"
+    0ADC:   test_cheat "WEATHERSTORE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0251: store_weather
@@ -804,7 +805,7 @@ return
 
 :RESTORE_WEATHER
 if
-    0ADC: test_cheat "WEATHERRESTORE"
+    0ADC:   test_cheat "WEATHERRESTORE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0252: restore_weather
@@ -813,7 +814,7 @@ return
 
 :RESTART_CRITICAL_MISSION
 if
-    0ADC: test_cheat "RESTART"
+    0ADC:   test_cheat "RESTART"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0255: set_critical_mission_restart_at -833.811 1304.07 10.5131 angle 200.4458
@@ -842,7 +843,7 @@ return
 
 :ACTIVATE_GARAGE
 if
-    0ADC: test_cheat "GARAGEA"
+    0ADC:   test_cheat "GARAGEA"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0299: activate_garage GARAGE
@@ -886,7 +887,7 @@ return
 
 :MESSAGE_WAIT
 if
-    0ADC: test_cheat "MESSAGEWAIT"
+    0ADC:   test_cheat "MESSAGEWAIT"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     00BC: text_highpriority 'ADMIRAL' time 2500 1
@@ -898,7 +899,7 @@ return
 
 :ADD_PARTICLE_EFFECT
 if
-    0ADC: test_cheat "PARTICLE"
+    0ADC:   test_cheat "PARTICLE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0054: store_player 0 position_to POSX POSY POSZ
@@ -908,7 +909,7 @@ return
 
 :ADD_SPRITE_BLIP_FOR_CAR
 if
-    0ADC: test_cheat "CARSPRITE"
+    0ADC:   test_cheat "CARSPRITE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0164: disable_marker BLIP
@@ -918,7 +919,7 @@ return
 
 :ADD_SPRITE_BLIP_FOR_CHAR
 if
-    0ADC: test_cheat "PEDSPRITE"
+    0ADC:   test_cheat "PEDSPRITE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0164: disable_marker BLIP
@@ -928,7 +929,7 @@ return
 
 :ADD_SPRITE_BLIP_FOR_OBJECT
 if
-    0ADC: test_cheat "OBJSPRITE"
+    0ADC:   test_cheat "OBJSPRITE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0164: disable_marker BLIP
@@ -938,7 +939,7 @@ return
 
 :DEACTIVATE_GARAGE
 if
-    0ADC: test_cheat "GARAGED"
+    0ADC:   test_cheat "GARAGED"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     02B9: deactivate_garage GARAGE
@@ -947,7 +948,7 @@ return
 
 :SET_SWAT_REQUIRED
 if
-    0ADC: test_cheat "SWATREQ"
+    0ADC:   test_cheat "SWATREQ"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     05F9: TEMP_VAR = SWAT_REQ AND 4
@@ -965,7 +966,7 @@ return
 
 :SET_FBI_REQUIRED
 if
-    0ADC: test_cheat "FBIREQ"
+    0ADC:   test_cheat "FBIREQ"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     05F9: TEMP_VAR = FBI_REQ AND 8
@@ -983,7 +984,7 @@ return
 
 :SET_ARMY_REQUIRED
 if
-    0ADC: test_cheat "ARMYREQ"
+    0ADC:   test_cheat "ARMYREQ"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     05F9: TEMP_VAR = ARMY_REQ AND 0x10
@@ -1001,7 +1002,7 @@ return
 
 :START_PACMAN_RACE
 if
-    0ADC: test_cheat "PMRACE"
+    0ADC:   test_cheat "PMRACE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     02C6: clear_pacman
@@ -1011,7 +1012,7 @@ return
 
 :CLEAR_PACMAN
 if
-    0ADC: test_cheat "CLEARPM"
+    0ADC:   test_cheat "CLEARPM"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     02C6: clear_pacman
@@ -1020,7 +1021,7 @@ return
 
 :START_PACMAN_SCRAMBLE
 if
-    0ADC: test_cheat "PMSCRAM"
+    0ADC:   test_cheat "PMSCRAM"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     02C6: clear_pacman
@@ -1031,7 +1032,7 @@ return
 
 :CLEAR_NUMBER_OF_POWER_PILLS_CARRIED
 if
-    0ADC: test_cheat "CLEARSCRAM"
+    0ADC:   test_cheat "CLEARSCRAM"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     02C9: clear_number_of_power_pills_carried
@@ -1043,7 +1044,7 @@ if
     00E0:   player 0 in_any_car
 then
     if
-        0ADC: test_cheat "COMEDY"
+        0ADC:   test_cheat "COMEDY"
     then
         018C: play_sound 1 at 0.0 0.0 0.0
         03C1: PLAYER_CAR = player 0 car_no_save
@@ -1076,7 +1077,7 @@ return
 
 :CLEAR_NUMBER_OF_POWER_PILLS_EATEN
 if
-    0ADC: test_cheat "CLEARRACE"
+    0ADC:   test_cheat "CLEARRACE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     02D9: clear_number_of_power_pills_eaten
@@ -1085,7 +1086,7 @@ return
 
 :ADD_POWER_PILL
 if
-    0ADC: test_cheat "PMONE"
+    0ADC:   test_cheat "PMONE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     02C6: clear_pacman
@@ -1111,7 +1112,7 @@ return
 
 :DROP_MINE
 if
-    0ADC: test_cheat "MINEA"
+    0ADC:   test_cheat "MINEA"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0054: store_player 0 position_to POSX POSY POSZ
@@ -1121,7 +1122,7 @@ return
 
 :DROP_NAUTICAL_MINE
 if
-    0ADC: test_cheat "MINEB"
+    0ADC:   test_cheat "MINEB"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0054: store_player 0 position_to POSX POSY POSZ
@@ -1131,7 +1132,7 @@ return
 
 :ACTIVATE_CRUSHER_CRANE
 if
-    0ADC: test_cheat "CRANEC"
+    0ADC:   test_cheat "CRANEC"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     01EF: deactivate_crane -964.0 -1490.0
@@ -1141,7 +1142,7 @@ return
 
 :PRINT_WITH_NUMBERS
 if
-    0ADC: test_cheat "PRINTNUM"
+    0ADC:   test_cheat "PRINTNUM"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     02FC: text_2numbers 'HJSTATW' 1 2 time 500 1
@@ -1209,7 +1210,7 @@ if
     00E0:   player 0 in_any_car
 then
     if
-        0ADC: test_cheat "INVISIBLE"
+        0ADC:   test_cheat "INVISIBLE"
     then
         018C: play_sound 1 at 0.0 0.0 0.0
         03C1: PLAYER_CAR = player 0 car_no_save
@@ -1220,7 +1221,7 @@ return
 
 :SET_TEXT_BACKGROUND_COLOUR
 if
-    0ADC: test_cheat "BACKGROUND"
+    0ADC:   test_cheat "BACKGROUND"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     05F9: TEMP_VAR = TEXTBG AND 0x1000
@@ -1236,7 +1237,7 @@ return
 
 :SET_TEXT_FONT
 if
-    0ADC: test_cheat "FONT"
+    0ADC:   test_cheat "FONT"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     05F9: TEMP_VAR = TEXTFONT AND 0x4000
@@ -1298,7 +1299,7 @@ return
 :START_KILL_FRENZY_HEADSHOT
 01FA: RAMP_STATE = rampage_status
 if and
-    0ADC: test_cheat "RAMPAGE"
+    0ADC:   test_cheat "RAMPAGE"
     not RAMP_STATE == 1
 then
     018C: play_sound 1 at 0.0 0.0 0.0
@@ -1311,7 +1312,7 @@ return
 
 :ACTIVATE_MILITARY_CRANE
 if
-    0ADC: test_cheat "CRANEM"
+    0ADC:   test_cheat "CRANEM"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     01EF: deactivate_crane -964.0 -1490.0
@@ -1321,7 +1322,7 @@ return
 
 :PRINT_WITH_NUMBERS_BIG
 if
-    0ADC: test_cheat "PRINTBIGNUM"
+    0ADC:   test_cheat "PRINTBIGNUM"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0218: text_1number_styled 'HJSTATW' 1 time 500 style 6
@@ -1343,13 +1344,13 @@ return
 
 :SET_2_REPEATED_PHONE_MESSAGES
 if
-    0ADC: test_cheat "PHONEA2X"
+    0ADC:   test_cheat "PHONEA2X"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0378: set_phone PHONE_A 2messages_repeated 'ADMIRAL' 'AMBULAN'
 end
 if
-    0ADC: test_cheat "PHONEB2X"
+    0ADC:   test_cheat "PHONEB2X"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0378: set_phone PHONE_B 2messages_repeated 'BENSON' 'BFINJC'
@@ -1358,13 +1359,13 @@ return
 
 :SET_2_PHONE_MESSAGES
 if
-    0ADC: test_cheat "PHONEA2Y"
+    0ADC:   test_cheat "PHONEA2Y"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0379: set_phone PHONE_A 2messages 'ADMIRAL' 'AMBULAN'
 end
 if
-    0ADC: test_cheat "PHONEB2Y"
+    0ADC:   test_cheat "PHONEB2Y"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0379: set_phone PHONE_B 2messages 'BENSON' 'BFINJC'
@@ -1373,13 +1374,13 @@ return
 
 :SET_3_REPEATED_PHONE_MESSAGES
 if
-    0ADC: test_cheat "PHONEA3X"
+    0ADC:   test_cheat "PHONEA3X"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     037A: set_phone PHONE_A 3messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL'
 end
 if
-    0ADC: test_cheat "PHONEB3X"
+    0ADC:   test_cheat "PHONEB3X"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     037A: set_phone PHONE_B 3messages_repeated 'BENSON' 'BFINJC' 'BLISTAC'
@@ -1388,13 +1389,13 @@ return
 
 :SET_3_PHONE_MESSAGES
 if
-    0ADC: test_cheat "PHONEA3Y"
+    0ADC:   test_cheat "PHONEA3Y"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     037B: set_phone PHONE_A 3messages 'ADMIRAL' 'AMBULAN' 'ANGEL'
 end
 if
-    0ADC: test_cheat "PHONEB3Y"
+    0ADC:   test_cheat "PHONEB3Y"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     037B: set_phone PHONE_B 3messages 'BENSON' 'BFINJC' 'BLISTAC'
@@ -1403,13 +1404,13 @@ return
 
 :SET_4_REPEATED_PHONE_MESSAGES
 if
-    0ADC: test_cheat "PHONEA4X"
+    0ADC:   test_cheat "PHONEA4X"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     037C: set_phone PHONE_A 4messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE'
 end
 if
-    0ADC: test_cheat "PHONEB4X"
+    0ADC:   test_cheat "PHONEB4X"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     037C: set_phone PHONE_B 4messages_repeated 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA'
@@ -1418,13 +1419,13 @@ return
 
 :SET_4_PHONE_MESSAGES
 if
-    0ADC: test_cheat "PHONEA4Y"
+    0ADC:   test_cheat "PHONEA4Y"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     037D: set_phone PHONE_A 4messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE'
 end
 if
-    0ADC: test_cheat "PHONEB4Y"
+    0ADC:   test_cheat "PHONEB4Y"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     037D: set_phone PHONE_B 4messages 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA'
@@ -1433,7 +1434,7 @@ return
 
 :GIVE_PLAYER_DETONATOR
 if
-    0ADC: test_cheat "DETONATE"
+    0ADC:   test_cheat "DETONATE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     037F: give_player_detonator
@@ -1442,13 +1443,13 @@ return
 
 :SET_5_REPEATED_PHONE_MESSAGES
 if
-    0ADC: test_cheat "PHONEA5X"
+    0ADC:   test_cheat "PHONEA5X"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0386: set_phone PHONE_A 5messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
 end
 if
-    0ADC: test_cheat "PHONEB5X"
+    0ADC:   test_cheat "PHONEB5X"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0386: set_phone PHONE_B 5messages_repeated 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA' 'BOBCAT'
@@ -1457,13 +1458,13 @@ return
 
 :SET_5_PHONE_MESSAGES
 if
-    0ADC: test_cheat "PHONEA5Y"
+    0ADC:   test_cheat "PHONEA5Y"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0387: set_phone PHONE_A 5messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE'
 end
 if
-    0ADC: test_cheat "PHONEB5Y"
+    0ADC:   test_cheat "PHONEB5Y"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0387: set_phone PHONE_B 5messages 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA' 'BOBCAT'
@@ -1472,13 +1473,13 @@ return
 
 :SET_6_REPEATED_PHONE_MESSAGES
 if
-    0ADC: test_cheat "PHONEA6X"
+    0ADC:   test_cheat "PHONEA6X"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0388: set_phone PHONE_A 6messages_repeated 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
 end
 if
-    0ADC: test_cheat "PHONEB6X"
+    0ADC:   test_cheat "PHONEB6X"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0388: set_phone PHONE_B 6messages_repeated 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA' 'BOBCAT' 'BOXVILL'
@@ -1487,13 +1488,13 @@ return
 
 :SET_6_PHONE_MESSAGES
 if
-    0ADC: test_cheat "PHONEA6Y"
+    0ADC:   test_cheat "PHONEA6Y"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0389: set_phone PHONE_A 6messages 'ADMIRAL' 'AMBULAN' 'ANGEL' 'BAGGAGE' 'BANSHEE' 'BARRCKS'
 end
 if
-    0ADC: test_cheat "PHONEB6Y"
+    0ADC:   test_cheat "PHONEB6Y"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0389: set_phone PHONE_B 6messages 'BENSON' 'BFINJC' 'BLISTAC' 'BLOODRA' 'BOBCAT' 'BOXVILL'
@@ -1567,7 +1568,7 @@ return
 
 :ADD_BLIP_FOR_PICKUP_OLD
 if
-    0ADC: test_cheat "PICKBLIP"
+    0ADC:   test_cheat "PICKBLIP"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0164: disable_marker BLIP
@@ -1577,7 +1578,7 @@ return
 
 :ADD_SPRITE_BLIP_FOR_PICKUP
 if
-    0ADC: test_cheat "PICKSPRITE"
+    0ADC:   test_cheat "PICKSPRITE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0164: disable_marker BLIP
@@ -1617,7 +1618,7 @@ return
 
 :SET_GANG_PED_MODEL_PREFERENCE
 if
-    0ADC: test_cheat "PREFERENCE"
+    0ADC:   test_cheat "PREFERENCE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     05F9: TEMP_VAR = GANGPREF AND 0x80
@@ -1635,7 +1636,7 @@ return
 
 :SET_GET_OUT_OF_JAIL_FREE
 if
-    0ADC: test_cheat "JAILFREE"
+    0ADC:   test_cheat "JAILFREE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0413: set_player 0 get_out_of_jail_free 1
@@ -1664,7 +1665,7 @@ return
 
 :REGISTER_KILL_FRENZY_PASSED
 if
-    0ADC: test_cheat "FRENZY"
+    0ADC:   test_cheat "FRENZY"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     041B: increment_rampages_passed
@@ -1673,7 +1674,7 @@ return
 
 :SET_CHAR_SAY
 if
-    0ADC: test_cheat "TALK"
+    0ADC:   test_cheat "TALK"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     041C: make_actor $PLAYER_ACTOR say 0x7A // picked up money talk
@@ -1682,13 +1683,13 @@ return
 
 :OVERRIDE_HOSPITAL_LEVEL
 if
-    0ADC: test_cheat "HOSPITAL1"
+    0ADC:   test_cheat "HOSPITAL1"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     041F: override_hospital 1
 end
 if
-    0ADC: test_cheat "HOSPITAL2"
+    0ADC:   test_cheat "HOSPITAL2"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     041F: override_hospital 2
@@ -1697,13 +1698,13 @@ return
 
 :OVERRIDE_POLICE_STATION_LEVEL
 if
-    0ADC: test_cheat "POLICE1"
+    0ADC:   test_cheat "POLICE1"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0420: override_police_station 1
 end
 if
-    0ADC: test_cheat "POLICE2"
+    0ADC:   test_cheat "POLICE2"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0420: override_police_station 2
@@ -1712,7 +1713,7 @@ return
 
 :FORCE_RAIN
 if
-    0ADC: test_cheat "FORCERAIN"
+    0ADC:   test_cheat "FORCERAIN"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     05F9: TEMP_VAR = FORCERAIN AND 0x20
@@ -1757,7 +1758,7 @@ then
     end
 end
 if
-    0ADC: test_cheat "GANGTHREAT"
+    0ADC:   test_cheat "GANGTHREAT"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     05F9: TEMP_VAR = GANGTHREAT AND 0x40
@@ -1775,7 +1776,7 @@ return
 
 :GET_CHAR_IN_CAR_PASSENGER_SEAT
 if
-    0ADC: test_cheat "PASSENGER"
+    0ADC:   test_cheat "PASSENGER"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     if and
@@ -1813,7 +1814,7 @@ return
 
 :SET_SCRIPT_FIRE_AUDIO
 if
-    0ADC: test_cheat "CARFIRE"
+    0ADC:   test_cheat "CARFIRE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     02D1: destroy_fire CARFIRE
@@ -1912,19 +1913,19 @@ return
 
 :GET_MAX_WANTED_LEVEL
 if
-    0ADC: test_cheat "WANTED0"
+    0ADC:   test_cheat "WANTED0"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     01F0: set_max_wanted_level_to 0
 end
 if
-    0ADC: test_cheat "WANTED4"
+    0ADC:   test_cheat "WANTED4"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     01F0: set_max_wanted_level_to 4
 end
 if
-    0ADC: test_cheat "WANTED6"
+    0ADC:   test_cheat "WANTED6"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     01F0: set_max_wanted_level_to 6
@@ -1933,7 +1934,7 @@ return
 
 :PRINT_HELP
 if
-    0ADC: test_cheat "PRINTHELP"
+    0ADC:   test_cheat "PRINTHELP"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0511: show_text_box_1number 'NUMBER' number 1
@@ -1948,7 +1949,7 @@ return
 
 :ADD_MONEY_SPENT_ON_AUTO_PAINTING
 if
-    0ADC: test_cheat "PAINT"
+    0ADC:   test_cheat "PAINT"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     052A: add_money_spent_on_auto_painting 10
@@ -1958,7 +1959,7 @@ return
 :GET_PLAYER_DRUNKENNESS
 052D: get_player 0 drunkenness_to TEMP_VAR
 if
-    0ADC: test_cheat "DRUNK"
+    0ADC:   test_cheat "DRUNK"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     if
@@ -1973,7 +1974,7 @@ return
 
 :ADD_LOAN_SHARK_VISITS
 if
-    0ADC: test_cheat "LOAN"
+    0ADC:   test_cheat "LOAN"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0530: add_loan_shark_visits 10
@@ -1982,7 +1983,7 @@ return
 
 :ADD_MOVIE_STUNTS
 if
-    0ADC: test_cheat "MOVIE"
+    0ADC:   test_cheat "MOVIE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0532: add_movie_stunts 10
@@ -1991,7 +1992,7 @@ return
 
 :ADD_GARBAGE_PICKUPS
 if
-    0ADC: test_cheat "GARBAGE"
+    0ADC:   test_cheat "GARBAGE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0535: add_garbage_pickups 10
@@ -2000,7 +2001,7 @@ return
 
 :SET_TOP_SHOOTING_RANGE_SCORE
 if
-    0ADC: test_cheat "RANGESCORE"
+    0ADC:   test_cheat "RANGESCORE"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0537: set_top_shooting_range_score 10
@@ -2009,7 +2010,7 @@ return
 
 :ADD_SHOOTING_RANGE_RANK
 if
-    0ADC: test_cheat "RANGERANK"
+    0ADC:   test_cheat "RANGERANK"
 then
     018C: play_sound 1 at 0.0 0.0 0.0
     0538: add_shooting_range_rank 10
@@ -2028,5 +2029,14 @@ then
     else
         0608: show_text_position 10.0 LINE text "0547: Player character is not touching spawned boat"
     end
+end
+return
+
+:REMOVE_WEAPON_FROM_CHAR
+if
+    0ADC:   test_cheat "REMOVEWEAPON"
+then
+    018C: play_sound 1 at 0.0 0.0 0.0
+    0555: remove_actor $PLAYER_ACTOR weapon 17
 end
 return

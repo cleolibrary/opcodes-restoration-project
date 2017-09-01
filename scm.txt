@@ -168,6 +168,8 @@
 0537=1,set_top_shooting_range_score %1d% 
 0538=1,add_shooting_range_rank %1d% 
 0547=2,  actor %1d% touching_car %2d% 
+0555=2,remove_actor %1d% weapon %2d% 
+056e=1,  car %1d% defined
 056f=4,create_asset_blip %1d% %2d% %3d% store_to %4d% 
 0577=1,set_fade_and_jumpcut_after_rc_explosion %1d% 
 059d=1,shuffle_card_decks %1d% 
@@ -175,6 +177,7 @@
 }
 { GTA3 only
 0116=1,  player %1d% alive
+01e6=4,text_1number_mediumpriority %1g% %2d% time %3d% %4d% 
 02bd=1,set_fbi_required %1d% 
 02be=1,set_army_required %1d% 
 0301=6,text_3numbers_mediumpriority %1g% %2d% %3d% %4d% time %5d% %6d% 

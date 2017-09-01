@@ -79,10 +79,11 @@ return
 
 :PRINT_SOON
 if
-    0ADC: test_cheat "PRINTSOON"
+    0ADC:   test_cheat "PRINTSOON"
 then
     018C: play_sound 94 at 0.0 0.0 0.0
     00BE: text_clear_all
+    01E6: text_1number_mediumpriority 'HJSTATW' 1 time 500 1
     0301: text_3numbers_mediumpriority 'HJSTATW' 1 2 3 time 500 1
     0304: text_4numbers_mediumpriority 'HJSTATW' 1 2 3 4 time 500 1
     0307: text_5numbers_mediumpriority 'HJSTATW' 1 2 3 4 5 time 500 1
@@ -103,7 +104,7 @@ return
 
 :SET_FBI_REQUIRED
 if
-    0ADC: test_cheat "FBIREQ"
+    0ADC:   test_cheat "FBIREQ"
 then
     018C: play_sound 94 at 0.0 0.0 0.0
     if
@@ -120,7 +121,7 @@ return
 
 :SET_ARMY_REQUIRED
 if
-    0ADC: test_cheat "ARMYREQ"
+    0ADC:   test_cheat "ARMYREQ"
 then
     018C: play_sound 94 at 0.0 0.0 0.0
     if
@@ -137,7 +138,7 @@ return
 
 :REMOVE_ALL_CHAR_WEAPONS
 if
-    0ADC: test_cheat "CLEARWEAPONS"
+    0ADC:   test_cheat "CLEARWEAPONS"
 then
     018C: play_sound 94 at 0.0 0.0 0.0
     048F: actor $PLAYER_ACTOR remove_weapons
@@ -150,7 +151,7 @@ return
 
 :PRINT_HELP_WITH_NUMBER
 if
-    0ADC: test_cheat "PRINTHELP"
+    0ADC:   test_cheat "PRINTHELP"
 then
     018C: play_sound 94 at 0.0 0.0 0.0
     0511: show_text_box_1number 'NUMBER' number 1

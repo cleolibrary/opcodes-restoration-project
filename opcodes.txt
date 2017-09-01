@@ -168,6 +168,8 @@
 0537: set_top_shooting_range_score 10
 0538: add_shooting_range_rank 10
 0547:   actor 0@ touching_car 1@
+0555: remove_actor 0@ weapon 17
+056E:   car 0@ defined
 056F: create_asset_blip 0.0 0.0 0.0 store_to 0@
 0577: set_fade_and_jumpcut_after_rc_explosion 1
 059D: shuffle_card_decks 1
@@ -175,6 +177,7 @@
 }
 { GTA3 only
 0116:   player $PLAYER_CHAR alive
+01E6: text_1number_mediumpriority 'AMBULAN' 0 time 1000 1
 02BD: set_fbi_required 1
 02BE: set_army_required 1
 0301: text_3numbers_mediumpriority 'AMBULAN' 0 0 0 time 1000 1

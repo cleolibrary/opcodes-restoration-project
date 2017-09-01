@@ -23,6 +23,7 @@
 #include "CExplosionHack.h"
 #include "CMessagesHack.h"
 #include "CPacManPickupsHack.h"
+#include "CPedHack.h"
 #include "CPhoneInfoHack.h"
 #include "CProjectileInfoHack.h"
 #include "CWeatherHack.h"
@@ -242,7 +243,7 @@ eOpcodeResult WINAPI IS_PLAYER_TOUCHING_OBJECT(CScript *script)
 	script->Collect(2);
 	CPlayerPed *player = CWorld::Players[ScriptParams[0].int32].playerEntity;
 	CObject *object = CPools::ms_pObjectPool->GetAt(ScriptParams[1].int32);
-	CPhysical *source = player;	
+	CPhysical *source = player;
 	if (player->isInAnyVehicle && player->vehicle) {
 		source = player->vehicle;
 	}
@@ -478,7 +479,7 @@ eOpcodeResult WINAPI SET_REPEATED_PHONE_MESSAGE(CScript *script)
 	script->Collect(1);
 	char gxt[8];
 	script->ReadShortString(gxt);
-	((CPhoneInfoHack *)&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(ScriptParams[0].int32, TheText.Get(gxt), 0, 0, 0, 0, 0);
+	static_cast<CPhoneInfoHack *>(&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(ScriptParams[0].int32, TheText.Get(gxt), 0, 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1256,7 +1257,7 @@ eOpcodeResult WINAPI SET_2_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[0] = TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[1] = TheText.Get(gxt);
-	((CPhoneInfoHack *)&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(ScriptParams[0].int32, string[0], string[1], 0, 0, 0, 0);
+	static_cast<CPhoneInfoHack *>(&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(ScriptParams[0].int32, string[0], string[1], 0, 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1286,7 +1287,7 @@ eOpcodeResult WINAPI SET_3_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[1] = TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[2] = TheText.Get(gxt);
-	((CPhoneInfoHack *)&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(ScriptParams[0].int32, string[0], string[1], string[2], 0, 0, 0);
+	static_cast<CPhoneInfoHack *>(&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(ScriptParams[0].int32, string[0], string[1], string[2], 0, 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1320,7 +1321,7 @@ eOpcodeResult WINAPI SET_4_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[2] = TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[3] = TheText.Get(gxt);
-	((CPhoneInfoHack *)&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(ScriptParams[0].int32, string[0], string[1], string[2], string[3], 0, 0);
+	static_cast<CPhoneInfoHack *>(&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(ScriptParams[0].int32, string[0], string[1], string[2], string[3], 0, 0);
 	return OR_CONTINUE;
 }
 
@@ -1347,8 +1348,8 @@ eOpcodeResult WINAPI GIVE_PLAYER_DETONATOR(CScript *)
 {
 	CStreaming::RequestModel(291, 1);
 	CStreaming::LoadAllRequestedModels(false);
-	FindPlayerPed()->GiveWeapon(34, 1, 1);
-	int slot = *(int *)(CWeaponInfo::GetWeaponInfo(34) + 0x60);
+	FindPlayerPed()->GiveWeapon(34, 1, true);
+	int slot = FindPlayerPed()->GetWeaponSlot(34);
 	FindPlayerPed()->weapons[slot].state = 0;
 	return OR_CONTINUE;
 }
@@ -1385,7 +1386,7 @@ eOpcodeResult WINAPI SET_5_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[3] = TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[4] = TheText.Get(gxt);
-	((CPhoneInfoHack *)&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(ScriptParams[0].int32, string[0], string[1], string[2], string[3], string[4], 0);
+	static_cast<CPhoneInfoHack *>(&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(ScriptParams[0].int32, string[0], string[1], string[2], string[3], string[4], 0);
 	return OR_CONTINUE;
 }
 
@@ -1427,7 +1428,7 @@ eOpcodeResult WINAPI SET_6_REPEATED_PHONE_MESSAGES(CScript *script)
 	string[4] = TheText.Get(gxt);
 	script->ReadShortString(gxt);
 	string[5] = TheText.Get(gxt);
-	((CPhoneInfoHack *)&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(ScriptParams[0].int32, string[0], string[1], string[2], string[3], string[4], string[5]);
+	static_cast<CPhoneInfoHack *>(&VCGlobals::gPhoneInfo)->SetPhoneMessage_Repeatedly(ScriptParams[0].int32, string[0], string[1], string[2], string[3], string[4], string[5]);
 	return OR_CONTINUE;
 }
 
@@ -1910,6 +1911,7 @@ eOpcodeResult WINAPI GET_NTH_CLOSEST_CHAR_NODE(CScript *script)
 eOpcodeResult WINAPI HAS_PHOTOGRAPH_BEEN_TAKEN(CScript *script)
 {
 	script->UpdateCompareFlag(CWeapon::bPhotographHasBeenTaken);
+	CWeapon::bPhotographHasBeenTaken = false;
 	return OR_CONTINUE;
 }
 
@@ -2039,6 +2041,24 @@ eOpcodeResult WINAPI IS_CHAR_TOUCHING_VEHICLE(CScript *script)
 		source = ped->vehicle;
 	}
 	script->UpdateCompareFlag(source->GetHasCollidedWith(vehicle));
+	return OR_CONTINUE;
+}
+
+/* 0555 */
+eOpcodeResult WINAPI REMOVE_WEAPON_FROM_CHAR(CScript *script)
+{
+	script->Collect(2);
+	CPed *ped = CPools::ms_pPedPool->GetAt(ScriptParams[0].int32);
+	static_cast<CPedHack *>(ped)->ClearWeapon(ScriptParams[1].int32);
+	return OR_CONTINUE;
+}
+
+/* 056E */
+eOpcodeResult WINAPI DOES_VEHICLE_EXIST(CScript *script)
+{
+	script->Collect(1);
+	CVehicle *vehicle = CPools::ms_pVehiclePool->GetAt(ScriptParams[0].int32);
+	script->UpdateCompareFlag(!!vehicle);
 	return OR_CONTINUE;
 }
 
@@ -2313,6 +2333,8 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		Opcodes::RegisterOpcode(0x537, SET_TOP_SHOOTING_RANGE_SCORE);
 		Opcodes::RegisterOpcode(0x538, ADD_SHOOTING_RANGE_RANK);
 		Opcodes::RegisterOpcode(0x547, IS_CHAR_TOUCHING_VEHICLE);
+		Opcodes::RegisterOpcode(0x555, REMOVE_WEAPON_FROM_CHAR);
+		Opcodes::RegisterOpcode(0x56E, DOES_VEHICLE_EXIST);
 		Opcodes::RegisterOpcode(0x56F, ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT);
 		Opcodes::RegisterOpcode(0x577, SET_FADE_AND_JUMPCUT_AFTER_RC_EXPLOSION);
 		Opcodes::RegisterOpcode(0x59D, SHUFFLE_CARD_DECKS);
@@ -2322,6 +2344,16 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 }
 
 #elif _III
+
+/* 01E6 */
+eOpcodeResult WINAPI PRINT_WITH_NUMBER_SOON(CScript *script)
+{
+	char gxt[8];
+	script->ReadShortString(gxt);
+	script->Collect(3);
+	CMessages::AddMessageSoonWithNumber(TheText.Get(gxt), ScriptParams[1].uint32, ScriptParams[2].uint16, ScriptParams[0].int32, -1, -1, -1, -1, -1);
+	return OR_CONTINUE;
+}
 
 /* 0301 */
 eOpcodeResult WINAPI PRINT_WITH_3_NUMBERS_SOON(CScript *script)
@@ -2420,6 +2452,7 @@ BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 		}
 
 		Opcodes::RegisterOpcode(0x116, IS_PLAYER_STILL_ALIVE);
+		Opcodes::RegisterOpcode(0x1E6, PRINT_WITH_NUMBER_SOON);
 		Opcodes::RegisterOpcode(0x2BD, SET_FBI_REQUIRED);
 		Opcodes::RegisterOpcode(0x2BE, SET_ARMY_REQUIRED);
 		Opcodes::RegisterOpcode(0x301, PRINT_WITH_3_NUMBERS_SOON);
