@@ -2,4 +2,4 @@ The **Opcodes Restoration Project** is a plugin for [CLEO v2.0.0.5](https://gith
 for Grand Theft Auto III and Grand Theft Auto: Vice City that aims to restore functionality to many unsupported opcodes.
 
 More information is here:
-http://www.gtamodding.com/wiki/Opcodes_Restoration_Project
+https://gtamods.com/wiki/Opcodes_Restoration_Project
